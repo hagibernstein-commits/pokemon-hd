@@ -363,10 +363,14 @@
     </div>
 
     <!-- Floating Right-Side Action Controls (Overworld Mode) -->
-    <div id="overworldTouchControls" class="fixed bottom-6 right-5 z-20 flex items-end gap-3 pointer-events-none">
-      <button id="btnRunToggle" class="touch-btn w-13 h-13 px-3.5 py-3 rounded-full text-xs font-extrabold text-amber-300 flex flex-col items-center justify-center pointer-events-auto" title="נעלי ריצה / אופניים">
-        <span class="text-base leading-none">👟</span>
-        <span id="runStatusText" class="text-[9px] mt-0.5">ריצה: פעיל</span>
+    <div id="overworldTouchControls" class="fixed bottom-6 right-5 z-20 flex items-end gap-2.5 pointer-events-none">
+      <button id="btnFishAction" class="touch-btn px-3 py-2.5 rounded-full text-xs font-extrabold text-cyan-300 flex flex-col items-center justify-center pointer-events-auto" title="חכת דיג (דוג פוקימוני מים!)">
+        <span class="text-base leading-none">🎣</span>
+        <span class="text-[9px] mt-0.5">דיג</span>
+      </button>
+      <button id="btnRunToggle" class="touch-btn px-3 py-2.5 rounded-full text-xs font-extrabold text-amber-300 flex flex-col items-center justify-center pointer-events-auto" title="הליכה / נעלי ריצה / אופניים מהירים">
+        <span id="runBikeIcon" class="text-base leading-none">🚲</span>
+        <span id="runStatusText" class="text-[9px] mt-0.5">אופניים</span>
       </button>
 
       <button id="btnInteract" class="touch-btn w-16 h-16 rounded-full text-sm font-black text-white bg-blue-600/75 border-blue-300/60 flex flex-col items-center justify-center pointer-events-auto shadow-lg">
@@ -1237,7 +1241,10 @@
         shiny: isShiny,
         name: isShiny ? `✨ ${sp.name}` : sp.name,
         type: sp.type,
-        typeName: sp.typeName,
+        secondaryType: sp.secondaryType || null,
+        typeName: sp.fullTypeName || sp.typeName,
+        atkStage: 0,
+        defStage: 0,
         level,
         maxHp,
         hp: maxHp,
@@ -1262,7 +1269,8 @@
       mon.dex = sp.dex;
       mon.name = sp.name;
       mon.type = sp.type;
-      mon.typeName = sp.typeName;
+      mon.secondaryType = sp.secondaryType || null;
+      mon.typeName = sp.fullTypeName || sp.typeName;
       mon.maxHp = Math.floor(sp.baseHp + (mon.level - 1) * 5.8);
       mon.hp = mon.maxHp;
       mon.atk = Math.floor(sp.baseAtk + (mon.level - 1) * 2.4);
@@ -2556,6 +2564,282 @@
       }
     }
 
+
+    /********************************************************************
+     * V4 COMPLETE KANTO AUTHENTIC MECHANICS:
+     * 1. DUAL TYPES, STAT STAGES, LEVEL-UP LEARNSETS & TM DISCS
+     * 2. OVERWORLD HMs (SURF ON WATER, CUT BUSHES, STRENGTH BOULDERS)
+     * 3. LINE-OF-SIGHT ROUTE TRAINERS (!) & TEAM ROCKET STORYLINE
+     * 4. FULL ELITE FOUR (LORELEI, BRUNO, AGATHA, LANCE) & RIVAL GARY
+     * 5. FISHING ROD, BICYCLE, FOSSIL REVIVAL LAB & DAYCARE CENTER
+     ********************************************************************/
+
+    // 1A. Authentic Kanto Secondary Types Map (Dual-Type System)
+    const KANTO_SECONDARY_TYPES = {
+      bulbasaur: 'POISON', ivysaur: 'POISON', venusaur: 'POISON',
+      charizard: 'FLYING', butterfree: 'FLYING',
+      weedle: 'POISON', kakuna: 'POISON', beedrill: 'POISON',
+      pidgey: 'NORMAL', pidgeotto: 'NORMAL', pidgeot: 'NORMAL',
+      spearow: 'NORMAL', fearow: 'NORMAL',
+      nidoqueen: 'GROUND', nidoking: 'GROUND',
+      zubat: 'FLYING', golbat: 'FLYING',
+      oddish: 'POISON', gloom: 'POISON', vileplume: 'POISON',
+      paras: 'GRASS', parasect: 'GRASS',
+      venonat: 'POISON', venomoth: 'POISON',
+      poliwrath: 'FIGHTING',
+      bellsprout: 'POISON', weepinbell: 'POISON', victreebel: 'POISON',
+      tentacool: 'POISON', tentacruel: 'POISON',
+      geodude: 'GROUND', graveler: 'GROUND', golem: 'GROUND',
+      slowpoke: 'PSYCHIC', slowbro: 'PSYCHIC',
+      magnemite: 'ROCK', magneton: 'ROCK',
+      farfetchd: 'NORMAL', doduo: 'NORMAL', dodrio: 'NORMAL',
+      dewgong: 'WATER', cloyster: 'WATER',
+      gastly: 'POISON', haunter: 'POISON', gengar: 'POISON',
+      onix: 'GROUND',
+      exeggcute: 'PSYCHIC', exeggutor: 'PSYCHIC',
+      rhyhorn: 'GROUND', rhydon: 'GROUND',
+      starmie: 'PSYCHIC', scyther: 'FLYING', jynx: 'PSYCHIC',
+      gyarados: 'FLYING', lapras: 'WATER',
+      omanyte: 'WATER', omastar: 'WATER', kabuto: 'WATER', kabutops: 'WATER',
+      aerodactyl: 'FLYING', articuno: 'FLYING', zapdos: 'FLYING', moltres: 'FLYING',
+      dragonite: 'FLYING'
+    };
+
+    // Enrich all 151 species with Dual Types & Extended Level-Up Move Learnsets
+    DEX_ORDER.forEach(id => {
+      const sp = SPECIES_DB[id];
+      const sec = KANTO_SECONDARY_TYPES[id] || null;
+      if (sec && sec !== sp.type) {
+        sp.secondaryType = sec;
+        sp.secondaryTypeName = TYPE_META[sec]?.name || '';
+        sp.fullTypeName = `${sp.typeName} / ${sp.secondaryTypeName}`;
+      } else {
+        sp.secondaryType = null;
+        sp.fullTypeName = sp.typeName;
+      }
+      // Add a Stat-Stage / Tactical Move as option + Level-up learnset pool
+      sp.learnset = [
+        { lv: 9,  move: { name: 'נהמת הרתעה (-התקפה)', type: 'NORMAL', power: 12, pp: 20, statEffect: { target: 'enemy', stat: 'atk', delta: -1 } } },
+        { lv: 15, move: { name: 'ריקוד עוצמה (+התקפה)', type: 'NORMAL', power: 14, pp: 15, statEffect: { target: 'self', stat: 'atk', delta: 1 } } },
+        { lv: 22, move: { ...(TYPE_MOVES_POOL[sp.secondaryType || sp.type]?.[1] || TYPE_MOVES_POOL.NORMAL[1]) } },
+        { lv: 30, move: { ...(TYPE_MOVES_POOL[sp.secondaryType || sp.type]?.[2] || TYPE_MOVES_POOL.NORMAL[2]) } }
+      ];
+    });
+
+    function getDualTypeMultiplier(moveType, defenderMon) {
+      if (moveType === 'HEAL') return 1.0;
+      const sp = SPECIES_DB[defenderMon.speciesId] || {};
+      const t1 = defenderMon.type || sp.type || 'NORMAL';
+      const t2 = defenderMon.secondaryType || sp.secondaryType || null;
+      const m1 = TYPE_CHART[moveType]?.[t1] ?? 1.0;
+      const m2 = (t2 && t2 !== t1) ? (TYPE_CHART[moveType]?.[t2] ?? 1.0) : 1.0;
+      return m1 * m2;
+    }
+
+    // 1B. TM Discs Database (Teachable Moves in Bag & Shop!)
+    const TM_DISCS_DB = {
+      tm24_thunderbolt: { key: 'tm24_thunderbolt', name: 'TM24 חזיז ורעם ⚡', icon: '💿', price: 1400, move: { name: 'TM24 חזיז ורעם', type: 'ELECTRIC', power: 27, pp: 15, maxPp: 15 }, desc: 'דיסק TM: מלמד את המוביל מתקפת חשמל עוצמתית (עוצמה 27)!' },
+      tm13_icebeam:     { key: 'tm13_icebeam',     name: 'TM13 קרן קרח ❄️',   icon: '💿', price: 1400, move: { name: 'TM13 קרן קרח', type: 'ICE', power: 27, pp: 15, maxPp: 15 }, desc: 'דיסק TM: מלמד את המוביל קרן קרח מקפיאה (עוצמה 27)!' },
+      tm38_fireblast:   { key: 'tm38_fireblast',   name: 'TM38 פיצוץ אש 🔥',  icon: '💿', price: 1600, move: { name: 'TM38 פיצוץ אש', type: 'FIRE', power: 31, pp: 10, maxPp: 10 }, desc: 'דיסק TM: מלמד את המוביל מתקפת אש אדירה (עוצמה 31)!' },
+      tm26_earthquake:  { key: 'tm26_earthquake',  name: 'TM26 רעידת אדמה 🏜️', icon: '💿', price: 1600, move: { name: 'TM26 רעידת אדמה', type: 'GROUND', power: 30, pp: 10, maxPp: 10 }, desc: 'דיסק TM: מלמד את המוביל רעידת אדמה אדירה (עוצמה 30)!' },
+      tm29_psychic:     { key: 'tm29_psychic',     name: 'TM29 כוח על-חושי 🔮', icon: '💿', price: 1600, move: { name: 'TM29 כוח על-חושי', type: 'PSYCHIC', power: 29, pp: 12, maxPp: 12 }, desc: 'דיסק TM: מלמד את המוביל גל על-חושי (עוצמה 29)!' },
+      tm08_swordsdance: { key: 'tm08_swordsdance', name: 'TM08 ריקוד חרבות ⚔️', icon: '💿', price: 1100, move: { name: 'TM08 ריקוד חרבות', type: 'NORMAL', power: 18, pp: 15, maxPp: 15, statEffect: { target: 'self', stat: 'atk', delta: 1 } }, desc: 'דיסק TM: תוקף ומעלה את ההתקפה של הפוקימון שלך בקרב!' }
+    };
+
+    Object.values(TM_DISCS_DB).forEach(tm => {
+      if (!SHOP_CATALOG.some(s => s.key === tm.key)) SHOP_CATALOG.push(tm);
+    });
+
+    // 2. Overworld HM Obstacles: Cuttable Bushes (Tile 21) & Strength Boulders (Tile 22)
+    function placeHMObstaclesOnWorldMap() {
+      const cutBushes = [ [12, 22], [25, 31], [36, 9], [44, 27] ];
+      const strengthBoulders = [ [42, 11], [48, 12], [13, 7] ];
+      cutBushes.forEach(([c, r]) => { if (WORLD_MAP[r]) WORLD_MAP[r][c] = 21; });
+      strengthBoulders.forEach(([c, r]) => { if (WORLD_MAP[r]) WORLD_MAP[r][c] = 22; });
+    }
+    placeHMObstaclesOnWorldMap();
+
+    // 3. Route Trainers with Line-of-Sight ('!'), Team Rocket, Fossil Scientist & Daycare NPCs
+    const V4_NPCS = [
+      // Route Trainers (Line-of-Sight!)
+      { id: 'rt_bug1',     name: 'לוכד החרקים סמי 👀', x: 9,  y: 23, dir: 'right', shirt: '#84cc16', hat: '#fef08a', role: 'route_trainer', sightRange: 3.6, rewardMoney: 450,  team: [ ['caterpie', 8], ['weedle', 8], ['butterfree', 10] ], intro: 'היי! המבטים שלנו נפגשו! חרקי היער שלי בלתי מנוצחים!' },
+      { id: 'rt_lass1',    name: 'המאמנת ליסה 👀',     x: 22, y: 38, dir: 'left',  shirt: '#f43f5e', hat: '#fbcfe8', role: 'route_trainer', sightRange: 3.6, rewardMoney: 550,  team: [ ['pidgey', 9], ['jigglypuff', 10] ], intro: 'ראיתי אותך עובר בדרך 2! בוא נראה כמה הפוקימונים שלך חזקים!' },
+      { id: 'rt_hiker1',   name: 'המטייל דניאל 👀',    x: 41, y: 15, dir: 'down',  shirt: '#d97706', hat: '#78350f', role: 'route_trainer', sightRange: 3.6, rewardMoney: 800,  team: [ ['geodude', 16], ['machop', 17], ['onix', 18] ], intro: 'אף מאמן לא חוצה את הר הירח בלי קרב סלעים אמיתי!' },
+      { id: 'rt_rocket1',  name: 'חייל צוות רוקט R 👀', x: 51, y: 10, dir: 'left',  shirt: '#1e293b', hat: '#ef4444', role: 'route_trainer', sightRange: 3.8, rewardMoney: 950,  team: [ ['ekans', 18], ['zubat', 18], ['koffing', 20] ], intro: 'צוות רוקט ישתלט על כל המאובנים והפוקימונים הנדירים בהר הירח!' },
+      { id: 'rt_swimmer1', name: 'השחיין רון 👀',      x: 42, y: 45, dir: 'up',    shirt: '#0ea5e9', hat: '#fde047', role: 'route_trainer', sightRange: 3.6, rewardMoney: 1100, team: [ ['horsea', 26], ['shellder', 27], ['starmie', 29] ], intro: 'אתה גולש על המים לעבר אי סיניבר? בוא לקרב מים!' },
+      // Rival Gary on Route 22 / Cerulean Bridge
+      { id: 'rival_mid',   name: 'היריב גארי (מפגש דרך) 👀', x: 32, y: 17, dir: 'down', shirt: '#7e22ce', hat: '#facc15', role: 'route_trainer', sightRange: 3.8, rewardMoney: 1500, team: [ ['pidgeotto', 19], ['kadabra', 20], ['gyarados', 22] ], intro: 'יו! ידעתי שתגיע לסרוליאן! אני כבר תפסתי מעל 20 מינים, בוא נבדוק אם השתפרת!' },
+      // Special Classic Kanto Feature NPCs:
+      { id: 'fossil_doc',  name: 'מדען החייאת מאובנים 🧬', x: 47, y: 50, dir: 'down', shirt: '#f8fafc', hat: '#38bdf8', role: 'fossil_lab' },
+      { id: 'daycare_npc', name: 'בעלת בית הגידול 🏡',     x: 29, y: 15, dir: 'down', shirt: '#ec4899', hat: '#fef08a', role: 'daycare' },
+      { id: 'rocket_door', name: 'מפקדת צוות רוקט ולוונדר 👻', x: 52, y: 27, dir: 'down', shirt: '#1e293b', hat: '#ef4444', role: 'enter_interior', targetInterior: 'ROCKET_TOWER' }
+    ];
+    V4_NPCS.forEach(n => {
+      if (!NPCS.some(e => e.id === n.id)) NPCS.push(n);
+    });
+
+    // 4. Add Team Rocket & Lavender Ghost Tower Interior + Full Elite Four in INDIGO_HALL!
+    INTERIOR_MAPS.ROCKET_TOWER = {
+      id: 'ROCKET_TOWER',
+      name: '👻 מגדל הרוחות בלוונדר ומפקדת צוות רוקט',
+      cols: 16, rows: 14,
+      grid: buildInteriorGrid(16, 14, 15, 16),
+      spawnX: 7.5, spawnY: 11.8,
+      floorColor1: '#1e1b4b', floorColor2: '#312e81',
+      npcs: [
+        { id: 'in_r_exec',  name: 'קצין צוות רוקט ארצ׳ר R', x: 7.5, y: 6.5, dir: 'down', shirt: '#0f172a', hat: '#ef4444', role: 'route_trainer', sightRange: 3.2, rewardMoney: 2200, team: [ ['arbok', 29], ['golbat', 30], ['weezing', 32] ], intro: 'לעולם לא ניתן לך לשחרר את רוח המארוואק או לקחת את משקפת סילף!' },
+        { id: 'in_marowak', name: 'רוח המארוואק העתיקה 👻', x: 7.5, y: 2.5, dir: 'down', role: 'legendary', speciesId: 'marowak', level: 34 },
+        { id: 'in_gengar_s',name: 'גנגר הצללים 👻',         x: 3.5, y: 3.5, dir: 'down', role: 'legendary', speciesId: 'gengar',  level: 36 }
+      ]
+    };
+
+    // Upgrade INDIGO_HALL with the Complete Elite Four (Lorelei, Bruno, Agatha, Lance) + Champion Gary + Mewtwo!
+    INTERIOR_MAPS.INDIGO_HALL = {
+      id: 'INDIGO_HALL',
+      name: '👑 היכל ליגת אינדיגו — רביעיית העילית (Elite Four) והאלוף',
+      cols: 16, rows: 16,
+      grid: buildInteriorGrid(16, 16, 9, 4),
+      spawnX: 7.5, spawnY: 13.8,
+      floorColor1: '#311042', floorColor2: '#4c1d95',
+      npcs: [
+        { id: 'e4_lorelei', name: 'לורליי (עילית #1 — קרח ❄️)',  x: 4.5,  y: 10.5, dir: 'right', shirt: '#06b6d4', hat: '#cffafe', role: 'elite4', e4Index: 1, rewardMoney: 3500, team: [ ['dewgong', 40], ['cloyster', 41], ['slowbro', 42], ['jynx', 43], ['lapras', 44] ] },
+        { id: 'e4_bruno',   name: 'ברונו (עילית #2 — לחימה 🥊)', x: 10.5, y: 8.5,  dir: 'left',  shirt: '#dc2626', hat: '#78350f', role: 'elite4', e4Index: 2, rewardMoney: 3800, team: [ ['onix', 41], ['hitmonchan', 42], ['hitmonlee', 42], ['machamp', 45] ] },
+        { id: 'e4_agatha',  name: 'אגאתה (עילית #3 — רוח 👻)',   x: 4.5,  y: 6.5,  dir: 'right', shirt: '#7e22ce', hat: '#d8b4fe', role: 'elite4', e4Index: 3, rewardMoney: 4200, team: [ ['gengar', 43], ['golbat', 43], ['haunter', 44], ['arbok', 44], ['gengar', 46] ] },
+        { id: 'e4_lance',   name: 'לאנס (עילית #4 — דרקון 🐉)',  x: 10.5, y: 4.5,  dir: 'left',  shirt: '#4f46e5', hat: '#facc15', role: 'elite4', e4Index: 4, rewardMoney: 4800, team: [ ['gyarados', 44], ['dragonair', 45], ['aerodactyl', 46], ['dragonite', 48] ] },
+        { id: 'in_champ',   name: 'האלוף גארי 👑 (גמר הליגה)',    x: 7.5,  y: 2.2,  dir: 'down',  shirt: '#7e22ce', hat: '#facc15', role: 'champion', rewardMoney: 7000, team: [ ['pidgeot', 46], ['alakazam', 47], ['rhydon', 48], ['gyarados', 49], ['arcanine', 50], ['charizard', 52] ] },
+        { id: 'in_mewtwo',  name: 'מיוטו האגדי 🔮',              x: 2.5,  y: 2.5,  dir: 'down',  role: 'legendary', speciesId: 'mewtwo', level: 55 }
+      ]
+    };
+
+
+    // 5. Fishing Rod Engine ('🎣')
+    function castFishingRod() {
+      if (state.mode !== 'OVERWORLD') return;
+      const mData = getActiveMapData();
+      const tx = Math.floor(state.player.x / TILE_SIZE);
+      const ty = Math.floor(state.player.y / TILE_SIZE);
+
+      // Check if player is on water or adjacent to water (or anywhere if Kid-Friendly mode wants to test fishing)
+      let nearWater = false;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (mData.grid[ty + dy]?.[tx + dx] === 3) nearWater = true;
+        }
+      }
+
+      if (!nearWater) {
+        showDialogue('חכת דיג עלית 🎣', [
+          'הטל את החכה ליד מים (נהר, אגם או חוף הים בדרום המפה) — או גלוש על המים (🌊 Surf) כדי לדוג פוקימוני מים נדירים!'
+        ]);
+        return;
+      }
+
+      sfx.playConfirm();
+      const fishPool = ['magikarp', 'poliwag', 'goldeen', 'horsea', 'krabby', 'shellder', 'staryu', 'tentacool', 'psyduck', 'slowpoke', 'seel', 'dratini', 'gyarados', 'lapras'];
+      const chosenFish = fishPool[Math.floor(Math.random() * fishPool.length)];
+      const avgLv = Math.max(8, Math.min(45, (state.party[0]?.level || 10) + Math.floor(Math.random() * 4 - 1)));
+      showDialogue('חכת דיג עלית 🎣', [
+        'הטלת את החכה למים הצלולים... 🌊 ... ... ❗ יש אכילה על החכה!',
+        `משכת מהמים את ${SPECIES_DB[chosenFish].name}!`
+      ], () => triggerWildBattle(tx, ty, chosenFish, avgLv));
+    }
+
+    // 6. Cinnabar Fossil Revival Lab ('🧬')
+    function handleFossilRevival() {
+      const fossils = [
+        { key: 'helix_fossil', name: 'מאובן הסליל (Helix)', speciesId: 'omanyte', lv: 25 },
+        { key: 'dome_fossil',  name: 'מאובן הכיפה (Dome)',  speciesId: 'kabuto',  lv: 25 },
+        { key: 'old_amber',    name: 'ענבר עתיק (Amber)',    speciesId: 'aerodactyl', lv: 30 }
+      ];
+      state.revivedFossils = state.revivedFossils || {};
+      const nextFossil = fossils.find(f => !state.revivedFossils[f.key]);
+
+      if (!nextFossil) {
+        showDialogue('מדען המאובנים באי סיניבר 🧬', [
+          'כבר החייאנו את כל 3 המאובנים העתיקים של קאנטו (אומנייט, קבוטו ואירודקטייל)!',
+          'המשך לאמן אותם — אומנייט וקבוטו מתפתחים ברמה 40 לאומסטאר ולקבוטופס!'
+        ]);
+        return;
+      }
+
+      state.revivedFossils[nextFossil.key] = true;
+      const revivedMon = createMonster(nextFossil.speciesId, nextFossil.lv);
+      markDexCaught(nextFossil.speciesId);
+      let whereMsg = 'נוסף לצוות שלך!';
+      if (state.party.length < 6) {
+        state.party.push(revivedMon);
+      } else {
+        state.pcBox.push(revivedMon);
+        whereMsg = 'נשלח למחשב האחסון (PC) שלך!';
+      }
+      sfx.playEvolveFanfare();
+      saveGameToSlot(state.saveName, true);
+      showDialogue('מעבדת החייאת המאובנים 🧬', [
+        `מכונת ה-DNA העתיקה הפיקה חיים מתוך ${nextFossil.name}!`,
+        `🎉 מזל טוב! קיבלת את הפוקימון הפרהיסטורי ${revivedMon.name} (#${revivedMon.dex} • רמה ${revivedMon.level}) והוא ${whereMsg}`,
+        'דבר איתי שוב כדי להחיות גם את המאובנים הבאים שמצאת בהר הירח!'
+      ]);
+    }
+
+    // 7. Kanto Daycare Center ('🏡')
+    function handleDaycareInteraction() {
+      const lead = state.party[0];
+      if (!lead) return;
+      lead.level++;
+      lead.nextXp = lead.level * 22;
+      lead.maxHp += 6;
+      lead.hp = lead.maxHp;
+      lead.atk += 2;
+      lead.def += 2;
+      lead.spd += 2;
+      sfx.playHealJingle();
+      saveGameToSlot(state.saveName, true);
+      const evoTarget = checkLevelEvolution(lead);
+      showDialogue('בית הגידול של קאנטו (Daycare) 🏡', [
+        `בעלת בית הגידול: בנוסף ל-XP שהפוקימונים שלך צוברים אוטומטית על כל צעד שאתה הולך במפה, הענקתי ל-${lead.name} אימון מיוחד והוא עלה לרמה ${lead.level}!`
+      ], () => {
+        if (evoTarget) evolveMonsterInPlace(lead, evoTarget);
+      });
+    }
+
+    // 8. Line-of-Sight ('!') Route Trainer Detection
+    function checkRouteTrainerLineOfSight() {
+      if (state.mode !== 'OVERWORLD') return;
+      state.defeatedTrainers = state.defeatedTrainers || {};
+      const mData = getActiveMapData();
+      const px = state.player.x / TILE_SIZE;
+      const py = state.player.y / TILE_SIZE;
+
+      for (const npc of mData.npcs) {
+        if (npc.role !== 'route_trainer') continue;
+        if (state.defeatedTrainers[npc.id]) continue;
+
+        const nx = npc.x + 0.5;
+        const ny = npc.y + 0.5;
+        const dx = px - nx;
+        const dy = py - ny;
+        const range = npc.sightRange || 3.5;
+
+        let inSight = false;
+        if (npc.dir === 'right' && Math.abs(dy) < 0.75 && dx > 0.4 && dx <= range) inSight = true;
+        else if (npc.dir === 'left' && Math.abs(dy) < 0.75 && dx < -0.4 && dx >= -range) inSight = true;
+        else if (npc.dir === 'down' && Math.abs(dx) < 0.75 && dy > 0.4 && dy <= range) inSight = true;
+        else if (npc.dir === 'up' && Math.abs(dx) < 0.75 && dy < -0.4 && dy >= -range) inSight = true;
+
+        if (inSight) {
+          inputState.vx = 0;
+          inputState.vy = 0;
+          inputState.activePointerId = null;
+          npc.alertTimer = 45;
+          sfx.playTone(880, 0.12, 'square', 0.1, 1174);
+          showDialogue(`❗ ${npc.name}`, [
+            npc.intro || 'המבטים שלנו נפגשו! כמאמן פוקימונים, אי אפשר לסרב לקרב!'
+          ], () => triggerTrainerBattle(npc));
+          return;
+        }
+      }
+    }
+
     /********************************************************************
      * 5. GAME STATE & MULTI-SLOT NAMED SAVE SYSTEM (localStorage)
      ********************************************************************/
@@ -2568,6 +2852,11 @@
       saveName: 'אש',
       selectedStarter: 'pikachu',
       runEnabled: true,
+      bikeMode: 2, // 0: Walk, 1: Run Shoes, 2: Bicycle
+      isSurfing: false,
+      defeatedTrainers: {},
+      eliteFourDefeated: {},
+      revivedFossils: {},
       money: 1500,
       badges: {},
       claimedQuests: {},
@@ -2681,7 +2970,10 @@
         party: JSON.parse(JSON.stringify(state.party)),
         pcBox: JSON.parse(JSON.stringify(state.pcBox)),
         collectedItems: { ...state.collectedItems },
-        championDefeated: !!state.championDefeated
+        championDefeated: !!state.championDefeated,
+        defeatedTrainers: { ...(state.defeatedTrainers || {}) },
+        eliteFourDefeated: { ...(state.eliteFourDefeated || {}) },
+        revivedFossils: { ...(state.revivedFossils || {}) }
       };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
@@ -2733,6 +3025,9 @@
         : [];
       state.collectedItems = data.collectedItems || {};
       state.championDefeated = !!data.championDefeated;
+      state.defeatedTrainers = data.defeatedTrainers || {};
+      state.eliteFourDefeated = data.eliteFourDefeated || {};
+      state.revivedFossils = data.revivedFossils || {};
       syncPartyToDex();
 
       try { localStorage.setItem(ACTIVE_SLOT_KEY, state.saveName); } catch (_) {}
@@ -2879,8 +3174,9 @@
       const ty = Math.floor(worldY / TILE_SIZE);
       if (tx < 0 || ty < 0 || tx >= mData.cols || ty >= mData.rows) return true;
       const tile = mData.grid[ty][tx];
-      if (tile === 1 || tile === 3 || tile === 5 || tile === 6 || tile === 8 || tile === 11 || tile === 13 || tile === 16) return true;
-      if (tile === 10 && !state.collectedItems[`${state.currentMap || 'OW'}_${tx},${ty}`] && !state.collectedItems[`${tx},${ty}`]) return true;
+      // Note: tile 3 (Water) is walkable via HM03 Surf!
+      if (tile === 1 || tile === 5 || tile === 6 || tile === 8 || tile === 11 || tile === 13 || tile === 16) return true;
+      if ((tile === 10 || tile === 21 || tile === 22) && !state.collectedItems[`${state.currentMap || 'OW'}_${tx},${ty}`] && !state.collectedItems[`${tx},${ty}`]) return true;
       for (const npc of mData.npcs) {
         const nx = (npc.x + 0.5) * TILE_SIZE;
         const ny = (npc.y + 0.5) * TILE_SIZE;
@@ -2932,7 +3228,7 @@
         state.player.dir = vy > 0 ? 'down' : 'up';
       }
 
-      const speed = state.runEnabled ? 4.2 : 2.5;
+      const speed = state.bikeMode === 2 ? 5.2 : (state.runEnabled ? 3.9 : 2.4);
       const nextX = state.player.x + vx * speed;
       const nextY = state.player.y + vy * speed;
 
@@ -2973,8 +3269,19 @@
 
         if (state.tick % 20 === 0) updateHud();
 
-        // Wild encounters in Tall Grass (tile 2) or Mountain Cave (tile 15)
-        if (tile === 2 || tile === 15) {
+        // Update HM03 Surfing state when on Water (tile 3)
+        state.isSurfing = (tile === 3);
+
+        // Passive Daycare XP on steps + Line-of-Sight Trainer check
+        if (state.tick % 18 === 0 && state.party[0]) {
+          state.party[0].xp = Math.min(state.party[0].nextXp - 1, (state.party[0].xp || 0) + 1);
+        }
+        if (state.tick % 8 === 0) {
+          checkRouteTrainerLineOfSight();
+        }
+
+        // Wild encounters in Tall Grass (tile 2), Mountain Cave (tile 15), or Surfing on Water (tile 3)
+        if (tile === 2 || tile === 15 || tile === 3) {
           state.player.grassDistAccum += speed;
           if (Math.random() < 0.24) {
             state.particles.push({
@@ -3123,6 +3430,32 @@
             ], () => triggerTrainerBattle(npc));
             return;
           }
+          if (npc.role === 'fossil_lab') {
+            handleFossilRevival();
+            return;
+          }
+          if (npc.role === 'daycare') {
+            handleDaycareInteraction();
+            return;
+          }
+          if (npc.role === 'route_trainer') {
+            state.defeatedTrainers = state.defeatedTrainers || {};
+            if (state.defeatedTrainers[npc.id]) {
+              showDialogue(npc.name, ['ניצחת אותי בצורה מרשימה! המשך להתקדם בדרכי קאנטו!']);
+            } else {
+              showDialogue(npc.name, [npc.intro || 'קדימה לקרב מאמנים!'], () => triggerTrainerBattle(npc));
+            }
+            return;
+          }
+          if (npc.role === 'elite4') {
+            state.eliteFourDefeated = state.eliteFourDefeated || {};
+            showDialogue(npc.name, [
+              state.eliteFourDefeated[npc.id]
+                ? 'כבר הוכחת את כוחך מולי ברביעיית העילית! מוכן לקרב אימון חוזר?'
+                : `אני חבר ברביעיית העילית של ליגת אינדיגו! נראה אם תצליח לעבור אותי בדרך אל האלוף גארי!`
+            ], () => triggerTrainerBattle(npc));
+            return;
+          }
           if (npc.role === 'legendary') {
             showDialogue(npc.name, [
               'גלי כוח על-חושי אדירים בוקעים ממיוטו האגדי! הוא מתכונן לקרב!'
@@ -3152,6 +3485,22 @@
       if (tile === 8) {
         const msg = SIGNS[`${tx},${ty}`] || '🗺️ שלט דרכים במחוז קאנטו: המשך לחקור את הערים והמכונים!';
         showDialogue('שלט עץ', [msg]);
+        return;
+      }
+      if (tile === 21 && !state.collectedItems[`${tx},${ty}`]) {
+        state.collectedItems[`${tx},${ty}`] = true;
+        sfx.playAttack('GRASS');
+        showDialogue('🌳 HM01 חיתוך (Cut)!', ['הפוקימון שלך חתך את השיח החוסם ופינה את המעבר!']);
+        return;
+      }
+      if (tile === 22 && !state.collectedItems[`${tx},${ty}`]) {
+        state.collectedItems[`${tx},${ty}`] = true;
+        sfx.playAttack('ROCK');
+        showDialogue('🪨 HM04 כוח (Strength)!', ['הפוקימון שלך הדף בעוצמה את סלע הענק ופתח את הדרך!']);
+        return;
+      }
+      if (tile === 3) {
+        castFishingRod();
         return;
       }
       if (tile === 10 && !state.collectedItems[`${tx},${ty}`]) {
@@ -3404,14 +3753,22 @@
         return;
       }
 
-      const mult = TYPE_CHART[move.type]?.[eMon.type] ?? 1.0;
+      // Apply move statEffect (+ATK / -ATK / +DEF / -DEF) if present
+      if (move.statEffect) {
+        const stTarget = move.statEffect.target === 'self' ? pMon : eMon;
+        if (move.statEffect.stat === 'atk') stTarget.atkStage = Math.max(-3, Math.min(3, (stTarget.atkStage || 0) + move.statEffect.delta));
+        if (move.statEffect.stat === 'def') stTarget.defStage = Math.max(-3, Math.min(3, (stTarget.defStage || 0) + move.statEffect.delta));
+      }
+      const mult = getDualTypeMultiplier(move.type, eMon);
+      const stageAtkMult = 1 + (pMon.atkStage || 0) * 0.22;
+      const stageDefMult = Math.max(0.4, 1 + (eMon.defStage || 0) * 0.22);
       const critChance = pMon.heldItem === 'quick_claw' ? 0.35 : 0.15;
       const isCrit = Math.random() < critChance;
       const critMult = isCrit ? 1.5 : 1.0;
       const heldAtkBoost = pMon.heldItem === 'mystic_gem' ? 1.22 : 1.0;
       const burnPenalty = pMon.status === 'BURN' ? 0.85 : 1.0;
       const kidBoost = state.kidFriendlyMode ? 1.15 : 1.0;
-      const raw = ((pMon.atk * move.power * heldAtkBoost * burnPenalty * kidBoost) / Math.max(8, eMon.def)) * 0.58;
+      const raw = ((pMon.atk * stageAtkMult * move.power * heldAtkBoost * burnPenalty * kidBoost) / Math.max(8, eMon.def * stageDefMult)) * 0.58;
       const dmg = Math.max(3, Math.round(raw * mult * critMult * (0.92 + Math.random() * 0.16)));
       eMon.hp = Math.max(0, eMon.hp - dmg);
 
@@ -3485,6 +3842,19 @@
         pMon.spd += 2;
         msgs.push(`🎉 ${pMon.name} עלה לרמה ${pMon.level}!`);
 
+        // Check if Pokemon learns a new move at this level!
+        const spLearn = SPECIES_DB[pMon.speciesId]?.learnset || [];
+        const learnedEntry = spLearn.find(l => l.lv === pMon.level);
+        if (learnedEntry && !pMon.moves.some(m => m.name === learnedEntry.move.name)) {
+          const newMoveObj = { ...learnedEntry.move, maxPp: learnedEntry.move.pp };
+          if (pMon.moves.length < 4) {
+            pMon.moves.push(newMoveObj);
+          } else {
+            pMon.moves[1] = newMoveObj;
+          }
+          msgs.push(`📚 ${pMon.name} למד מתקפה חדשה: ${newMoveObj.name}!`);
+        }
+
         const evoTarget = checkLevelEvolution(pMon);
         if (evoTarget) {
           b.pendingEvolution = { mon: pMon, targetId: evoTarget };
@@ -3504,6 +3874,16 @@
             state.badges[npc.badgeId] = true;
             state.money += (npc.rewardMoney || 1500);
             msgs.push(`🏅 ניצחת את ${npc.name}! זכית ב-${npc.badgeName} ובבונוס של ₽${npc.rewardMoney || 1500}!`);
+          } else if (npc.role === 'route_trainer') {
+            state.defeatedTrainers = state.defeatedTrainers || {};
+            state.defeatedTrainers[npc.id] = true;
+            state.money += (npc.rewardMoney || 600);
+            msgs.push(`⚔️ ניצחת את ${npc.name} וזכית ב-₽${npc.rewardMoney || 600}!`);
+          } else if (npc.role === 'elite4') {
+            state.eliteFourDefeated = state.eliteFourDefeated || {};
+            state.eliteFourDefeated[npc.id] = true;
+            state.money += (npc.rewardMoney || 4000);
+            msgs.push(`🏆 ניצחת את חבר רביעיית העילית ${npc.name}! (+₽${npc.rewardMoney || 4000})`);
           } else if (npc.role === 'champion') {
             state.championDefeated = true;
             state.money += 6000;
@@ -3554,7 +3934,7 @@
       b.playerShake = 16;
       spawnBattleParticles(canvas.width * 0.32, canvas.height * 0.52, SPECIES_DB[eMon.speciesId]?.primary || '#ef4444');
 
-      const mult = TYPE_CHART[move.type]?.[pMon.type] ?? 1.0;
+      const mult = getDualTypeMultiplier(move.type, pMon);
       const gogglesRed = pMon.heldItem === 'safety_goggles' ? 0.85 : 1.0;
       const kidDef = state.kidFriendlyMode ? 0.82 : 1.0;
       const raw = ((eMon.atk * move.power * gogglesRed * kidDef) / Math.max(8, pMon.def)) * 0.45;
@@ -3775,6 +4155,32 @@
         ctx.strokeStyle = '#451a03';
         ctx.lineWidth = 2;
         ctx.strokeRect(sx + 6, sy + 8, 32, 18);
+      } else if (tile === 21 && !state.collectedItems[`${c},${r}`]) {
+        // HM01 Cuttable Bush
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath();
+        ctx.arc(sx + 22, sy + 24, 13, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#bbf7d0';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('✂️', sx + 22, sy + 28);
+      } else if (tile === 22 && !state.collectedItems[`${c},${r}`]) {
+        // HM04 Strength Boulder
+        ctx.fillStyle = '#78350f';
+        ctx.beginPath();
+        ctx.arc(sx + 22, sy + 22, 15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('💪', sx + 22, sy + 26);
       } else if (tile === 10 && !state.collectedItems[`${c},${r}`]) {
         const pulse = Math.sin(state.tick * 0.1) * 2;
         ctx.fillStyle = 'rgba(250, 204, 21, 0.38)';
@@ -3911,7 +4317,8 @@
         if (npc.role === 'legendary') {
           drawHDMonster(ctx, npc.speciesId, sx, sy, 48, state.tick, false);
         } else {
-          drawHDTrainer(sx, sy, npc.dir, 0, npc.shirt, npc.hat, npc.name);
+          const isUndefeatedRoute = npc.role === 'route_trainer' && !(state.defeatedTrainers && state.defeatedTrainers[npc.id]);
+          drawHDTrainer(sx, sy, npc.dir, 0, npc.shirt, npc.hat, isUndefeatedRoute ? `❗ ${npc.name}` : npc.name);
         }
       }
 
@@ -3933,6 +4340,28 @@
         }
       }
 
+      // Draw Surfing Mount (HM03 Surf) or Kanto Bicycle under Player!
+      if (state.isSurfing) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.85)';
+        ctx.strokeStyle = '#e0f2fe';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.ellipse(w / 2, h / 2 + 12, 22, 11, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      } else if (state.bikeMode === 2) {
+        ctx.save();
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(w / 2 - 10, h / 2 + 12, 6, 0, Math.PI * 2);
+        ctx.arc(w / 2 + 10, h / 2 + 12, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
       // Draw Player
       drawHDTrainer(
         w / 2,
@@ -3941,7 +4370,7 @@
         state.player.moving ? state.player.walkCycle : 0,
         '#2563eb',
         '#ef4444',
-        state.saveName
+        state.isSurfing ? `🌊 ${state.saveName}` : state.saveName
       );
 
       for (let i = state.particles.length - 1; i >= 0; i--) {
@@ -4311,9 +4740,15 @@
     document.getElementById('dialogueCard').addEventListener('click', advanceDialogue);
     document.getElementById('battleMsgBox').addEventListener('click', advanceBattleMessage);
 
+    document.getElementById('btnFishAction').addEventListener('click', castFishingRod);
+
     document.getElementById('btnRunToggle').addEventListener('click', () => {
-      state.runEnabled = !state.runEnabled;
-      document.getElementById('runStatusText').textContent = state.runEnabled ? 'ריצה: פעיל' : 'ריצה: כבוי';
+      state.bikeMode = ((state.bikeMode ?? 2) + 1) % 3;
+      state.runEnabled = state.bikeMode >= 1;
+      const icons = ['🚶', '👟', '🚲'];
+      const labels = ['הליכה', 'ריצה', 'אופניים'];
+      document.getElementById('runBikeIcon').textContent = icons[state.bikeMode];
+      document.getElementById('runStatusText').textContent = labels[state.bikeMode];
       sfx.playConfirm();
     });
 
@@ -4503,7 +4938,7 @@
             const mBtn = document.createElement('button');
             mBtn.className = 'p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-right flex flex-col justify-between';
             const eType = b.enemy.type;
-            const eff = m.type === 'HEAL' ? 1 : (TYPE_CHART[m.type]?.[eType] ?? 1.0);
+            const eff = m.type === 'HEAL' ? 1 : getDualTypeMultiplier(m.type, b.enemy);
             const effLabel = m.type === 'HEAL'
               ? '<span class="text-emerald-300">💚 ריפוי עצמי</span>'
               : eff > 1.2
@@ -4701,7 +5136,7 @@
       bList.innerHTML = '';
       SHOP_CATALOG.forEach(item => {
         const count = state.inventory[item.key] || 0;
-        const isUsableOnLead = ['rare_candy', 'fire_stone', 'water_stone', 'thunder_stone', 'leaf_stone', 'moon_stone', 'link_cable'].includes(item.key);
+        const isUsableOnLead = ['rare_candy', 'fire_stone', 'water_stone', 'thunder_stone', 'leaf_stone', 'moon_stone', 'link_cable'].includes(item.key) || !!TM_DISCS_DB[item.key];
         const card = document.createElement('button');
         card.type = 'button';
         card.className = `p-2 rounded-xl border text-center transition ${
@@ -4760,6 +5195,18 @@
     function useSpecialItemOnLead(itemKey) {
       const lead = state.party[0];
       if (!lead || (state.inventory[itemKey] || 0) <= 0) return;
+
+      if (TM_DISCS_DB[itemKey]) {
+        const tm = TM_DISCS_DB[itemKey];
+        state.inventory[itemKey]--;
+        const moveCopy = { ...tm.move, maxPp: tm.move.pp };
+        if (lead.moves.length < 4) lead.moves.push(moveCopy);
+        else lead.moves[2] = moveCopy;
+        sfx.playEvolveFanfare();
+        saveGameToSlot(state.saveName, true);
+        openPartyBagModal(false);
+        return;
+      }
 
       if (itemKey === 'rare_candy') {
         state.inventory.rare_candy--;

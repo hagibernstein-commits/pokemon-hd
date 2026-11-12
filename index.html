@@ -172,10 +172,20 @@
           <span>🗺️</span>
           <span class="hidden md:inline">מפה</span>
         </button>
+        <button id="btnTrainerCardHud" class="glass-hud px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:bg-slate-800/80 active:scale-95 transition flex items-center gap-1" title="כרטיס מאמן ותגי מכון">
+          <span>🪪</span>
+          <span class="hidden lg:inline">מאמן</span>
+        </button>
+        <button id="btnWeatherHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-sky-200 hover:bg-slate-800/80 active:scale-95 transition" title="החלף זמן ומזג אוויר (יום / שקיעה / לילה / גשם)">
+          <span id="weatherIcon">☀️</span>
+        </button>
         <button id="btnSaveMenu" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-emerald-300 hover:bg-slate-800/80 active:scale-95 transition" title="שמירות">
           <span>💾</span>
         </button>
-        <button id="btnSoundHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800/80 active:scale-95 transition" title="סאונד">
+        <button id="btnMusicHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-pink-300 hover:bg-slate-800/80 active:scale-95 transition" title="מוזיקת רקע (BGM)">
+          <span id="musicIcon">🎵</span>
+        </button>
+        <button id="btnSoundHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800/80 active:scale-95 transition" title="אפקטים קוליים">
           <span id="soundIcon">🔊</span>
         </button>
         <button id="btnFullscreen" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800/80 active:scale-95 transition" title="מסך מלא">
@@ -476,6 +486,21 @@
       </div>
     </div>
 
+        <!-- Trainer License Card & Badges Modal -->
+    <div id="trainerCardModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div class="glass-modal rounded-3xl max-w-md w-full p-5 space-y-4 border-2 border-amber-400/50 scroll-y max-h-[92dvh]">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
+          <div>
+            <div class="text-[10px] font-black text-amber-300 uppercase tracking-widest">KANTO POKéMON LEAGUE</div>
+            <h2 class="text-lg font-black text-white">🪪 כרטיס מאמן רשמי והיכל התהילה</h2>
+          </div>
+          <button id="btnCloseTrainerCard" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">סגור ✕</button>
+        </div>
+
+        <div id="trainerCardBody" class="space-y-3"></div>
+      </div>
+    </div>
+
     <!-- Evolution Celebration Modal -->
     <div id="evolutionModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
       <div class="glass-modal rounded-3xl max-w-sm w-full p-6 text-center space-y-4 border-2 border-amber-400/60">
@@ -704,6 +729,53 @@
       }
     }
     const sfx = new SoundEngine();
+
+    // Procedural Chiptune Background Music (BGM) Sequencer
+    class BgmSequencer {
+      constructor(soundEngine) {
+        this.sfx = soundEngine;
+        this.playing = false;
+        this.step = 0;
+        this.timer = null;
+        // Classic upbeat Kanto-style melodies (frequencies in Hz)
+        this.overworldNotes = [
+          392.00, 440.00, 493.88, 587.33, 523.25, 493.88, 440.00, 392.00,
+          329.63, 392.00, 440.00, 523.25, 493.88, 440.00, 392.00, 329.63
+        ];
+        this.battleNotes = [
+          330.00, 349.23, 392.00, 440.00, 392.00, 349.23, 330.00, 293.66,
+          349.23, 392.00, 440.00, 523.25, 493.88, 440.00, 392.00, 440.00
+        ];
+      }
+      toggle() {
+        this.playing = !this.playing;
+        if (this.playing) {
+          this.sfx.init();
+          this.startLoop();
+        } else {
+          this.stopLoop();
+        }
+        return this.playing;
+      }
+      startLoop() {
+        this.stopLoop();
+        this.timer = setInterval(() => {
+          if (!this.playing || !this.sfx.enabled || state.mode === 'TITLE') return;
+          const isBattle = state.mode === 'BATTLE';
+          const seq = isBattle ? this.battleNotes : this.overworldNotes;
+          const freq = seq[this.step % seq.length];
+          this.step++;
+          this.sfx.playTone(freq, isBattle ? 0.13 : 0.20, isBattle ? 'square' : 'triangle', 0.028);
+        }, 230);
+      }
+      stopLoop() {
+        if (this.timer) {
+          clearInterval(this.timer);
+          this.timer = null;
+        }
+      }
+    }
+    const bgm = new BgmSequencer(sfx);
 
     /********************************************************************
      * 2. 151 KANTO POKÉMON DATABASE, EVOLUTIONS & PROCEDURAL 2D-HD ART
@@ -970,15 +1042,18 @@
       return map[speciesId] || (SPECIES_DB[speciesId] ? speciesId : 'pikachu');
     }
 
-    function createMonster(speciesId, level = 5) {
+    function createMonster(speciesId, level = 5, forceShiny = null) {
       const normId = normalizeSpeciesId(speciesId);
       const sp = SPECIES_DB[normId] || SPECIES_DB.pikachu;
-      const maxHp = Math.floor(sp.baseHp + (level - 1) * 5.5);
+      const isShiny = forceShiny !== null ? forceShiny : (Math.random() < 0.05);
+      const shinyBonus = isShiny ? 1.12 : 1.0;
+      const maxHp = Math.floor((sp.baseHp + (level - 1) * 5.5) * shinyBonus);
       return {
         uid: 'mon_' + Math.random().toString(36).slice(2, 9) + '_' + Date.now(),
         speciesId: normId,
         dex: sp.dex,
-        name: sp.name,
+        shiny: isShiny,
+        name: isShiny ? `✨ ${sp.name}` : sp.name,
         type: sp.type,
         typeName: sp.typeName,
         level,
@@ -1590,6 +1665,8 @@
       },
       pokedexSeen: { pikachu: true, bulbasaur: true },
       pokedexCaught: { pikachu: true, bulbasaur: true },
+      weatherMode: 0, // 0: Sunny Day, 1: Golden Sunset, 2: Starry Night, 3: Rainstorm
+      partnerTrail: [],
       player: {
         x: 11.5 * TILE_SIZE,
         y: 44.5 * TILE_SIZE,
@@ -1944,6 +2021,8 @@
       }
 
       if (moved) {
+        state.partnerTrail.push({ x: state.player.x, y: state.player.y });
+        if (state.partnerTrail.length > 14) state.partnerTrail.shift();
         const tx = Math.floor(state.player.x / TILE_SIZE);
         const ty = Math.floor(state.player.y / TILE_SIZE);
         const tile = WORLD_MAP[ty]?.[tx];
@@ -2321,11 +2400,22 @@
       spawnBattleParticles(canvas.width * 0.68, canvas.height * 0.28, SPECIES_DB[pMon.speciesId]?.primary || '#38bdf8');
 
       const mult = TYPE_CHART[move.type]?.[eMon.type] ?? 1.0;
+      const isCrit = Math.random() < 0.15;
+      const critMult = isCrit ? 1.5 : 1.0;
       const raw = ((pMon.atk * move.power) / Math.max(8, eMon.def)) * 0.58;
-      const dmg = Math.max(3, Math.round(raw * mult * (0.92 + Math.random() * 0.16)));
+      const dmg = Math.max(3, Math.round(raw * mult * critMult * (0.92 + Math.random() * 0.16)));
       eMon.hp = Math.max(0, eMon.hp - dmg);
 
-      const msgs = [`${pMon.name} תקף עם ${move.name}!`];
+      b.floatingText = {
+        text: `-${dmg}${isCrit ? ' קריטי! 💥' : ''}`,
+        x: canvas.width * 0.68,
+        y: canvas.height * 0.22,
+        color: isCrit ? '#facc15' : (mult > 1.2 ? '#fb923c' : '#f8fafc'),
+        timer: 38
+      };
+
+      const msgs = [`${pMon.name} תקף עם ${move.name}! (-${dmg} HP)`];
+      if (isCrit) msgs.push('💥 מכה קריטית עוצמתית!');
       if (mult > 1.2) msgs.push('🔥 זה אפקטיבי במיוחד!');
       else if (mult < 0.85) msgs.push('זה לא מאוד אפקטיבי...');
 
@@ -2727,6 +2817,24 @@
         }
       }
 
+      // Draw Following Lead Pokemon Partner (Pokemon Yellow / HGSS style!)
+      const leadMon = state.party[0];
+      if (leadMon) {
+        const trailPt = state.partnerTrail[0] || {
+          x: state.player.x - (state.player.dir === 'right' ? 34 : state.player.dir === 'left' ? -34 : 0),
+          y: state.player.y - (state.player.dir === 'down' ? 34 : state.player.dir === 'up' ? -34 : -34)
+        };
+        const px = trailPt.x - camX;
+        const py = trailPt.y - camY;
+        drawHDMonster(ctx, leadMon.speciesId, px, py + 4, 34, state.tick, false);
+        if (leadMon.shiny && state.tick % 4 === 0) {
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath();
+          ctx.arc(px + Math.sin(state.tick * 0.2) * 14, py - 12, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
       // Draw Player
       drawHDTrainer(
         w / 2,
@@ -2750,9 +2858,42 @@
         if (p.life <= 0) state.particles.splice(i, 1);
       }
 
+      // Dynamic Day/Night & Weather Atmospheric Lighting
+      if (state.weatherMode === 1) {
+        // Golden Sunset
+        ctx.fillStyle = 'rgba(249, 115, 22, 0.18)';
+        ctx.fillRect(0, 0, w, h);
+      } else if (state.weatherMode === 2) {
+        // Starry Night + Firefly Particles
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.46)';
+        ctx.fillRect(0, 0, w, h);
+        for (let i = 0; i < 14; i++) {
+          const fx = ((i * 197 + state.tick * 0.6) % w);
+          const fy = ((i * 131 + Math.sin(state.tick * 0.05 + i) * 18) % h);
+          ctx.fillStyle = 'rgba(250, 204, 21, 0.72)';
+          ctx.beginPath();
+          ctx.arc(fx, fy, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (state.weatherMode === 3) {
+        // Rainstorm + Falling Raindrops
+        ctx.fillStyle = 'rgba(30, 58, 138, 0.26)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = 'rgba(186, 230, 253, 0.55)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < 42; i++) {
+          const rx = ((i * 97 + state.tick * 9) % (w + 60)) - 30;
+          const ry = ((i * 73 + state.tick * 15) % h);
+          ctx.moveTo(rx, ry);
+          ctx.lineTo(rx - 6, ry + 14);
+        }
+        ctx.stroke();
+      }
+
       const vig = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
       vig.addColorStop(0, 'rgba(0,0,0,0)');
-      vig.addColorStop(1, 'rgba(9, 13, 22, 0.32)');
+      vig.addColorStop(1, 'rgba(9, 13, 22, 0.34)');
       ctx.fillStyle = vig;
       ctx.fillRect(0, 0, w, h);
     }
@@ -2926,6 +3067,20 @@
         if (pt.life <= 0) b.fxParticles.splice(i, 1);
       }
 
+      if (b.floatingText && b.floatingText.timer > 0) {
+        b.floatingText.timer--;
+        b.floatingText.y -= 0.9;
+        ctx.save();
+        ctx.font = '900 18px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 4;
+        ctx.strokeText(b.floatingText.text, b.floatingText.x, b.floatingText.y);
+        ctx.fillStyle = b.floatingText.color;
+        ctx.fillText(b.floatingText.text, b.floatingText.x, b.floatingText.y);
+        ctx.restore();
+      }
+
       const cardW = Math.min(240, w * 0.46);
       drawBattleStatCard(14, 62, cardW, eMon, false);
       drawBattleStatCard(w - cardW - 14, h * 0.44, cardW, pMon, true);
@@ -3056,6 +3211,73 @@
     document.getElementById('btnSoundHud').addEventListener('click', () => {
       const on = sfx.toggle();
       document.getElementById('soundIcon').textContent = on ? '🔊' : '🔇';
+    });
+
+    document.getElementById('btnMusicHud').addEventListener('click', () => {
+      const on = bgm.toggle();
+      document.getElementById('musicIcon').textContent = on ? '🎵' : '🔕';
+      if (on) sfx.playConfirm();
+    });
+
+    document.getElementById('btnWeatherHud').addEventListener('click', () => {
+      state.weatherMode = ((state.weatherMode || 0) + 1) % 4;
+      const icons = ['☀️', '🌅', '🌙', '🌧️'];
+      document.getElementById('weatherIcon').textContent = icons[state.weatherMode];
+      sfx.playConfirm();
+    });
+
+    function openTrainerCardModal() {
+      const body = document.getElementById('trainerCardBody');
+      const caughtCount = Object.keys(state.pokedexCaught).length;
+      const badgeList = [
+        { id: 'boulder', name: 'תג הסלע', icon: '🪨', leader: 'ברוק' },
+        { id: 'cascade', name: 'תג המפל', icon: '💧', leader: 'מיסטי' },
+        { id: 'thunder', name: 'תג הרעם', icon: '⚡', leader: 'סרג׳' },
+        { id: 'volcano', name: 'תג הלבה', icon: '🔥', leader: 'בליין' }
+      ];
+      const shinyCount = [...state.party, ...state.pcBox].filter(m => m.shiny).length;
+      body.innerHTML = `
+        <div class="bg-slate-900/95 border border-slate-700 rounded-2xl p-3.5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-black text-white">שם המאמן: <strong class="text-amber-300">${state.saveName}</strong></span>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black">
+              ${state.championDefeated ? '👑 אלוף ליגת אינדיגו' : '⭐ מאמן פוקימונים'}
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+            <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">💰 כסף: <strong class="text-emerald-300">₽${state.money.toLocaleString()}</strong></div>
+            <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">📖 פוקידע: <strong class="text-purple-300">${caughtCount} / 151</strong></div>
+            <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">⚔️ ניצחונות: <strong class="text-sky-300">${state.stats.battlesWon || 0}</strong></div>
+            <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">✨ פוקימוני שייני: <strong class="text-amber-300">${shinyCount}</strong></div>
+          </div>
+        </div>
+        <div class="space-y-1.5">
+          <div class="text-xs font-extrabold text-amber-300">🏅 תגי המכונים של מחוז קאנטו:</div>
+          <div class="grid grid-cols-2 gap-2">
+            ${badgeList.map(b => {
+              const has = !!state.badges[b.id];
+              return `
+                <div class="p-2.5 rounded-xl border flex items-center gap-2 ${has ? 'bg-amber-500/20 border-amber-400 text-white' : 'bg-slate-900/50 border-slate-800 text-slate-500'}">
+                  <span class="text-xl">${has ? b.icon : '🔒'}</span>
+                  <div>
+                    <div class="text-xs font-black">${b.name}</div>
+                    <div class="text-[10px]">${has ? `נוצח: ${b.leader} ✓` : `מנהיג: ${b.leader}`}</div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+      document.getElementById('trainerCardModal').classList.remove('hidden');
+      document.getElementById('trainerCardModal').classList.add('flex');
+      sfx.playConfirm();
+    }
+
+    document.getElementById('btnTrainerCardHud').addEventListener('click', openTrainerCardModal);
+    document.getElementById('btnCloseTrainerCard').addEventListener('click', () => {
+      document.getElementById('trainerCardModal').classList.add('hidden');
+      document.getElementById('trainerCardModal').classList.remove('flex');
     });
 
     document.getElementById('btnFullscreen').addEventListener('click', () => toggleFullscreen(false));

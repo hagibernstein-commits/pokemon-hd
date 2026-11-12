@@ -1,0 +1,2556 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="פוקימון HD" />
+  <title>פוקימון: מהדורת 2D-HD | POKéMON POCKET HD</title>
+  <link id="appleTouchIcon" rel="apple-touch-icon" />
+  <link id="webManifestLink" rel="manifest" />
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      background: #090d16;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #f8fafc;
+    }
+
+    #gameViewport {
+      position: relative;
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      background: #0b1320;
+    }
+
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Glassmorphic Floating UI Panels */
+    .glass-hud {
+      background: rgba(15, 23, 42, 0.76);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .glass-modal {
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75);
+    }
+
+    .touch-btn {
+      background: rgba(15, 23, 42, 0.68);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(255, 255, 255, 0.24);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+      transition: transform 0.08s ease, background-color 0.12s ease;
+    }
+
+    .touch-btn:active, .touch-btn.active {
+      transform: scale(0.92);
+      background: rgba(59, 130, 246, 0.75);
+      border-color: rgba(147, 197, 253, 0.8);
+    }
+
+    /* Floating Virtual Joystick */
+    #joystickBase {
+      position: absolute;
+      width: 116px;
+      height: 116px;
+      margin-left: -58px;
+      margin-top: -58px;
+      border-radius: 9999px;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(15,23,42,0.55) 100%);
+      border: 2px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+      pointer-events: none;
+      z-index: 20;
+      transition: opacity 0.15s ease;
+    }
+
+    #joystickKnob {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 48px;
+      height: 48px;
+      margin-left: -24px;
+      margin-top: -24px;
+      border-radius: 9999px;
+      background: radial-gradient(circle at 35% 35%, rgba(96, 165, 250, 0.95), rgba(37, 99, 235, 0.9));
+      border: 2px solid rgba(255, 255, 255, 0.75);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+    }
+
+    /* Custom Scrollbar for Modals */
+    .scroll-y {
+      overflow-y: auto;
+      touch-action: pan-y;
+    }
+    .scroll-y * {
+      touch-action: pan-y;
+    }
+    input, button {
+      touch-action: manipulation;
+    }
+
+    @keyframes pulseSlow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .animate-pulse-slow {
+      animation: pulseSlow 2.4s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameViewport">
+    <!-- Fullscreen 2D-HD Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Top Floating HUD Bar (Visible in Overworld & Battle) -->
+    <header id="topHud" class="fixed top-2.5 inset-x-2.5 z-30 flex items-center justify-between gap-2 pointer-events-none">
+      <!-- Active Profile & Lead Pokemon Badge -->
+      <div class="glass-hud rounded-2xl px-3 py-1.5 flex items-center gap-2.5 pointer-events-auto">
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-extrabold text-amber-300" id="hudProfileName">מאמן: אש</span>
+            <span id="saveIndicator" class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 hidden">נשמר ✓</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-200 font-semibold mt-0.5">
+            <span id="hudLeadInfo">וולטצ׳ו רמ׳5</span>
+            <span class="text-slate-400">|</span>
+            <span id="hudBallsInfo" class="text-sky-300">🔴 8 פוקדורים</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Right Quick Controls -->
+      <div class="flex items-center gap-1.5 pointer-events-auto">
+        <button id="btnSaveMenu" class="glass-hud px-2.5 py-2 rounded-xl text-xs font-bold text-emerald-300 hover:bg-slate-800/80 active:scale-95 transition flex items-center gap-1" title="שמירה / החלפת שמירה / משחק חדש">
+          <span>💾</span>
+          <span class="hidden sm:inline">שמירות</span>
+        </button>
+        <button id="btnPartyHud" class="glass-hud px-2.5 py-2 rounded-xl text-xs font-bold text-amber-200 hover:bg-slate-800/80 active:scale-95 transition flex items-center gap-1" title="צוות הפוקימונים">
+          <span>🐾</span>
+          <span id="hudPartyCount">2/6</span>
+        </button>
+        <button id="btnBagHud" class="glass-hud px-2.5 py-2 rounded-xl text-xs font-bold text-sky-200 hover:bg-slate-800/80 active:scale-95 transition flex items-center gap-1" title="תיק חפצים">
+          <span>🎒</span>
+        </button>
+        <button id="btnSoundHud" class="glass-hud px-2.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800/80 active:scale-95 transition" title="סאונד">
+          <span id="soundIcon">🔊</span>
+        </button>
+        <button id="btnFullscreen" class="glass-hud px-2.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800/80 active:scale-95 transition" title="מסך מלא">
+          <span>⛶</span>
+        </button>
+        <button id="btnInstallPwa" class="glass-hud px-2.5 py-2 rounded-xl text-xs font-bold text-pink-300 hover:bg-slate-800/80 active:scale-95 transition flex items-center gap-1" title="התקן כאפליקציה או העבר למכשיר אחר">
+          <span>📲</span>
+          <span class="hidden md:inline">אפליקציה / שיתוף</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Floating Virtual Joystick (Appears at finger position or fixed corner in Overworld) -->
+    <div id="joystickBase" style="left: 92px; bottom: 32px; opacity: 0.65;">
+      <div id="joystickKnob"></div>
+    </div>
+
+    <!-- Floating Right-Side Action Controls (Overworld Mode) -->
+    <div id="overworldTouchControls" class="fixed bottom-6 right-5 z-20 flex items-end gap-3 pointer-events-none">
+      <!-- Turbo / Run Shoes Toggle -->
+      <button id="btnRunToggle" class="touch-btn w-13 h-13 px-3.5 py-3 rounded-full text-xs font-extrabold text-amber-300 flex flex-col items-center justify-center pointer-events-auto" title="נעלי ריצה (הליכה מהירה)">
+        <span class="text-base leading-none">👟</span>
+        <span id="runStatusText" class="text-[9px] mt-0.5">ריצה: פעיל</span>
+      </button>
+
+      <!-- Interact / Talk / Pick Up (A Button) -->
+      <button id="btnInteract" class="touch-btn w-16 h-16 rounded-full text-sm font-black text-white bg-blue-600/75 border-blue-300/60 flex flex-col items-center justify-center pointer-events-auto shadow-lg">
+        <span class="text-lg leading-none">💬</span>
+        <span class="text-[10px] mt-0.5">פעולה (A)</span>
+      </button>
+    </div>
+
+    <!-- Modern Dialogue Overlay Box -->
+    <div id="dialogueOverlay" class="fixed bottom-4 inset-x-3 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-[540px] z-40 hidden">
+      <div id="dialogueCard" class="glass-modal rounded-2xl p-4 border-2 border-sky-400/40 cursor-pointer">
+        <div class="flex items-center justify-between mb-1">
+          <span id="dialogueSpeaker" class="text-xs font-extrabold text-amber-300 tracking-wide">הודעה</span>
+          <span class="text-[10px] text-slate-400">גע להמשך ◀</span>
+        </div>
+        <p id="dialogueText" class="text-sm sm:text-base font-bold text-slate-100 leading-relaxed min-h-[2.75rem]"></p>
+      </div>
+    </div>
+
+    <!-- Modern Battle Touch UI Overlay -->
+    <div id="battleOverlay" class="fixed inset-x-0 bottom-0 z-30 p-3 sm:p-5 hidden pointer-events-none">
+      <div class="max-w-xl mx-auto glass-modal rounded-3xl p-3.5 sm:p-4 border border-slate-600/60 pointer-events-auto">
+        <!-- Battle Message Banner -->
+        <div id="battleMsgBox" class="bg-slate-900/90 border border-slate-700/80 rounded-2xl px-3.5 py-2.5 mb-3 min-h-[3.2rem] flex items-center justify-between cursor-pointer">
+          <p id="battleMsgText" class="text-xs sm:text-sm font-bold text-slate-100 leading-snug"></p>
+          <span id="battleMsgNext" class="text-xs text-amber-400 font-extrabold animate-bounce mr-2">▼</span>
+        </div>
+
+        <!-- Main 4 Battle Action Buttons -->
+        <div id="battleMainActions" class="grid grid-cols-2 gap-2.5">
+          <button data-bact="fight" class="py-3 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-orange-600 hover:from-rose-500 hover:to-orange-500 active:scale-95 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg">
+            <span>⚔️</span><span>תקיפה (קרב)</span>
+          </button>
+          <button data-bact="bag" class="py-3 px-4 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 active:scale-95 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg">
+            <span>🔴</span><span>זרוק פוקדור / תיק</span>
+          </button>
+          <button data-bact="party" class="py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg">
+            <span>🐾</span><span>החלף פוקימון</span>
+          </button>
+          <button data-bact="run" class="py-3 px-4 rounded-2xl bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-100 font-extrabold text-sm flex items-center justify-center gap-2 shadow">
+            <span>🏃</span><span>בריחה</span>
+          </button>
+        </div>
+
+        <!-- Moves Submenu -->
+        <div id="battleMovesGrid" class="hidden">
+          <div id="movesContainer" class="grid grid-cols-2 gap-2 mb-2"></div>
+          <button id="btnCancelMoves" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">↩ חזרה לתפריט הקרב</button>
+        </div>
+
+        <!-- Bag Submenu in Battle -->
+        <div id="battleBagGrid" class="hidden">
+          <div id="battleBagContainer" class="grid grid-cols-3 gap-2 mb-2"></div>
+          <button id="btnCancelBattleBag" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">↩ חזרה לתפריט הקרב</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Title / Welcome Screen Modal (With Load Save / New Game with Custom Name) -->
+    <div id="titleModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+      <div class="glass-modal rounded-3xl max-w-md w-full p-5 sm:p-6 border border-slate-700/80 space-y-4 scroll-y max-h-[92dvh]">
+        <div class="text-center space-y-1">
+          <div class="inline-block px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-extrabold mb-1">
+            מהדורת 2D-HD למובייל וטאבלט
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">פוקימון: עולם הפיקסל</h1>
+          <p class="text-xs text-slate-300">שמירה אוטומטית • ג׳ויסטיק מגע רציף • מסך מלא</p>
+        </div>
+
+        <!-- Existing Saved Games Section -->
+        <div id="titleSavedSection" class="space-y-2 hidden">
+          <h2 class="text-xs font-extrabold text-sky-300 uppercase tracking-wider">📂 המשך שמירה קיימת:</h2>
+          <div id="titleSavesList" class="space-y-2 max-h-40 scroll-y pr-1"></div>
+        </div>
+
+        <!-- Start New Game with Custom Name & Starter Selection -->
+        <div class="bg-slate-900/85 border border-slate-700/80 rounded-2xl p-3.5 space-y-3">
+          <h2 class="text-xs font-extrabold text-emerald-300">✨ פתיחת משחק חדש:</h2>
+          <div>
+            <label class="block text-xs text-slate-300 mb-1 font-semibold" for="newGameNameInput">שם השמירה / שם המאמן:</label>
+            <input id="newGameNameInput" type="text" maxlength="18" placeholder="למשל: אש קטצ׳אם / שמירה 1" value="אש"
+              class="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-600 text-white text-sm font-bold focus:outline-none focus:border-sky-400" />
+          </div>
+
+          <div>
+            <label class="block text-xs text-slate-300 mb-1.5 font-semibold">בחר פוקימון התחלתי:</label>
+            <div id="starterSelectGrid" class="grid grid-cols-2 gap-2"></div>
+          </div>
+
+          <button id="btnStartNewGame" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-98 text-slate-950 font-black text-sm shadow-lg transition">
+            🚀 התחל הרפתקה חדשה במסך מלא!
+          </button>
+
+          <button id="btnCopyHtmlClipboard" type="button" class="w-full py-2.5 rounded-xl bg-sky-500/20 border border-sky-400/50 hover:bg-sky-500/30 text-sky-200 font-extrabold text-xs transition flex items-center justify-center gap-1.5">
+            <span>📋</span>
+            <span id="copyBtnLabel">העתק את כל קוד המשחק ללוח (ללא הורדת קובץ)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save & Profile Manager Modal (Save Current, Save As New Name, Load, New Game, Delete) -->
+    <div id="saveModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+      <div class="glass-modal rounded-3xl max-w-md w-full p-5 space-y-4 scroll-y max-h-[90dvh]">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
+          <h2 class="text-base font-black text-white flex items-center gap-2">💾 ניהול שמירות ומשחקים</h2>
+          <button id="btnCloseSaveModal" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">סגור ✕</button>
+        </div>
+
+        <!-- Current Active Save Quick Action -->
+        <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-emerald-300 font-bold">שמירה פעילה כעת: <strong id="currentSaveSlotTitle" class="text-white">אש</strong></span>
+            <button id="btnQuickSaveNow" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition">
+              שמור עכשיו ✓
+            </button>
+          </div>
+          <!-- Save As Different Name -->
+          <div class="pt-2 border-t border-emerald-500/20 flex items-center gap-2">
+            <input id="saveAsInput" type="text" maxlength="18" placeholder="שמור בשם חדש (למשל: לפני הבוס)..."
+              class="flex-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold focus:outline-none focus:border-emerald-400" />
+            <button id="btnSaveAsNew" class="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs whitespace-nowrap transition">
+              שמור בשם אחר +
+            </button>
+          </div>
+        </div>
+
+        <!-- All Saved Slots List -->
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-slate-300">כל השמירות במכשיר:</h3>
+          <div id="saveSlotsList" class="space-y-2 max-h-48 scroll-y pr-1"></div>
+        </div>
+
+        <!-- Open New Game Button -->
+        <div class="pt-2 border-t border-slate-700/80 flex items-center justify-between gap-2">
+          <button id="btnOpenNewGameScreen" class="w-full py-2.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 hover:bg-amber-500/30 font-extrabold text-xs transition">
+            ✨ פתיחת משחק חדש משלב ההתחלה
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Party & Bag Modal -->
+    <div id="partyBagModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+      <div class="glass-modal rounded-3xl max-w-md w-full p-5 space-y-4 scroll-y max-h-[90dvh]">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
+          <h2 id="partyBagTitle" class="text-base font-black text-white">🐾 צוות הפוקימונים והתיק</h2>
+          <button id="btnClosePartyBag" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">סגור ✕</button>
+        </div>
+
+        <!-- Party List -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-amber-300">הפוקימונים שלי (לחץ להחלפת מוביל):</h3>
+            <button id="btnInstantHealModal" class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-400/40 text-rose-300 text-xs font-bold">🏥 ריפוי מלא</button>
+          </div>
+          <div id="modalPartyList" class="space-y-2"></div>
+        </div>
+
+        <!-- Bag Items -->
+        <div class="space-y-2 pt-2 border-t border-slate-700/80">
+          <h3 class="text-xs font-bold text-sky-300">🎒 תיק חפצים:</h3>
+          <div id="modalBagList" class="grid grid-cols-3 gap-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Install as Web App (PWA) & Share to Another Device Modal -->
+    <div id="pwaModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+      <div class="glass-modal rounded-3xl max-w-sm w-full p-5 space-y-3.5 scroll-y max-h-[90dvh]">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+          <h2 class="text-base font-black text-white">📲 העברה למכשיר אחר / אפליקציה</h2>
+          <button id="btnClosePwaModal" class="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">סגור ✕</button>
+        </div>
+
+        <!-- Portable File Download / Share Section -->
+        <div class="bg-emerald-950/50 border border-emerald-500/40 rounded-2xl p-3 space-y-2">
+          <div class="text-xs font-extrabold text-emerald-300">📤 שליחה לטלפון או טאבלט אחר:</div>
+          <p class="text-[11px] text-slate-200 leading-relaxed">
+            המשחק כולו בנוי כקובץ HTML עצמאי יחיד! הורד או שתף אותו בוואטסאפ/טלגרם/מייל/דרייב ופתח אותו בכל מכשיר:
+          </p>
+          <div class="flex gap-2">
+            <button id="btnDownloadPortableHtml" class="flex-1 py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow transition">
+              ⬇️ הורד קובץ משחק
+            </button>
+            <button id="btnSharePortableHtml" class="py-2.5 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs shadow transition">
+              🔗 שתף קובץ
+            </button>
+          </div>
+        </div>
+
+        <button id="btnTriggerNativeInstall" class="w-full py-3 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black text-xs shadow-lg hidden">
+          📥 התקן אפליקציה כעת (אנדרואיד / כרום)
+        </button>
+        <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-3 space-y-2 text-xs text-slate-200">
+          <div>📱 <strong>באייפון / אייפד (Safari):</strong> לחץ על כפתור ה<strong>שיתוף (Share)</strong> ובחר <strong>״הוסף למסך הבית״ (Add to Home Screen)</strong>.</div>
+          <div>🤖 <strong>באנדרואיד (Chrome):</strong> לחץ על תפריט שלוש הנקודות <strong>⋮</strong> ובחר <strong>״התקן אפליקציה״</strong> או <strong>״הוסף למסך הבית״</strong>.</div>
+        </div>
+        <button id="btnEnterFullscreenFromPwa" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 font-black text-xs border border-sky-400/30">
+          ⛶ הפעל מסך מלא עכשיו
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /********************************************************************
+     * 1. PWA SETUP (Dynamic High-Res App Icon & Web Manifest Generation)
+     ********************************************************************/
+    let deferredInstallPrompt = null;
+
+    function setupPWA() {
+      // Generate a crisp 192x192 Pokéball HD icon via offscreen canvas
+      const iconCanvas = document.createElement('canvas');
+      iconCanvas.width = 192;
+      iconCanvas.height = 192;
+      const ic = iconCanvas.getContext('2d');
+
+      // Background rounded gradient
+      const bgGrad = ic.createLinearGradient(0, 0, 192, 192);
+      bgGrad.addColorStop(0, '#0f172a');
+      bgGrad.addColorStop(1, '#1e293b');
+      ic.fillStyle = bgGrad;
+      ic.fillRect(0, 0, 192, 192);
+
+      // Pokéball sphere
+      ic.save();
+      ic.translate(96, 96);
+      ic.beginPath();
+      ic.arc(0, 0, 72, 0, Math.PI * 2);
+      ic.clip();
+
+      // Top red half
+      const redGrad = ic.createRadialGradient(-20, -30, 10, 0, 0, 75);
+      redGrad.addColorStop(0, '#ff5f6d');
+      redGrad.addColorStop(1, '#dc2626');
+      ic.fillStyle = redGrad;
+      ic.fillRect(-75, -75, 150, 75);
+
+      // Bottom white half
+      const whiteGrad = ic.createRadialGradient(-10, 20, 10, 0, 0, 75);
+      whiteGrad.addColorStop(0, '#ffffff');
+      whiteGrad.addColorStop(1, '#cbd5e1');
+      ic.fillStyle = whiteGrad;
+      ic.fillRect(-75, 0, 150, 75);
+
+      // Center band
+      ic.fillStyle = '#0f172a';
+      ic.fillRect(-75, -8, 150, 16);
+      ic.restore();
+
+      // Outer ring & Center button
+      ic.strokeStyle = '#0f172a';
+      ic.lineWidth = 8;
+      ic.beginPath();
+      ic.arc(96, 96, 72, 0, Math.PI * 2);
+      ic.stroke();
+
+      ic.fillStyle = '#0f172a';
+      ic.beginPath();
+      ic.arc(96, 96, 22, 0, Math.PI * 2);
+      ic.fill();
+
+      ic.fillStyle = '#f8fafc';
+      ic.beginPath();
+      ic.arc(96, 96, 13, 0, Math.PI * 2);
+      ic.fill();
+
+      const iconDataUrl = iconCanvas.toDataURL('image/png');
+      document.getElementById('appleTouchIcon').href = iconDataUrl;
+
+      const manifestObj = {
+        name: 'פוקימון: מהדורת 2D-HD',
+        short_name: 'פוקימון HD',
+        description: 'משחק פוקימון במסך מלא מותאם למובייל וטאבלט עם שמירות מרובות',
+        lang: 'he',
+        dir: 'rtl',
+        start_url: '.',
+        display: 'fullscreen',
+        orientation: 'any',
+        background_color: '#090d16',
+        theme_color: '#0f172a',
+        icons: [
+          { src: iconDataUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: iconDataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+        ]
+      };
+
+      const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+      document.getElementById('webManifestLink').href = URL.createObjectURL(manifestBlob);
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        const btn = document.getElementById('btnTriggerNativeInstall');
+        if (btn) btn.classList.remove('hidden');
+      });
+    }
+    setupPWA();
+
+    function toggleFullscreen(forceEnter = false) {
+      const docEl = document.documentElement;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+        else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+      } else if (!forceEnter) {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
+
+    /********************************************************************
+     * 2. SYNTHESIZED RETRO-MODERN AUDIO ENGINE
+     ********************************************************************/
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      toggle() {
+        this.enabled = !this.enabled;
+        if (this.enabled) {
+          this.init();
+          this.playTone(660, 0.06, 'sine', 0.08);
+        }
+        return this.enabled;
+      }
+      playTone(freq, duration = 0.08, type = 'triangle', vol = 0.08, slideTo = null) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        if (slideTo) osc.frequency.exponentialRampToValueAtTime(Math.max(25, slideTo), now + duration);
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+      playConfirm() {
+        this.playTone(523.25, 0.05, 'triangle', 0.09);
+        setTimeout(() => this.playTone(783.99, 0.08, 'triangle', 0.09), 45);
+      }
+      playCancel() {
+        this.playTone(380, 0.07, 'sine', 0.07, 240);
+      }
+      playStep() {
+        this.playTone(180, 0.025, 'sine', 0.03, 120);
+      }
+      playAttack(type) {
+        if (type === 'FIRE') {
+          this.playTone(220, 0.2, 'sawtooth', 0.09, 640);
+        } else if (type === 'ELECTRIC') {
+          [880, 1320, 990, 1760].forEach((f, i) => setTimeout(() => this.playTone(f, 0.045, 'square', 0.07), i * 40));
+        } else if (type === 'WATER') {
+          this.playTone(350, 0.16, 'sine', 0.1, 760);
+        } else {
+          this.playTone(190, 0.12, 'triangle', 0.1, 70);
+        }
+      }
+      playHealJingle() {
+        const notes = [493.88, 493.88, 493.88, 392.00, 659.25];
+        notes.forEach((f, i) => setTimeout(() => this.playTone(f, i === 4 ? 0.35 : 0.12, 'triangle', 0.09), i * 145));
+      }
+      playVictory() {
+        const notes = [
+          { f: 523.25, t: 0, d: 0.1 }, { f: 523.25, t: 110, d: 0.1 },
+          { f: 523.25, t: 220, d: 0.1 }, { f: 523.25, t: 330, d: 0.25 },
+          { f: 415.30, t: 600, d: 0.22 }, { f: 466.16, t: 840, d: 0.22 },
+          { f: 523.25, t: 1080, d: 0.4 }
+        ];
+        notes.forEach(n => setTimeout(() => this.playTone(n.f, n.d, 'triangle', 0.09), n.t));
+      }
+    }
+    const sfx = new SoundEngine();
+
+    /********************************************************************
+     * 3. MONSTER DATABASE & 2D-HD PROCEDURAL SPRITE RENDERER
+     ********************************************************************/
+    const SPECIES_DB = {
+      voltchu: {
+        id: 'voltchu',
+        name: 'וולטצ׳ו',
+        type: 'ELECTRIC',
+        typeName: 'חשמל ⚡',
+        badgeColor: '#eab308',
+        primary: '#facc15',
+        secondary: '#ea580c',
+        accent: '#fef08a',
+        baseHp: 46, baseAtk: 15, baseDef: 11, baseSpd: 19,
+        moves: [
+          { name: 'מכת ברק', type: 'ELECTRIC', power: 19, pp: 15 },
+          { name: 'נגיחה מהירה', type: 'NORMAL', power: 14, pp: 25 },
+          { name: 'סופת רעמים', type: 'ELECTRIC', power: 25, pp: 10 },
+          { name: 'ניצוץ מרפא', type: 'HEAL', power: 20, pp: 8 }
+        ]
+      },
+      charflame: {
+        id: 'charflame',
+        name: 'צ׳ארלהב',
+        type: 'FIRE',
+        typeName: 'אש 🔥',
+        badgeColor: '#f97316',
+        primary: '#f97316',
+        secondary: '#fde047',
+        accent: '#ef4444',
+        baseHp: 48, baseAtk: 17, baseDef: 11, baseSpd: 16,
+        moves: [
+          { name: 'להביור', type: 'FIRE', power: 20, pp: 15 },
+          { name: 'שריטת דרקון', type: 'NORMAL', power: 14, pp: 25 },
+          { name: 'סופת אש', type: 'FIRE', power: 26, pp: 8 },
+          { name: 'חום מרפא', type: 'HEAL', power: 18, pp: 8 }
+        ]
+      },
+      aquashell: {
+        id: 'aquashell',
+        name: 'אקווהצב',
+        type: 'WATER',
+        typeName: 'מים 💧',
+        badgeColor: '#0ea5e9',
+        primary: '#38bdf8',
+        secondary: '#b45309',
+        accent: '#e0f2fe',
+        baseHp: 54, baseAtk: 14, baseDef: 16, baseSpd: 12,
+        moves: [
+          { name: 'תותח מים', type: 'WATER', power: 19, pp: 15 },
+          { name: 'נגיחת שריון', type: 'NORMAL', power: 14, pp: 20 },
+          { name: 'גל צונאמי', type: 'WATER', power: 25, pp: 8 },
+          { name: 'טיפת חיים', type: 'HEAL', power: 22, pp: 8 }
+        ]
+      },
+      florabulb: {
+        id: 'florabulb',
+        name: 'בלבצמח',
+        type: 'GRASS',
+        typeName: 'עשב 🌿',
+        badgeColor: '#22c55e',
+        primary: '#4ade80',
+        secondary: '#15803d',
+        accent: '#f43f5e',
+        baseHp: 52, baseAtk: 14, baseDef: 15, baseSpd: 13,
+        moves: [
+          { name: 'עלה תער', type: 'GRASS', power: 19, pp: 15 },
+          { name: 'הצלפת גפן', type: 'GRASS', power: 16, pp: 20 },
+          { name: 'דחיפה', type: 'NORMAL', power: 14, pp: 25 },
+          { name: 'סינתזה', type: 'HEAL', power: 24, pp: 8 }
+        ]
+      },
+      georock: {
+        id: 'georock',
+        name: 'סלעון',
+        type: 'ROCK',
+        typeName: 'אבן 🪨',
+        badgeColor: '#78716c',
+        primary: '#a8a29e',
+        secondary: '#57534e',
+        accent: '#d6d3d1',
+        baseHp: 58, baseAtk: 16, baseDef: 18, baseSpd: 9,
+        moves: [
+          { name: 'מפולת סלעים', type: 'ROCK', power: 20, pp: 15 },
+          { name: 'אגרוף אבן', type: 'NORMAL', power: 15, pp: 20 },
+          { name: 'רעידת אדמה', type: 'ROCK', power: 26, pp: 8 },
+          { name: 'שריון סלע', type: 'HEAL', power: 20, pp: 8 }
+        ]
+      },
+      shadoghoul: {
+        id: 'shadoghoul',
+        name: 'פנטום',
+        type: 'GHOST',
+        typeName: 'רוח 👻',
+        badgeColor: '#9333ea',
+        primary: '#a855f7',
+        secondary: '#4c1d95',
+        accent: '#f43f5e',
+        baseHp: 46, baseAtk: 18, baseDef: 12, baseSpd: 18,
+        moves: [
+          { name: 'כדור צללים', type: 'GHOST', power: 21, pp: 15 },
+          { name: 'מבט מהפנט', type: 'GHOST', power: 17, pp: 20 },
+          { name: 'מכת חושך', type: 'NORMAL', power: 15, pp: 20 },
+          { name: 'שאיבת אנרגיה', type: 'HEAL', power: 20, pp: 8 }
+        ]
+      }
+    };
+
+    const TYPE_CHART = {
+      FIRE:     { GRASS: 1.6, WATER: 0.65, ROCK: 0.65, FIRE: 0.75 },
+      WATER:    { FIRE: 1.6, ROCK: 1.6, GRASS: 0.65, WATER: 0.75 },
+      GRASS:    { WATER: 1.6, ROCK: 1.6, FIRE: 0.65, GRASS: 0.75 },
+      ELECTRIC: { WATER: 1.6, GRASS: 0.7, ROCK: 0.65, ELECTRIC: 0.75 },
+      ROCK:     { FIRE: 1.6, ELECTRIC: 1.5, GRASS: 0.75, WATER: 0.75 },
+      GHOST:    { GHOST: 1.6, ELECTRIC: 1.2, FIRE: 1.1 },
+      NORMAL:   { ROCK: 0.75 }
+    };
+
+    function createMonster(speciesId, level = 5) {
+      const sp = SPECIES_DB[speciesId];
+      const maxHp = Math.floor(sp.baseHp + (level - 1) * 5);
+      return {
+        speciesId,
+        name: sp.name,
+        type: sp.type,
+        typeName: sp.typeName,
+        level,
+        maxHp,
+        hp: maxHp,
+        atk: Math.floor(sp.baseAtk + (level - 1) * 2),
+        def: Math.floor(sp.baseDef + (level - 1) * 1.6),
+        spd: Math.floor(sp.baseSpd + (level - 1) * 1.6),
+        xp: 0,
+        nextXp: level * 22,
+        moves: sp.moves.map(m => ({ ...m, maxPp: m.pp }))
+      };
+    }
+
+    // High-Detail 2D-HD Monster Renderer with Shading, Breathing Animation & Glow
+    function drawHDMonster(ctx, speciesId, cx, cy, size, tick, isBack = false) {
+      const sp = SPECIES_DB[speciesId];
+      if (!sp) return;
+      const breathe = Math.sin(tick * 0.08) * (size * 0.035);
+      const r = size * 0.42;
+
+      ctx.save();
+      ctx.translate(cx, cy + breathe);
+
+      // Ground drop shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.95 - breathe, r * 0.85, r * 0.28, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Species-specific appendages (ears, tail, shell, bulb, spikes)
+      if (speciesId === 'voltchu') {
+        // Long lightning ears with dark tips
+        [-1, 1].forEach(side => {
+          ctx.save();
+          ctx.rotate(side * 0.35);
+          ctx.fillStyle = sp.primary;
+          ctx.beginPath();
+          ctx.ellipse(side * r * 0.45, -r * 0.95, r * 0.22, r * 0.55, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#1e293b';
+          ctx.beginPath();
+          ctx.ellipse(side * r * 0.45, -r * 1.28, r * 0.16, r * 0.22, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+        // Lightning bolt tail
+        ctx.fillStyle = '#eab308';
+        ctx.beginPath();
+        ctx.moveTo(r * 0.6, r * 0.2);
+        ctx.lineTo(r * 1.15, -r * 0.2);
+        ctx.lineTo(r * 0.95, -r * 0.25);
+        ctx.lineTo(r * 1.35, -r * 0.75);
+        ctx.lineTo(r * 0.75, -r * 0.35);
+        ctx.closePath();
+        ctx.fill();
+      } else if (speciesId === 'charflame') {
+        // Flame tail with animated flicker
+        const flicker = Math.sin(tick * 0.25) * 4;
+        const flameGrad = ctx.createRadialGradient(r * 0.95, 0, 2, r * 0.95, -r * 0.2, r * 0.55);
+        flameGrad.addColorStop(0, '#fef08a');
+        flameGrad.addColorStop(0.5, '#f97316');
+        flameGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+        ctx.fillStyle = flameGrad;
+        ctx.beginPath();
+        ctx.arc(r * 0.95, -r * 0.15 + flicker, r * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (speciesId === 'florabulb') {
+        // Lush flower bulb on back
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath();
+        ctx.arc(0, -r * 0.55, r * 0.55, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(0, -r * 0.85, r * 0.32, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (speciesId === 'aquashell') {
+        // Armored tortoise shell
+        ctx.fillStyle = '#92400e';
+        ctx.strokeStyle = '#fef3c7';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(isBack ? 0 : r * 0.18, 0, r * 0.82, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // Main 3D-Shaded Body Sphere
+      const bodyGrad = ctx.createRadialGradient(-r * 0.25, -r * 0.3, r * 0.1, 0, 0, r);
+      bodyGrad.addColorStop(0, sp.accent);
+      bodyGrad.addColorStop(0.35, sp.primary);
+      bodyGrad.addColorStop(1, sp.secondary);
+
+      ctx.fillStyle = bodyGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(15, 23, 42, 0.75)';
+      ctx.stroke();
+
+      // Front Facial Features
+      if (!isBack) {
+        // Eyes
+        [-1, 1].forEach(side => {
+          const ex = side * r * 0.34;
+          const ey = -r * 0.12;
+          ctx.fillStyle = speciesId === 'shadoghoul' ? '#ef4444' : '#0f172a';
+          ctx.beginPath();
+          ctx.ellipse(ex, ey, r * 0.13, r * 0.18, 0, 0, Math.PI * 2);
+          ctx.fill();
+          // Eye shine highlight
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(ex - r * 0.04, ey - r * 0.06, r * 0.055, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Electric rosy cheeks for Voltchu
+        if (speciesId === 'voltchu') {
+          ctx.fillStyle = '#ef4444';
+          [-1, 1].forEach(side => {
+            ctx.beginPath();
+            ctx.arc(side * r * 0.52, r * 0.12, r * 0.14, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+
+        // Cute mouth / grin
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, r * 0.12, r * 0.18, 0.15 * Math.PI, 0.85 * Math.PI);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    /********************************************************************
+     * 4. WORLD MAP (24x20 Rich Overworld with Water, Flowers, Center, Gym)
+     ********************************************************************/
+    // Tile types:
+    // 0: Grass, 1: Pine Tree (Solid), 2: Tall Wild Grass (Encounters),
+    // 3: Crystal Water (Solid), 4: Blooming Flowers, 5: Building Wall (Solid),
+    // 6: PokeCenter Red Roof (Solid), 7: PokeCenter Healing Door (Interact),
+    // 8: Info Sign (Interact), 9: Cobblestone/Sand Path, 10: Treasure Pokéball
+    const MAP_COLS = 22;
+    const MAP_ROWS = 18;
+    const TILE_SIZE = 44; // Crisp 44x44px HD tiles
+
+    const WORLD_MAP = [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,2,2,2,2,2,0,0,9,9,9,9,0,0,2,2,2,2,2,10,1,1],
+      [1,2,2,2,2,2,0,4,9,9,9,9,4,0,2,2,2,2,2,2,2,1],
+      [1,2,2,2,0,0,0,0,9,9,9,9,0,0,0,0,2,2,2,2,2,1],
+      [1,0,0,0,0,8,0,0,9,9,9,9,0,6,6,6,6,6,0,0,0,1],
+      [1,0,4,4,0,0,0,0,9,9,9,9,0,5,5,5,5,5,0,4,0,1],
+      [1,0,4,4,0,0,0,9,9,9,9,9,0,5,5,7,5,5,0,4,0,1],
+      [1,0,0,0,0,0,9,9,9,0,0,0,0,0,9,9,9,0,0,0,0,1],
+      [1,2,2,2,2,0,9,9,0,0,4,4,4,0,9,9,9,0,2,2,2,1],
+      [1,2,2,2,2,0,9,9,0,0,4,4,4,0,9,9,9,0,2,2,2,1],
+      [1,2,2,2,2,0,9,9,9,9,9,9,9,9,9,9,0,0,2,2,2,1],
+      [1,10,2,2,0,0,0,0,9,9,9,0,0,0,0,0,0,3,3,3,0,1],
+      [1,0,0,0,0,0,8,0,9,9,9,0,4,4,0,0,3,3,3,3,0,1],
+      [1,0,4,4,0,0,0,0,9,9,9,0,4,4,0,0,3,3,3,3,10,1],
+      [1,0,4,4,0,2,2,2,9,9,9,2,2,2,2,0,3,3,3,3,0,1],
+      [1,0,0,0,0,2,2,2,9,9,9,2,2,2,2,0,0,0,0,0,0,1],
+      [1,0,10,0,0,2,2,2,9,9,9,2,2,2,2,0,0,4,4,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    const NPCS = [
+      { id: 'nurse', name: 'האחות ג׳וי', x: 15, y: 7, dir: 'down', shirt: '#ec4899', hat: '#fbcfe8', role: 'healer' },
+      { id: 'prof', name: 'פרופסור אלון', x: 7, y: 7, dir: 'down', shirt: '#3b82f6', hat: '#e2e8f0', role: 'prof' },
+      { id: 'champion', name: 'האלוף גארי', x: 10, y: 2, dir: 'down', shirt: '#ef4444', hat: '#facc15', role: 'champion' }
+    ];
+
+    const SIGNS = {
+      '5,4': '🌿 שלט הדרכה: צעד בתוך הדשא הגבוה הכהה כדי לפגוש פוקימוני פרא וללכוד אותם!',
+      '6,12': '🏘️ עיירת פיקסל HD — במזרח נמצא מרכז הריפוי (גג אדום), ובצפון ממתין האלוף גארי!'
+    };
+
+    /********************************************************************
+     * 5. GAME STATE & MULTI-SLOT NAMED SAVE SYSTEM (localStorage)
+     ********************************************************************/
+    const STORAGE_KEY = 'POKEMON_HD_SAVES_V2';
+    const ACTIVE_SLOT_KEY = 'POKEMON_HD_ACTIVE_SLOT_V2';
+
+    const state = {
+      mode: 'TITLE', // 'TITLE', 'OVERWORLD', 'DIALOGUE', 'BATTLE'
+      tick: 0,
+      saveName: 'אש',
+      selectedStarter: 'voltchu',
+      runEnabled: true,
+      player: {
+        x: 9.5 * TILE_SIZE, // Smooth sub-tile pixel position!
+        y: 10.5 * TILE_SIZE,
+        dir: 'down',
+        moving: false,
+        walkCycle: 0,
+        grassDistAccum: 0
+      },
+      inventory: {
+        pokeball: 8,
+        greatball: 3,
+        potion: 5
+      },
+      party: [
+        createMonster('voltchu', 5),
+        createMonster('charflame', 5)
+      ],
+      collectedItems: {},
+      championDefeated: false,
+      dialogue: {
+        speaker: '',
+        lines: [],
+        index: 0,
+        onComplete: null
+      },
+      battle: null,
+      particles: []
+    };
+
+    function getAllSaves() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveGameToSlot(slotName = state.saveName, showBadge = true) {
+      const cleanName = (slotName || 'אש').trim() || 'אש';
+      state.saveName = cleanName;
+      const all = getAllSaves();
+      all[cleanName] = {
+        saveName: cleanName,
+        updatedAt: Date.now(),
+        playerX: state.player.x,
+        playerY: state.player.y,
+        playerDir: state.player.dir,
+        inventory: { ...state.inventory },
+        party: JSON.parse(JSON.stringify(state.party)),
+        collectedItems: { ...state.collectedItems },
+        championDefeated: !!state.championDefeated
+      };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+        localStorage.setItem(ACTIVE_SLOT_KEY, cleanName);
+      } catch (_) {}
+
+      updateHud();
+      if (showBadge) {
+        const ind = document.getElementById('saveIndicator');
+        if (ind) {
+          ind.classList.remove('hidden');
+          clearTimeout(ind._timer);
+          ind._timer = setTimeout(() => ind.classList.add('hidden'), 2000);
+        }
+      }
+    }
+
+    function loadGameFromSlot(slotName) {
+      const all = getAllSaves();
+      const data = all[slotName];
+      if (!data) return false;
+      state.saveName = data.saveName || slotName;
+      state.player.x = data.playerX ?? (9.5 * TILE_SIZE);
+      state.player.y = data.playerY ?? (10.5 * TILE_SIZE);
+      state.player.dir = data.playerDir || 'down';
+      state.inventory = { pokeball: 8, greatball: 3, potion: 5, ...(data.inventory || {}) };
+      state.party = Array.isArray(data.party) && data.party.length > 0
+        ? data.party
+        : [createMonster('voltchu', 5)];
+      state.collectedItems = data.collectedItems || {};
+      state.championDefeated = !!data.championDefeated;
+      try { localStorage.setItem(ACTIVE_SLOT_KEY, state.saveName); } catch (_) {}
+      state.mode = 'OVERWORLD';
+      document.getElementById('titleModal').classList.add('hidden');
+      document.getElementById('saveModal').classList.add('hidden');
+      document.getElementById('saveModal').classList.remove('flex');
+      updateHud();
+      sfx.playConfirm();
+      return true;
+    }
+
+    function deleteSaveSlot(slotName) {
+      const all = getAllSaves();
+      delete all[slotName];
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+      } catch (_) {}
+      renderSaveSlotsList();
+      renderTitleScreenModal();
+    }
+
+    function startNewGame(customName, starterId) {
+      const cleanName = (customName || 'אש').trim() || 'אש';
+      state.saveName = cleanName;
+      state.player.x = 9.5 * TILE_SIZE;
+      state.player.y = 10.5 * TILE_SIZE;
+      state.player.dir = 'down';
+      state.inventory = { pokeball: 8, greatball: 3, potion: 5 };
+      state.party = [createMonster(starterId || 'voltchu', 5)];
+      state.collectedItems = {};
+      state.championDefeated = false;
+      state.mode = 'OVERWORLD';
+
+      document.getElementById('titleModal').classList.add('hidden');
+      document.getElementById('saveModal').classList.add('hidden');
+      document.getElementById('saveModal').classList.remove('flex');
+
+      saveGameToSlot(cleanName, true);
+      sfx.playVictory();
+      toggleFullscreen(true);
+
+      showDialogue(
+        'פרופסור אלון',
+        [
+          `ברוך הבא ${cleanName}! בחרת את ${SPECIES_DB[starterId].name} בתור השותף שלך!`,
+          'החזק וגרור את האצבע בכל מקום על המסך לתנועה רציפה, וצעד בדשא הגבוה כדי לתפוס פוקימונים חדשים!'
+        ]
+      );
+    }
+
+    function updateHud() {
+      document.getElementById('hudProfileName').textContent = `שמירה: ${state.saveName}`;
+      const lead = state.party[0];
+      if (lead) {
+        document.getElementById('hudLeadInfo').textContent = `${lead.name} רמ׳${lead.level} (♥${lead.hp}/${lead.maxHp})`;
+      }
+      const totalBalls = (state.inventory.pokeball || 0) + (state.inventory.greatball || 0);
+      document.getElementById('hudBallsInfo').textContent = `🔴 ${totalBalls} פוקדורים`;
+      document.getElementById('hudPartyCount').textContent = `${state.party.length}/6`;
+      document.getElementById('currentSaveSlotTitle').textContent = state.saveName;
+    }
+
+    /********************************************************************
+     * 6. CONTINUOUS MOVEMENT & COLLISION ENGINE
+     ********************************************************************/
+    // Input vector from Floating Joystick, Direct Screen Hold, or Keyboard
+    const inputState = {
+      vx: 0,
+      vy: 0,
+      activePointerId: null,
+      pointerMode: null, // 'joystick' | 'screenFollow'
+      joyOriginX: 92,
+      joyOriginY: window.innerHeight - 90,
+      screenTargetX: 0,
+      screenTargetY: 0,
+      keys: new Set()
+    };
+
+    function isPointSolid(worldX, worldY) {
+      const tx = Math.floor(worldX / TILE_SIZE);
+      const ty = Math.floor(worldY / TILE_SIZE);
+      if (tx < 0 || ty < 0 || tx >= MAP_COLS || ty >= MAP_ROWS) return true;
+      const tile = WORLD_MAP[ty][tx];
+      if (tile === 1 || tile === 3 || tile === 5 || tile === 6 || tile === 8) return true;
+      if (tile === 10 && !state.collectedItems[`${tx},${ty}`]) return true;
+      for (const npc of NPCS) {
+        const nx = (npc.x + 0.5) * TILE_SIZE;
+        const ny = (npc.y + 0.5) * TILE_SIZE;
+        if (Math.hypot(worldX - nx, worldY - ny) < TILE_SIZE * 0.42) return true;
+      }
+      return false;
+    }
+
+    function canStandAt(wx, wy) {
+      const r = TILE_SIZE * 0.28;
+      return (
+        !isPointSolid(wx - r, wy - r) &&
+        !isPointSolid(wx + r, wy - r) &&
+        !isPointSolid(wx - r, wy + r) &&
+        !isPointSolid(wx + r, wy + r)
+      );
+    }
+
+    function updateContinuousPlayerMovement() {
+      if (state.mode !== 'OVERWORLD') {
+        state.player.moving = false;
+        return;
+      }
+
+      let vx = inputState.vx;
+      let vy = inputState.vy;
+
+      // Keyboard fallback
+      if (inputState.keys.size > 0) {
+        vx = 0; vy = 0;
+        if (inputState.keys.has('left')) vx -= 1;
+        if (inputState.keys.has('right')) vx += 1;
+        if (inputState.keys.has('up')) vy -= 1;
+        if (inputState.keys.has('down')) vy += 1;
+        const len = Math.hypot(vx, vy);
+        if (len > 0) { vx /= len; vy /= len; }
+      } else if (inputState.pointerMode === 'screenFollow') {
+        // Calculate vector from screen center (player position) to held touch point
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const dx = inputState.screenTargetX - cx;
+        const dy = inputState.screenTargetY - cy;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 14) {
+          vx = dx / dist;
+          vy = dy / dist;
+        } else {
+          vx = 0; vy = 0;
+        }
+      }
+
+      if (Math.hypot(vx, vy) < 0.08) {
+        state.player.moving = false;
+        return;
+      }
+
+      state.player.moving = true;
+      state.player.walkCycle += state.runEnabled ? 0.26 : 0.16;
+
+      // Update facing direction
+      if (Math.abs(vx) > Math.abs(vy)) {
+        state.player.dir = vx > 0 ? 'right' : 'left';
+      } else {
+        state.player.dir = vy > 0 ? 'down' : 'up';
+      }
+
+      const speed = state.runEnabled ? 3.8 : 2.3;
+      const nextX = state.player.x + vx * speed;
+      const nextY = state.player.y + vy * speed;
+
+      let moved = false;
+      if (canStandAt(nextX, state.player.y)) {
+        state.player.x = nextX;
+        moved = true;
+      }
+      if (canStandAt(state.player.x, nextY)) {
+        state.player.y = nextY;
+        moved = true;
+      }
+
+      if (moved) {
+        const tx = Math.floor(state.player.x / TILE_SIZE);
+        const ty = Math.floor(state.player.y / TILE_SIZE);
+        const tile = WORLD_MAP[ty]?.[tx];
+
+        // Tall grass rustling particles & wild encounter check
+        if (tile === 2) {
+          state.player.grassDistAccum += speed;
+          if (Math.random() < 0.25) {
+            state.particles.push({
+              x: state.player.x + (Math.random() - 0.5) * 20,
+              y: state.player.y + 8,
+              vx: (Math.random() - 0.5) * 1.2,
+              vy: -Math.random() * 1.5 - 0.5,
+              color: '#4ade80',
+              life: 18
+            });
+          }
+          if (state.player.grassDistAccum > TILE_SIZE * 1.45) {
+            state.player.grassDistAccum = 0;
+            sfx.playStep();
+            if (Math.random() < 0.26) {
+              triggerWildBattle();
+            }
+          }
+        }
+      }
+    }
+
+    /********************************************************************
+     * 7. OVERWORLD INTERACTION & DIALOGUE
+     ********************************************************************/
+    function showDialogue(speaker, lines, onComplete = null) {
+      state.mode = 'DIALOGUE';
+      state.dialogue.speaker = speaker || 'הודעה';
+      state.dialogue.lines = Array.isArray(lines) ? lines : [lines];
+      state.dialogue.index = 0;
+      state.dialogue.onComplete = onComplete;
+
+      document.getElementById('dialogueSpeaker').textContent = state.dialogue.speaker;
+      document.getElementById('dialogueText').textContent = state.dialogue.lines[0];
+      document.getElementById('dialogueOverlay').classList.remove('hidden');
+      sfx.playConfirm();
+    }
+
+    function advanceDialogue() {
+      if (state.mode !== 'DIALOGUE') return;
+      state.dialogue.index++;
+      if (state.dialogue.index < state.dialogue.lines.length) {
+        document.getElementById('dialogueText').textContent = state.dialogue.lines[state.dialogue.index];
+        sfx.playConfirm();
+      } else {
+        document.getElementById('dialogueOverlay').classList.add('hidden');
+        state.mode = 'OVERWORLD';
+        const cb = state.dialogue.onComplete;
+        state.dialogue.onComplete = null;
+        if (cb) cb();
+      }
+    }
+
+    function interactInOverworld() {
+      if (state.mode === 'DIALOGUE') {
+        advanceDialogue();
+        return;
+      }
+      if (state.mode !== 'OVERWORLD') return;
+
+      const dirOffsets = {
+        up: [0, -TILE_SIZE * 0.85],
+        down: [0, TILE_SIZE * 0.85],
+        left: [-TILE_SIZE * 0.85, 0],
+        right: [TILE_SIZE * 0.85, 0]
+      };
+      const [ox, oy] = dirOffsets[state.player.dir] || [0, TILE_SIZE * 0.85];
+      const lookX = state.player.x + ox;
+      const lookY = state.player.y + oy;
+
+      // 1. Check nearby NPCs
+      for (const npc of NPCS) {
+        const nx = (npc.x + 0.5) * TILE_SIZE;
+        const ny = (npc.y + 0.5) * TILE_SIZE;
+        if (Math.hypot(state.player.x - nx, state.player.y - ny) < TILE_SIZE * 1.45) {
+          if (npc.role === 'healer') {
+            healEntireParty();
+            return;
+          }
+          if (npc.role === 'prof') {
+            const uniqueSpecies = new Set(state.party.map(p => p.speciesId)).size;
+            showDialogue(npc.name, [
+              `שלום ${state.saveName}! תפסת עד כה ${uniqueSpecies} מתוך 6 מיני פוקימונים במחוז!`,
+              uniqueSpecies >= 6
+                ? 'מדהים! השלמת את כל הפוקידע של המחוז! אתה מאסטר פוקימון אמיתי!'
+                : 'המשך לחקור את הדשא הגבוה הכהה כדי ללכוד את כל 6 המינים!'
+            ]);
+            return;
+          }
+          if (npc.role === 'champion') {
+            showDialogue(npc.name, [
+              state.championDefeated
+                ? 'הקרב הקודם שלנו היה אדיר! מוכן לקרב אליפות חוזר?'
+                : 'הגעת עד לצפון עיירת פיקסל! נראה אם הצוות שלך מסוגל לנצח את האלוף!'
+            ], () => triggerTrainerBattle(npc));
+            return;
+          }
+        }
+      }
+
+      // 2. Check Tile in front (Door, Sign, Pokéball item)
+      const tx = Math.floor(lookX / TILE_SIZE);
+      const ty = Math.floor(lookY / TILE_SIZE);
+      const tile = WORLD_MAP[ty]?.[tx];
+
+      if (tile === 7) {
+        healEntireParty();
+        return;
+      }
+      if (tile === 8 && SIGNS[`${tx},${ty}`]) {
+        showDialogue('שלט עץ', [SIGNS[`${tx},${ty}`]]);
+        return;
+      }
+      if (tile === 10 && !state.collectedItems[`${tx},${ty}`]) {
+        state.collectedItems[`${tx},${ty}`] = true;
+        state.inventory.greatball += 2;
+        state.inventory.potion += 2;
+        saveGameToSlot(state.saveName, true);
+        sfx.playVictory();
+        showDialogue('מצאת אוצר!', ['אספת 2 פוקדורי-על (Great Ball) ו-2 שיקויי חיים! המשחק נשמר אוטומטית.']);
+        return;
+      }
+    }
+
+    function healEntireParty() {
+      state.party.forEach(mon => {
+        mon.hp = mon.maxHp;
+        mon.moves.forEach(m => { m.pp = m.maxPp; });
+      });
+      if (state.inventory.pokeball < 5) state.inventory.pokeball = 6;
+      saveGameToSlot(state.saveName, true);
+      sfx.playHealJingle();
+      showDialogue('מרכז הפוקימונים 🏥', [
+        'האחות ג׳וי: כל הפוקימונים שלך רופאו למלוא החיים והכוח, והמשחק נשמר אוטומטית!'
+      ]);
+    }
+
+    /********************************************************************
+     * 8. MODERN TURN-BASED BATTLE ENGINE
+     ********************************************************************/
+    function triggerWildBattle() {
+      inputState.vx = 0;
+      inputState.vy = 0;
+      inputState.activePointerId = null;
+
+      const pool = Object.keys(SPECIES_DB);
+      const owned = new Set(state.party.map(p => p.speciesId));
+      const unowned = pool.filter(id => !owned.has(id));
+      const chosenId = (unowned.length > 0 && Math.random() < 0.65)
+        ? unowned[Math.floor(Math.random() * unowned.length)]
+        : pool[Math.floor(Math.random() * pool.length)];
+
+      const avgLv = Math.max(3, Math.round(state.party[0].level + (Math.random() * 2 - 1)));
+      const enemy = createMonster(chosenId, avgLv);
+
+      let activeIdx = state.party.findIndex(p => p.hp > 0);
+      if (activeIdx === -1) {
+        state.party[0].hp = state.party[0].maxHp;
+        activeIdx = 0;
+      }
+
+      state.battle = {
+        isTrainer: false,
+        trainerName: null,
+        trainerParty: [enemy],
+        enemyIndex: 0,
+        enemy,
+        playerIndex: activeIdx,
+        msgQueue: [],
+        afterMsg: null,
+        enemyShake: 0,
+        playerShake: 0,
+        fxParticles: [],
+        ballAnim: null
+      };
+
+      state.mode = 'BATTLE';
+      document.getElementById('overworldTouchControls').classList.add('hidden');
+      document.getElementById('joystickBase').classList.add('hidden');
+      document.getElementById('battleOverlay').classList.remove('hidden');
+
+      sfx.playConfirm();
+      showBattleMessages([`פוקימון פרא ${enemy.name} (רמה ${enemy.level}) קפץ מהדשא הגבוה!`], 'MENU');
+    }
+
+    function triggerTrainerBattle(npc) {
+      inputState.vx = 0;
+      inputState.vy = 0;
+      const tParty = [
+        createMonster('georock', Math.max(6, state.party[0].level)),
+        createMonster('aquashell', Math.max(7, state.party[0].level + 1)),
+        createMonster('shadoghoul', Math.max(8, state.party[0].level + 2))
+      ];
+      let activeIdx = state.party.findIndex(p => p.hp > 0);
+      if (activeIdx === -1) {
+        state.party[0].hp = state.party[0].maxHp;
+        activeIdx = 0;
+      }
+
+      state.battle = {
+        isTrainer: true,
+        trainerName: npc.name,
+        trainerParty: tParty,
+        enemyIndex: 0,
+        enemy: tParty[0],
+        playerIndex: activeIdx,
+        msgQueue: [],
+        afterMsg: null,
+        enemyShake: 0,
+        playerShake: 0,
+        fxParticles: [],
+        ballAnim: null
+      };
+
+      state.mode = 'BATTLE';
+      document.getElementById('overworldTouchControls').classList.add('hidden');
+      document.getElementById('joystickBase').classList.add('hidden');
+      document.getElementById('battleOverlay').classList.remove('hidden');
+
+      showBattleMessages([`${npc.name} מזמין אותך לקרב אליפות!`, `${npc.name} שלח את ${tParty[0].name}!`], 'MENU');
+    }
+
+    function showBattleMessages(msgs, nextStep = 'MENU') {
+      const b = state.battle;
+      if (!b) return;
+      b.msgQueue = [...msgs];
+      b.afterMsg = nextStep;
+      document.getElementById('battleMainActions').classList.add('hidden');
+      document.getElementById('battleMovesGrid').classList.add('hidden');
+      document.getElementById('battleBagGrid').classList.add('hidden');
+      document.getElementById('battleMsgNext').classList.remove('hidden');
+      document.getElementById('battleMsgText').textContent = b.msgQueue.shift();
+    }
+
+    function advanceBattleMessage() {
+      const b = state.battle;
+      if (!b) return;
+      if (b.ballAnim) return; // Wait for ball catch animation
+      if (b.msgQueue.length > 0) {
+        sfx.playConfirm();
+        document.getElementById('battleMsgText').textContent = b.msgQueue.shift();
+        return;
+      }
+
+      const step = b.afterMsg;
+      b.afterMsg = null;
+
+      if (step === 'MENU') {
+        openBattleMainMenu();
+      } else if (step === 'ENEMY_TURN') {
+        runEnemyBattleTurn();
+      } else if (step === 'END_BATTLE') {
+        endBattleToOverworld();
+      }
+    }
+
+    function openBattleMainMenu() {
+      const b = state.battle;
+      if (!b) return;
+      const pMon = state.party[b.playerIndex];
+      document.getElementById('battleMsgText').textContent = `מה ${pMon.name} יעשה עכשיו?`;
+      document.getElementById('battleMsgNext').classList.add('hidden');
+      document.getElementById('battleMainActions').classList.remove('hidden');
+      document.getElementById('battleMovesGrid').classList.add('hidden');
+      document.getElementById('battleBagGrid').classList.add('hidden');
+    }
+
+    function endBattleToOverworld() {
+      state.battle = null;
+      state.mode = 'OVERWORLD';
+      document.getElementById('battleOverlay').classList.add('hidden');
+      document.getElementById('overworldTouchControls').classList.remove('hidden');
+      document.getElementById('joystickBase').classList.remove('hidden');
+      saveGameToSlot(state.saveName, true);
+    }
+
+    function spawnBattleParticles(x, y, color) {
+      if (!state.battle) return;
+      for (let i = 0; i < 18; i++) {
+        const angle = (Math.PI * 2 * i) / 18;
+        const spd = 2 + Math.random() * 4;
+        state.battle.fxParticles.push({
+          x, y,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          color,
+          life: 22
+        });
+      }
+    }
+
+    function usePlayerMove(moveIdx) {
+      const b = state.battle;
+      if (!b) return;
+      const pMon = state.party[b.playerIndex];
+      const eMon = b.enemy;
+      const move = pMon.moves[moveIdx];
+
+      if (move.pp <= 0) {
+        sfx.playCancel();
+        showBattleMessages(['אין יותר נקודות כוח (PP) למהלך זה!'], 'MENU');
+        return;
+      }
+      move.pp--;
+
+      if (move.type === 'HEAL') {
+        sfx.playHealJingle();
+        const healAmt = Math.min(pMon.maxHp - pMon.hp, Math.floor(pMon.maxHp * 0.45));
+        pMon.hp += healAmt;
+        showBattleMessages([`${pMon.name} השתמש ב-${move.name} וחידש ${healAmt} נק׳ חיים!`], 'ENEMY_TURN');
+        return;
+      }
+
+      sfx.playAttack(move.type);
+      b.enemyShake = 16;
+      spawnBattleParticles(canvas.width * 0.68, canvas.height * 0.28, SPECIES_DB[pMon.speciesId].primary);
+
+      const mult = TYPE_CHART[move.type]?.[eMon.type] ?? 1.0;
+      const raw = ((pMon.atk * move.power) / Math.max(8, eMon.def)) * 0.58;
+      const dmg = Math.max(3, Math.round(raw * mult * (0.92 + Math.random() * 0.16)));
+      eMon.hp = Math.max(0, eMon.hp - dmg);
+
+      const msgs = [`${pMon.name} תקף עם ${move.name}!`];
+      if (mult > 1.2) msgs.push('🔥 זה אפקטיבי במיוחד!');
+      else if (mult < 0.85) msgs.push('זה לא מאוד אפקטיבי...');
+
+      if (eMon.hp <= 0) {
+        onEnemyDefeated(msgs);
+      } else {
+        showBattleMessages(msgs, 'ENEMY_TURN');
+      }
+    }
+
+    function onEnemyDefeated(msgs) {
+      const b = state.battle;
+      const pMon = state.party[b.playerIndex];
+      const eMon = b.enemy;
+      const xpGain = eMon.level * 15 + (b.isTrainer ? 25 : 12);
+
+      sfx.playVictory();
+      msgs.push(`${eMon.name} היריב התעלף! (+${xpGain} XP)`);
+      pMon.xp += xpGain;
+
+      while (pMon.xp >= pMon.nextXp) {
+        pMon.xp -= pMon.nextXp;
+        pMon.level++;
+        pMon.nextXp = pMon.level * 22;
+        pMon.maxHp += 6;
+        pMon.hp = pMon.maxHp;
+        pMon.atk += 2;
+        pMon.def += 2;
+        pMon.spd += 2;
+        msgs.push(`🎉 ${pMon.name} עלה לרמה ${pMon.level}!`);
+      }
+
+      if (b.isTrainer && b.enemyIndex + 1 < b.trainerParty.length) {
+        b.enemyIndex++;
+        b.enemy = b.trainerParty[b.enemyIndex];
+        msgs.push(`${b.trainerName} שולח לקרב את ${b.enemy.name} (רמה ${b.enemy.level})!`);
+        showBattleMessages(msgs, 'MENU');
+      } else {
+        if (b.isTrainer) {
+          state.championDefeated = true;
+          state.inventory.greatball += 3;
+          state.inventory.potion += 3;
+          msgs.push(`🏆 ניצחת את ${b.trainerName}! קיבלת 3 פוקדורי-על ו-3 שיקויים!`);
+        }
+        showBattleMessages(msgs, 'END_BATTLE');
+      }
+    }
+
+    function runEnemyBattleTurn() {
+      const b = state.battle;
+      if (!b) return;
+      const pMon = state.party[b.playerIndex];
+      const eMon = b.enemy;
+      const atkMoves = eMon.moves.filter(m => m.type !== 'HEAL');
+      const move = atkMoves[Math.floor(Math.random() * atkMoves.length)];
+
+      sfx.playAttack(move.type);
+      b.playerShake = 16;
+      spawnBattleParticles(canvas.width * 0.32, canvas.height * 0.52, SPECIES_DB[eMon.speciesId].primary);
+
+      const mult = TYPE_CHART[move.type]?.[pMon.type] ?? 1.0;
+      const raw = ((eMon.atk * move.power) / Math.max(8, pMon.def)) * 0.45;
+      const dmg = Math.max(2, Math.round(raw * mult * (0.9 + Math.random() * 0.18)));
+      pMon.hp = Math.max(0, pMon.hp - dmg);
+
+      const msgs = [`${eMon.name} היריב השתמש ב-${move.name}!`];
+      if (mult > 1.2) msgs.push('זה אפקטיבי במיוחד!');
+
+      if (pMon.hp <= 0) {
+        msgs.push(`${pMon.name} שלך התעייף!`);
+        const nextAlive = state.party.findIndex(p => p.hp > 0);
+        if (nextAlive !== -1) {
+          b.playerIndex = nextAlive;
+          msgs.push(`צא לקרב, ${state.party[nextAlive].name}!`);
+          showBattleMessages(msgs, 'MENU');
+        } else {
+          state.party.forEach(p => { p.hp = p.maxHp; });
+          msgs.push('כל הצוות התעייף! האחות ג׳וי חילצה וריפאה את הצוות שלך.');
+          showBattleMessages(msgs, 'END_BATTLE');
+        }
+      } else {
+        showBattleMessages(msgs, 'MENU');
+      }
+    }
+
+    function throwBallInBattle(ballKey) {
+      const b = state.battle;
+      if (!b) return;
+      if (b.isTrainer) {
+        sfx.playCancel();
+        showBattleMessages(['אי אפשר ללכוד פוקימון ששייך למאמן אחר!'], 'MENU');
+        return;
+      }
+      if ((state.inventory[ballKey] || 0) <= 0) {
+        sfx.playCancel();
+        showBattleMessages(['אין לך כדורים מסוג זה בתיק!'], 'MENU');
+        return;
+      }
+      state.inventory[ballKey]--;
+      updateHud();
+
+      const eMon = b.enemy;
+      const hpRatio = eMon.hp / eMon.maxHp;
+      const bonus = ballKey === 'greatball' ? 0.38 : 0.18;
+      const chance = Math.min(0.96, (1 - hpRatio * 0.72) + bonus);
+      const caught = Math.random() < chance;
+
+      document.getElementById('battleMainActions').classList.add('hidden');
+      document.getElementById('battleBagGrid').classList.add('hidden');
+      document.getElementById('battleMsgText').textContent = `זרקת ${ballKey === 'greatball' ? 'פוקדור-על' : 'פוקדור'} לעבר ${eMon.name}...`;
+
+      sfx.playConfirm();
+      b.ballAnim = { timer: 0, caught, ballKey };
+    }
+
+    /********************************************************************
+     * 9. 2D-HD RENDERING ENGINE (Full Viewport Adaptive Resolution)
+     ********************************************************************/
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function drawHDTile(tile, sx, sy, c, r) {
+      // Lush base grass gradient
+      ctx.fillStyle = ((c + r) % 2 === 0) ? '#34d399' : '#2dd4bf';
+      ctx.fillStyle = ((c + r) % 2 === 0) ? '#4ade80' : '#38cb79';
+      ctx.fillRect(sx, sy, TILE_SIZE + 0.6, TILE_SIZE + 0.6);
+
+      if (tile === 9) {
+        // Warm Cobblestone / Sandstone Road
+        ctx.fillStyle = '#fde68a';
+        ctx.fillRect(sx, sy, TILE_SIZE + 0.6, TILE_SIZE + 0.6);
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(sx + 12, sy + 14, 3, 0, Math.PI * 2);
+        ctx.arc(sx + 30, sy + 28, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (tile === 1) {
+        // Layered 2D-HD Pine Tree with drop shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.22)';
+        ctx.beginPath();
+        ctx.ellipse(sx + TILE_SIZE / 2, sy + TILE_SIZE - 4, 16, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Trunk
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(sx + 17, sy + 28, 10, 14);
+
+        // 3 Layered Canopy Circles
+        const grad = ctx.createRadialGradient(sx + 18, sy + 14, 4, sx + 22, sy + 20, 20);
+        grad.addColorStop(0, '#4ade80');
+        grad.addColorStop(0.55, '#15803d');
+        grad.addColorStop(1, '#052e16');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(sx + TILE_SIZE / 2, sy + 18, 18, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (tile === 2) {
+        // Tall swaying wild grass
+        ctx.fillStyle = '#16a34a';
+        ctx.fillRect(sx + 2, sy + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+        const sway = Math.sin(state.tick * 0.06 + c + r) * 2.2;
+        ctx.strokeStyle = '#052e16';
+        ctx.lineWidth = 2.5;
+        for (let gx = 8; gx <= 34; gx += 8) {
+          for (let gy = 14; gy <= 38; gy += 12) {
+            ctx.beginPath();
+            ctx.moveTo(sx + gx, sy + gy);
+            ctx.lineTo(sx + gx + sway, sy + gy - 9);
+            ctx.stroke();
+          }
+        }
+      } else if (tile === 3) {
+        // Shimmering Crystal Water
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(sx, sy, TILE_SIZE + 0.6, TILE_SIZE + 0.6);
+        const wave = Math.sin(state.tick * 0.07 + c) * 4;
+        ctx.strokeStyle = 'rgba(186, 230, 253, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(sx + 8 + wave, sy + 14);
+        ctx.lineTo(sx + 22 + wave, sy + 14);
+        ctx.moveTo(sx + 16 - wave, sy + 30);
+        ctx.lineTo(sx + 32 - wave, sy + 30);
+        ctx.stroke();
+      } else if (tile === 4) {
+        // Blooming Animated Flowers
+        const sway = Math.sin(state.tick * 0.08 + c) * 2;
+        [ [14, 14, '#f43f5e'], [30, 28, '#facc15'], [14, 30, '#a855f7'] ].forEach(([fx, fy, col]) => {
+          ctx.fillStyle = col;
+          ctx.beginPath();
+          ctx.arc(sx + fx + sway, sy + fy, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(sx + fx + sway, sy + fy, 2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      } else if (tile === 5) {
+        // PokeCenter Modern Wall
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fillRect(sx, sy, TILE_SIZE + 0.6, TILE_SIZE + 0.6);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(sx + 8, sy + 10, TILE_SIZE - 16, 16);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(sx, sy + TILE_SIZE - 5, TILE_SIZE, 5);
+      } else if (tile === 6) {
+        // PokeCenter Red Roof
+        const rGrad = ctx.createLinearGradient(sx, sy, sx, sy + TILE_SIZE);
+        rGrad.addColorStop(0, '#ef4444');
+        rGrad.addColorStop(1, '#b91c1c');
+        ctx.fillStyle = rGrad;
+        ctx.fillRect(sx, sy, TILE_SIZE + 0.6, TILE_SIZE + 0.6);
+      } else if (tile === 7) {
+        // PokeCenter Glowing Entrance Door
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fillRect(sx, sy, TILE_SIZE + 0.6, TILE_SIZE + 0.6);
+        ctx.fillStyle = '#0ea5e9';
+        ctx.fillRect(sx + 6, sy + 4, TILE_SIZE - 12, TILE_SIZE - 4);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('✚', sx + TILE_SIZE / 2, sy + 24);
+      } else if (tile === 8) {
+        // Wooden Signpost
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(sx + 19, sy + 24, 6, 16);
+        ctx.fillStyle = '#d97706';
+        ctx.fillRect(sx + 6, sy + 8, 32, 18);
+        ctx.strokeStyle = '#451a03';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(sx + 6, sy + 8, 32, 18);
+      } else if (tile === 10 && !state.collectedItems[`${c},${r}`]) {
+        // Glowing Item Pokéball on Ground
+        const pulse = Math.sin(state.tick * 0.1) * 2;
+        ctx.fillStyle = 'rgba(250, 204, 21, 0.35)';
+        ctx.beginPath();
+        ctx.arc(sx + 22, sy + 22, 13 + pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(sx + 22, sy + 22, 9, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(sx + 22, sy + 22, 9, 0, Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(sx + 22, sy + 22, 9, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    function drawHDTrainer(sx, sy, dir, walkCycle, shirtColor, hatColor, label = null) {
+      const bounce = Math.abs(Math.sin(walkCycle)) * 4;
+
+      ctx.save();
+      ctx.translate(sx, sy);
+
+      // Ground Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.32)';
+      ctx.beginPath();
+      ctx.ellipse(0, 14, 12, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Feet
+      const legSwing = Math.sin(walkCycle) * 4;
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(-5, 11 + legSwing * 0.5, 4, 0, Math.PI * 2);
+      ctx.arc(5, 11 - legSwing * 0.5, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Body / Jacket
+      ctx.fillStyle = shirtColor;
+      ctx.beginPath();
+      ctx.roundRect(-10, -4 - bounce, 20, 15, 6);
+      ctx.fill();
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      // Head
+      ctx.fillStyle = '#fde68a';
+      ctx.beginPath();
+      ctx.arc(0, -12 - bounce, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cap / Hat
+      ctx.fillStyle = hatColor;
+      ctx.beginPath();
+      ctx.arc(0, -15 - bounce, 10.5, Math.PI, 0);
+      ctx.fill();
+      ctx.fillRect(-11, -16 - bounce, 22, 4);
+
+      // Eyes
+      ctx.fillStyle = '#0f172a';
+      if (dir === 'down') {
+        ctx.fillRect(-5, -12 - bounce, 2.5, 3.5);
+        ctx.fillRect(2.5, -12 - bounce, 2.5, 3.5);
+      } else if (dir === 'left') {
+        ctx.fillRect(-7, -12 - bounce, 2.5, 3.5);
+      } else if (dir === 'right') {
+        ctx.fillRect(4.5, -12 - bounce, 2.5, 3.5);
+      }
+
+      // Floating Name Tag for NPCs
+      if (label) {
+        ctx.font = 'bold 11px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        const tw = ctx.measureText(label).width + 12;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
+        ctx.beginPath();
+        ctx.roundRect(-tw / 2, -38 - bounce, tw, 16, 8);
+        ctx.fill();
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillText(label, 0, -26 - bounce);
+      }
+
+      ctx.restore();
+    }
+
+    function renderOverworldScene() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const camX = state.player.x - w / 2;
+      const camY = state.player.y - h / 2;
+
+      ctx.fillStyle = '#064e3b';
+      ctx.fillRect(0, 0, w, h);
+
+      const startCol = Math.max(0, Math.floor(camX / TILE_SIZE) - 1);
+      const endCol = Math.min(MAP_COLS - 1, Math.ceil((camX + w) / TILE_SIZE) + 1);
+      const startRow = Math.max(0, Math.floor(camY / TILE_SIZE) - 1);
+      const endRow = Math.min(MAP_ROWS - 1, Math.ceil((camY + h) / TILE_SIZE) + 1);
+
+      for (let r = startRow; r <= endRow; r++) {
+        for (let c = startCol; c <= endCol; c++) {
+          const sx = Math.floor(c * TILE_SIZE - camX);
+          const sy = Math.floor(r * TILE_SIZE - camY);
+          drawHDTile(WORLD_MAP[r][c], sx, sy, c, r);
+        }
+      }
+
+      // Draw NPCs
+      for (const npc of NPCS) {
+        const sx = (npc.x + 0.5) * TILE_SIZE - camX;
+        const sy = (npc.y + 0.5) * TILE_SIZE - camY;
+        drawHDTrainer(sx, sy, npc.dir, 0, npc.shirt, npc.hat, npc.name);
+      }
+
+      // Draw Player at Screen Center
+      drawHDTrainer(
+        w / 2,
+        h / 2,
+        state.player.dir,
+        state.player.moving ? state.player.walkCycle : 0,
+        '#2563eb',
+        '#ef4444',
+        state.saveName
+      );
+
+      // Draw Grass & Ambient Particles
+      for (let i = state.particles.length - 1; i >= 0; i--) {
+        const p = state.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x - camX, p.y - camY, 3, 0, Math.PI * 2);
+        ctx.fill();
+        if (p.life <= 0) state.particles.splice(i, 1);
+      }
+
+      // Subtle atmospheric sunlight vignette
+      const vig = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
+      vig.addColorStop(0, 'rgba(0,0,0,0)');
+      vig.addColorStop(1, 'rgba(9, 13, 22, 0.32)');
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    function drawBattleStatCard(x, y, cardW, mon, isPlayer) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.86)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(x, y, cardW, isPlayer ? 74 : 64, 16);
+      ctx.fill();
+      ctx.stroke();
+
+      // Name & Level
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 14px system-ui, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`${mon.name}  רמ׳ ${mon.level}`, x + cardW - 14, y + 22);
+
+      // Type badge
+      ctx.fillStyle = SPECIES_DB[mon.speciesId]?.badgeColor || '#3b82f6';
+      ctx.font = 'bold 11px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(mon.typeName, x + 14, y + 22);
+
+      // HP Bar
+      const ratio = Math.max(0, Math.min(1, mon.hp / mon.maxHp));
+      const barW = cardW - 28;
+      ctx.fillStyle = '#334155';
+      ctx.beginPath();
+      ctx.roundRect(x + 14, y + 32, barW, 10, 5);
+      ctx.fill();
+
+      ctx.fillStyle = ratio > 0.5 ? '#22c55e' : ratio > 0.22 ? '#eab308' : '#ef4444';
+      ctx.beginPath();
+      ctx.roundRect(x + 14, y + 32, Math.max(4, barW * ratio), 10, 5);
+      ctx.fill();
+
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = 'bold 11px system-ui, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`חיים: ${mon.hp} / ${mon.maxHp}`, x + cardW - 14, y + 56);
+
+      if (isPlayer) {
+        const xpRatio = Math.min(1, mon.xp / mon.nextXp);
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(x + 14, y + 63, barW, 4);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(x + 14, y + 63, barW * xpRatio, 4);
+      }
+
+      ctx.restore();
+    }
+
+    function renderBattleScene() {
+      const b = state.battle;
+      if (!b) return;
+      const w = canvas.width;
+      const h = canvas.height;
+      const pMon = state.party[b.playerIndex];
+      const eMon = b.enemy;
+
+      // Sky & Lush Arena Backdrop
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.65);
+      skyGrad.addColorStop(0, '#0f172a');
+      skyGrad.addColorStop(0.5, '#1e3a8a');
+      skyGrad.addColorStop(1, '#065f46');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      const groundGrad = ctx.createLinearGradient(0, h * 0.45, 0, h);
+      groundGrad.addColorStop(0, '#047857');
+      groundGrad.addColorStop(1, '#064e3b');
+      ctx.fillStyle = groundGrad;
+      ctx.fillRect(0, h * 0.45, w, h * 0.55);
+
+      const enemyX = w * 0.68 + (b.enemyShake > 0 ? (b.enemyShake % 2 === 0 ? -6 : 6) : 0);
+      const enemyY = h * 0.29;
+      if (b.enemyShake > 0) b.enemyShake--;
+
+      const playerX = w * 0.30 + (b.playerShake > 0 ? (b.playerShake % 2 === 0 ? -6 : 6) : 0);
+      const playerY = h * 0.52;
+      if (b.playerShake > 0) b.playerShake--;
+
+      const spriteSize = Math.min(w, h) * 0.25;
+
+      // Glowing Arena Platforms
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.35)';
+      ctx.strokeStyle = '#34d399';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(enemyX, enemyY + spriteSize * 0.38, spriteSize * 0.65, spriteSize * 0.22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(playerX, playerY + spriteSize * 0.38, spriteSize * 0.72, spriteSize * 0.24, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Draw Enemy Monster (unless inside Pokéball during catch)
+      if (!b.ballAnim || b.ballAnim.timer < 22) {
+        drawHDMonster(ctx, eMon.speciesId, enemyX, enemyY, spriteSize, state.tick, false);
+      }
+
+      // Draw Player Monster
+      drawHDMonster(ctx, pMon.speciesId, playerX, playerY, spriteSize * 1.05, state.tick, true);
+
+      // Pokéball Throw & Wobble Animation
+      if (b.ballAnim) {
+        b.ballAnim.timer++;
+        const t = b.ballAnim.timer;
+        let bx = playerX;
+        let by = playerY;
+        if (t < 22) {
+          const prog = t / 22;
+          bx = playerX + (enemyX - playerX) * prog;
+          by = playerY + (enemyY - playerY) * prog - Math.sin(prog * Math.PI) * 110;
+        } else {
+          bx = enemyX;
+          by = enemyY + 10;
+          if (t > 28 && t < 75) {
+            bx += Math.sin(t * 0.5) * 6;
+          }
+        }
+
+        // Draw HD Pokéball
+        ctx.save();
+        ctx.translate(bx, by);
+        ctx.fillStyle = b.ballAnim.ballKey === 'greatball' ? '#2563eb' : '#ef4444';
+        ctx.beginPath();
+        ctx.arc(0, 0, 14, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, 14, 0, Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, 14, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        if (t >= 84) {
+          const caught = b.ballAnim.caught;
+          b.ballAnim = null;
+          if (caught) {
+            sfx.playVictory();
+            if (state.party.length < 6) {
+              state.party.push(eMon);
+            } else {
+              state.party[state.party.length - 1] = eMon;
+            }
+            saveGameToSlot(state.saveName, true);
+            showBattleMessages([`✨ קליק! תפסת את ${eMon.name} בהצלחה! הוא נוסף לצוות שלך והמשחק נשמר!`], 'END_BATTLE');
+          } else {
+            sfx.playCancel();
+            showBattleMessages([`אוי לא! ${eMon.name} השתחרר מהפוקדור!`], 'ENEMY_TURN');
+          }
+        }
+      }
+
+      // Draw Battle FX Particles
+      for (let i = b.fxParticles.length - 1; i >= 0; i--) {
+        const pt = b.fxParticles[i];
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.life--;
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        if (pt.life <= 0) b.fxParticles.splice(i, 1);
+      }
+
+      // Stat Cards
+      const cardW = Math.min(230, w * 0.46);
+      drawBattleStatCard(14, 62, cardW, eMon, false);
+      drawBattleStatCard(w - cardW - 14, h * 0.44, cardW, pMon, true);
+    }
+
+    function gameLoop() {
+      state.tick++;
+      updateContinuousPlayerMovement();
+
+      if (state.mode === 'BATTLE') {
+        renderBattleScene();
+      } else {
+        renderOverworldScene();
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    /********************************************************************
+     * 10. TOUCH CONTROLS (Floating Joystick + Continuous Screen Hold)
+     ********************************************************************/
+    const joyBase = document.getElementById('joystickBase');
+    const joyKnob = document.getElementById('joystickKnob');
+
+    function updateJoystickVisual(dx, dy) {
+      const maxRadius = 42;
+      const dist = Math.hypot(dx, dy);
+      const clamped = Math.min(dist, maxRadius);
+      const angle = Math.atan2(dy, dx);
+      const kx = Math.cos(angle) * clamped;
+      const ky = Math.sin(angle) * clamped;
+      joyKnob.style.transform = `translate(${kx}px, ${ky}px)`;
+
+      if (dist > 6) {
+        inputState.vx = dx / dist;
+        inputState.vy = dy / dist;
+      } else {
+        inputState.vx = 0;
+        inputState.vy = 0;
+      }
+    }
+
+    function resetJoystick() {
+      inputState.activePointerId = null;
+      inputState.pointerMode = null;
+      inputState.vx = 0;
+      inputState.vy = 0;
+      joyKnob.style.transform = 'translate(0px, 0px)';
+      joyBase.style.opacity = '0.65';
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      sfx.init();
+      if (state.mode === 'DIALOGUE') {
+        advanceDialogue();
+        return;
+      }
+      if (state.mode !== 'OVERWORLD') return;
+
+      inputState.activePointerId = e.pointerId;
+      // Floating joystick spawns where the player touches in the lower/left half,
+      // OR continuous follow-finger anywhere on the map!
+      inputState.pointerMode = 'joystick';
+      inputState.joyOriginX = e.clientX;
+      inputState.joyOriginY = e.clientY;
+
+      joyBase.style.left = `${e.clientX}px`;
+      joyBase.style.top = `${e.clientY}px`;
+      joyBase.style.bottom = 'auto';
+      joyBase.style.opacity = '0.95';
+      updateJoystickVisual(0, 0);
+
+      // If user also taps close to an NPC/Sign/Item without dragging, we detect quick tap on pointerup
+      inputState.tapStartTime = Date.now();
+      inputState.tapStartX = e.clientX;
+      inputState.tapStartY = e.clientY;
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (e.pointerId !== inputState.activePointerId) return;
+      if (state.mode !== 'OVERWORLD') return;
+      const dx = e.clientX - inputState.joyOriginX;
+      const dy = e.clientY - inputState.joyOriginY;
+      updateJoystickVisual(dx, dy);
+    });
+
+    window.addEventListener('pointerup', (e) => {
+      if (e.pointerId !== inputState.activePointerId) return;
+      const elapsed = Date.now() - (inputState.tapStartTime || 0);
+      const movedDist = Math.hypot(e.clientX - (inputState.tapStartX || 0), e.clientY - (inputState.tapStartY || 0));
+      resetJoystick();
+
+      // Quick tap on screen triggers interaction if standing next to NPC/Sign/Pokéball
+      if (elapsed < 240 && movedDist < 14 && state.mode === 'OVERWORLD') {
+        interactInOverworld();
+      }
+    });
+
+    window.addEventListener('pointercancel', resetJoystick);
+
+    // Keyboard Controls
+    window.addEventListener('keydown', (e) => {
+      const map = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right' };
+      if (map[e.code]) {
+        inputState.keys.add(map[e.code]);
+      } else if (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyZ') {
+        if (state.mode === 'OVERWORLD' || state.mode === 'DIALOGUE') interactInOverworld();
+        else if (state.mode === 'BATTLE') advanceBattleMessage();
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      const map = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right' };
+      if (map[e.code]) inputState.keys.delete(map[e.code]);
+    });
+
+    /********************************************************************
+     * 11. UI MODALS, SAVE MANAGER & BUTTON WIRING
+     ********************************************************************/
+    document.getElementById('btnInteract').addEventListener('click', interactInOverworld);
+    document.getElementById('dialogueCard').addEventListener('click', advanceDialogue);
+    document.getElementById('battleMsgBox').addEventListener('click', advanceBattleMessage);
+
+    document.getElementById('btnRunToggle').addEventListener('click', () => {
+      state.runEnabled = !state.runEnabled;
+      document.getElementById('runStatusText').textContent = state.runEnabled ? 'ריצה: פעיל' : 'ריצה: כבוי';
+      sfx.playConfirm();
+    });
+
+    document.getElementById('btnSoundHud').addEventListener('click', () => {
+      const on = sfx.toggle();
+      document.getElementById('soundIcon').textContent = on ? '🔊' : '🔇';
+    });
+
+    document.getElementById('btnFullscreen').addEventListener('click', () => toggleFullscreen(false));
+
+    // Battle Overlay Buttons
+    document.querySelectorAll('[data-bact]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const act = btn.getAttribute('data-bact');
+        const b = state.battle;
+        if (!b) return;
+        sfx.playConfirm();
+
+        if (act === 'fight') {
+          const pMon = state.party[b.playerIndex];
+          const container = document.getElementById('movesContainer');
+          container.innerHTML = '';
+          pMon.moves.forEach((m, idx) => {
+            const mBtn = document.createElement('button');
+            mBtn.className = 'p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-right flex flex-col justify-between';
+            mBtn.innerHTML = `
+              <span class="text-xs font-extrabold text-white">${m.name}</span>
+              <span class="text-[10px] text-amber-300 font-semibold">עוצמה ${m.power} | PP ${m.pp}/${m.maxPp}</span>
+            `;
+            mBtn.addEventListener('click', () => usePlayerMove(idx));
+            container.appendChild(mBtn);
+          });
+          document.getElementById('battleMainActions').classList.add('hidden');
+          document.getElementById('battleMovesGrid').classList.remove('hidden');
+        } else if (act === 'bag') {
+          const bagCont = document.getElementById('battleBagContainer');
+          bagCont.innerHTML = `
+            <button data-item="pokeball" class="p-2.5 rounded-xl bg-rose-600/30 border border-rose-400/50 text-center">
+              <div class="text-base">🔴</div>
+              <div class="text-xs font-bold text-white">פוקדור</div>
+              <div class="text-[10px] text-rose-200">x${state.inventory.pokeball}</div>
+            </button>
+            <button data-item="greatball" class="p-2.5 rounded-xl bg-blue-600/30 border border-blue-400/50 text-center">
+              <div class="text-base">🔵</div>
+              <div class="text-xs font-bold text-white">פוקדור-על</div>
+              <div class="text-[10px] text-blue-200">x${state.inventory.greatball}</div>
+            </button>
+            <button data-item="potion" class="p-2.5 rounded-xl bg-emerald-600/30 border border-emerald-400/50 text-center">
+              <div class="text-base">🧪</div>
+              <div class="text-xs font-bold text-white">שיקוי +30</div>
+              <div class="text-[10px] text-emerald-200">x${state.inventory.potion}</div>
+            </button>
+          `;
+          bagCont.querySelectorAll('[data-item]').forEach(ib => {
+            ib.addEventListener('click', () => {
+              const it = ib.getAttribute('data-item');
+              if (it === 'potion') {
+                if (state.inventory.potion <= 0) {
+                  sfx.playCancel();
+                  showBattleMessages(['נגמרו השיקויים בתיק!'], 'MENU');
+                  return;
+                }
+                state.inventory.potion--;
+                const pMon = state.party[b.playerIndex];
+                const heal = Math.min(pMon.maxHp - pMon.hp, 30);
+                pMon.hp += heal;
+                sfx.playHealJingle();
+                showBattleMessages([`השתמשת בשיקוי! ${pMon.name} חידש ${heal} נק׳ חיים!`], 'ENEMY_TURN');
+              } else {
+                throwBallInBattle(it);
+              }
+            });
+          });
+          document.getElementById('battleMainActions').classList.add('hidden');
+          document.getElementById('battleBagGrid').classList.remove('hidden');
+        } else if (act === 'party') {
+          openPartyBagModal(true);
+        } else if (act === 'run') {
+          if (b.isTrainer) {
+            showBattleMessages(['אי אפשר לברוח מקרב מול אלוף!'], 'MENU');
+          } else {
+            sfx.playCancel();
+            showBattleMessages(['ברחת מהקרב בבטחה!'], 'END_BATTLE');
+          }
+        }
+      });
+    });
+
+    document.getElementById('btnCancelMoves').addEventListener('click', openBattleMainMenu);
+    document.getElementById('btnCancelBattleBag').addEventListener('click', openBattleMainMenu);
+
+    // Party & Bag Modal
+    function openPartyBagModal(fromBattle = false) {
+      const modal = document.getElementById('partyBagModal');
+      const pList = document.getElementById('modalPartyList');
+      pList.innerHTML = '';
+
+      state.party.forEach((mon, idx) => {
+        const row = document.createElement('div');
+        row.className = 'p-2.5 rounded-2xl bg-slate-900/90 border border-slate-700 flex items-center justify-between cursor-pointer hover:border-amber-400 transition';
+        row.innerHTML = `
+          <div>
+            <div class="text-xs font-black text-white">${idx === 0 ? '⭐ ' : ''}${mon.name} <span class="text-amber-300">רמ׳ ${mon.level}</span></div>
+            <div class="text-[11px] text-slate-300">${mon.typeName} | ♥ ${mon.hp}/${mon.maxHp}</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 text-[11px] font-bold">
+            ${fromBattle ? 'שלח לקרב' : (idx === 0 ? 'מוביל' : 'קבע כמוביל')}
+          </span>
+        `;
+        row.addEventListener('click', () => {
+          if (fromBattle && state.battle) {
+            if (mon.hp <= 0) {
+              sfx.playCancel();
+              return;
+            }
+            state.battle.playerIndex = idx;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            showBattleMessages([`צא לקרב, ${mon.name}!`], 'ENEMY_TURN');
+          } else if (idx !== 0) {
+            const tmp = state.party[0];
+            state.party[0] = state.party[idx];
+            state.party[idx] = tmp;
+            sfx.playConfirm();
+            updateHud();
+            openPartyBagModal(false);
+          }
+        });
+        pList.appendChild(row);
+      });
+
+      const bList = document.getElementById('modalBagList');
+      bList.innerHTML = `
+        <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-center">
+          <div class="text-lg">🔴</div>
+          <div class="text-xs font-bold text-white">פוקדור</div>
+          <div class="text-[11px] text-sky-300 font-bold">x${state.inventory.pokeball}</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-center">
+          <div class="text-lg">🔵</div>
+          <div class="text-xs font-bold text-white">פוקדור-על</div>
+          <div class="text-[11px] text-sky-300 font-bold">x${state.inventory.greatball}</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-center">
+          <div class="text-lg">🧪</div>
+          <div class="text-xs font-bold text-white">שיקוי חיים</div>
+          <div class="text-[11px] text-emerald-300 font-bold">x${state.inventory.potion}</div>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    document.getElementById('btnPartyHud').addEventListener('click', () => openPartyBagModal(state.mode === 'BATTLE'));
+    document.getElementById('btnBagHud').addEventListener('click', () => openPartyBagModal(state.mode === 'BATTLE'));
+    document.getElementById('btnClosePartyBag').addEventListener('click', () => {
+      document.getElementById('partyBagModal').classList.add('hidden');
+      document.getElementById('partyBagModal').classList.remove('flex');
+    });
+    document.getElementById('btnInstantHealModal').addEventListener('click', () => {
+      document.getElementById('partyBagModal').classList.add('hidden');
+      document.getElementById('partyBagModal').classList.remove('flex');
+      healEntireParty();
+    });
+
+    // Save Manager Modal
+    function renderSaveSlotsList() {
+      const all = getAllSaves();
+      const keys = Object.keys(all).sort((a, b) => (all[b].updatedAt || 0) - (all[a].updatedAt || 0));
+      const container = document.getElementById('saveSlotsList');
+      container.innerHTML = '';
+
+      if (keys.length === 0) {
+        container.innerHTML = `<div class="text-xs text-slate-400 py-2">אין עדיין שמירות במכשיר.</div>`;
+        return;
+      }
+
+      keys.forEach(k => {
+        const item = all[k];
+        const dateStr = new Date(item.updatedAt || Date.now()).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+        const lead = item.party?.[0];
+        const row = document.createElement('div');
+        row.className = 'p-2.5 rounded-2xl bg-slate-900/90 border border-slate-700 flex items-center justify-between gap-2';
+        row.innerHTML = `
+          <div class="min-w-0">
+            <div class="text-xs font-extrabold text-white truncate">${item.saveName} ${item.saveName === state.saveName ? '<span class="text-emerald-400">(פעיל)</span>' : ''}</div>
+            <div class="text-[10px] text-slate-400">${lead ? `${lead.name} רמ׳${lead.level}` : ''} • צוות: ${item.party?.length || 1}/6 • ${dateStr}</div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button data-load="${item.saveName}" class="px-2.5 py-1 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs">טען</button>
+            <button data-del="${item.saveName}" class="px-2 py-1 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 font-bold text-xs">🗑️</button>
+          </div>
+        `;
+        row.querySelector('[data-load]').addEventListener('click', () => loadGameFromSlot(item.saveName));
+        row.querySelector('[data-del]').addEventListener('click', () => deleteSaveSlot(item.saveName));
+        container.appendChild(row);
+      });
+    }
+
+    document.getElementById('btnSaveMenu').addEventListener('click', () => {
+      renderSaveSlotsList();
+      document.getElementById('saveModal').classList.remove('hidden');
+      document.getElementById('saveModal').classList.add('flex');
+    });
+
+    document.getElementById('btnCloseSaveModal').addEventListener('click', () => {
+      document.getElementById('saveModal').classList.add('hidden');
+      document.getElementById('saveModal').classList.remove('flex');
+    });
+
+    document.getElementById('btnQuickSaveNow').addEventListener('click', () => {
+      saveGameToSlot(state.saveName, true);
+      sfx.playConfirm();
+      renderSaveSlotsList();
+    });
+
+    document.getElementById('btnSaveAsNew').addEventListener('click', () => {
+      const inp = document.getElementById('saveAsInput');
+      const newName = inp.value.trim();
+      if (!newName) {
+        sfx.playCancel();
+        inp.focus();
+        return;
+      }
+      saveGameToSlot(newName, true);
+      inp.value = '';
+      sfx.playVictory();
+      renderSaveSlotsList();
+    });
+
+    document.getElementById('btnOpenNewGameScreen').addEventListener('click', () => {
+      document.getElementById('saveModal').classList.add('hidden');
+      document.getElementById('saveModal').classList.remove('flex');
+      renderTitleScreenModal();
+      document.getElementById('titleModal').classList.remove('hidden');
+    });
+
+    // Title Screen Setup (Starter Picker & Saved Games List)
+    function renderTitleScreenModal() {
+      const grid = document.getElementById('starterSelectGrid');
+      grid.innerHTML = '';
+      const starters = ['voltchu', 'charflame', 'aquashell', 'florabulb'];
+      starters.forEach(id => {
+        const sp = SPECIES_DB[id];
+        const selected = state.selectedStarter === id;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `p-2.5 rounded-xl border text-right transition flex items-center justify-between ${
+          selected ? 'bg-amber-500/25 border-amber-400 text-white' : 'bg-slate-800/80 border-slate-700 text-slate-300'
+        }`;
+        btn.innerHTML = `
+          <div>
+            <div class="text-xs font-extrabold">${sp.name}</div>
+            <div class="text-[10px] opacity-80">${sp.typeName}</div>
+          </div>
+          <span class="w-3 h-3 rounded-full" style="background:${sp.primary}"></span>
+        `;
+        btn.addEventListener('click', () => {
+          state.selectedStarter = id;
+          sfx.playConfirm();
+          renderTitleScreenModal();
+        });
+        grid.appendChild(btn);
+      });
+
+      const all = getAllSaves();
+      const keys = Object.keys(all).sort((a, b) => (all[b].updatedAt || 0) - (all[a].updatedAt || 0));
+      const sec = document.getElementById('titleSavedSection');
+      const list = document.getElementById('titleSavesList');
+      list.innerHTML = '';
+
+      if (keys.length > 0) {
+        sec.classList.remove('hidden');
+        keys.forEach(k => {
+          const item = all[k];
+          const lead = item.party?.[0];
+          const card = document.createElement('div');
+          card.className = 'p-2.5 rounded-2xl bg-slate-900/95 border border-sky-500/40 flex items-center justify-between gap-2';
+          card.innerHTML = `
+            <div>
+              <div class="text-xs font-black text-white">${item.saveName}</div>
+              <div class="text-[10px] text-sky-300">${lead ? `${lead.name} רמ׳${lead.level}` : ''} • צוות: ${item.party?.length || 1}/6</div>
+            </div>
+            <button class="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs">
+              המשך משחק ◀
+            </button>
+          `;
+          card.querySelector('button').addEventListener('click', () => {
+            toggleFullscreen(true);
+            loadGameFromSlot(item.saveName);
+          });
+          list.appendChild(card);
+        });
+      } else {
+        sec.classList.add('hidden');
+      }
+    }
+
+    document.getElementById('btnStartNewGame').addEventListener('click', () => {
+      const nameVal = document.getElementById('newGameNameInput').value.trim() || 'אש';
+      startNewGame(nameVal, state.selectedStarter);
+    });
+
+    // PWA Install Modal
+    document.getElementById('btnInstallPwa').addEventListener('click', () => {
+      document.getElementById('pwaModal').classList.remove('hidden');
+      document.getElementById('pwaModal').classList.add('flex');
+    });
+    document.getElementById('btnClosePwaModal').addEventListener('click', () => {
+      document.getElementById('pwaModal').classList.add('hidden');
+      document.getElementById('pwaModal').classList.remove('flex');
+    });
+    document.getElementById('btnEnterFullscreenFromPwa').addEventListener('click', () => {
+      toggleFullscreen(true);
+      document.getElementById('pwaModal').classList.add('hidden');
+      document.getElementById('pwaModal').classList.remove('flex');
+    });
+    document.getElementById('btnTriggerNativeInstall').addEventListener('click', async () => {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+      }
+    });
+
+    function buildStandaloneHtmlBlob() {
+      const htmlString = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      return new Blob([htmlString], { type: 'text/html;charset=utf-8' });
+    }
+
+    document.getElementById('btnCopyHtmlClipboard').addEventListener('click', async () => {
+      const htmlString = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const lbl = document.getElementById('copyBtnLabel');
+      try {
+        await navigator.clipboard.writeText(htmlString);
+        lbl.textContent = '✓ כל קוד המשחק הועתק ללוח! הדבק אותו בשיחה השנייה או ב-GitHub';
+        sfx.playVictory();
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = htmlString;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        lbl.textContent = '✓ כל קוד המשחק הועתק ללוח! הדבק אותו בשיחה השנייה או ב-GitHub';
+        sfx.playVictory();
+      }
+    });
+
+    document.getElementById('btnDownloadPortableHtml').addEventListener('click', () => {
+      const blob = buildStandaloneHtmlBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'pokemon_pocket_hd.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      sfx.playConfirm();
+    });
+
+    document.getElementById('btnSharePortableHtml').addEventListener('click', async () => {
+      const blob = buildStandaloneHtmlBlob();
+      const file = new File([blob], 'pokemon_pocket_hd.html', { type: 'text/html' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: 'פוקימון: מהדורת 2D-HD',
+            text: 'משחק פוקימון 2D-HD למובייל וטאבלט',
+            files: [file]
+          });
+          return;
+        } catch (_) {}
+      }
+      // Fallback to direct download if Web Share API for files isn't supported on current browser
+      document.getElementById('btnDownloadPortableHtml').click();
+    });
+
+    // Initialize Title Screen & Game Loop
+    renderTitleScreenModal();
+    updateHud();
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>

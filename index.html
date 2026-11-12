@@ -117,6 +117,151 @@
     input, button {
       touch-action: manipulation;
     }
+  
+    /* Offline Fallback Utility Styles (Works 100% without internet/CDN) */
+    .fixed { position: fixed; }
+    .absolute { position: absolute; }
+    .relative { position: relative; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .inset-x-0 { left: 0; right: 0; }
+    .inset-x-2 { left: 0.5rem; right: 0.5rem; }
+    .inset-x-3 { left: 0.75rem; right: 0.75rem; }
+    .top-2 { top: 0.5rem; }
+    .top-16 { top: 4rem; }
+    .bottom-0 { bottom: 0; }
+    .bottom-4 { bottom: 1rem; }
+    .bottom-6 { bottom: 1.5rem; }
+    .right-2\.5 { right: 0.625rem; }
+    .right-5 { right: 1.25rem; }
+    .z-20 { z-index: 20; }
+    .z-30 { z-index: 30; }
+    .z-40 { z-index: 40; }
+    .z-50 { z-index: 50; }
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .grid { display: grid; }
+    .inline-block { display: inline-block; }
+    .flex-col { flex-direction: column; }
+    .flex-wrap { flex-wrap: wrap; }
+    .flex-1 { flex: 1 1 0%; }
+    .shrink-0 { flex-shrink: 0; }
+    .items-center { align-items: center; }
+    .items-end { align-items: flex-end; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-1\.5 { gap: 0.375rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-2\.5 { gap: 0.625rem; }
+    .gap-3 { gap: 0.75rem; }
+    .space-y-1 > * + * { margin-top: 0.25rem; }
+    .space-y-1\.5 > * + * { margin-top: 0.375rem; }
+    .space-y-2 > * + * { margin-top: 0.5rem; }
+    .space-y-2\.5 > * + * { margin-top: 0.625rem; }
+    .space-y-3 > * + * { margin-top: 0.75rem; }
+    .space-y-3\.5 > * + * { margin-top: 0.875rem; }
+    .space-y-4 > * + * { margin-top: 1rem; }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .w-full { width: 100%; }
+    .w-16 { width: 4rem; }
+    .h-16 { height: 4rem; }
+    .max-w-sm { max-width: 24rem; }
+    .max-w-md { max-width: 28rem; }
+    .max-w-lg { max-width: 32rem; }
+    .max-w-xl { max-width: 36rem; }
+    .max-w-2xl { max-width: 42rem; }
+    .max-h-36 { max-height: 9rem; }
+    .max-h-44 { max-height: 11rem; }
+    .max-h-48 { max-height: 12rem; }
+    .max-h-56 { max-height: 14rem; }
+    .max-h-60 { max-height: 15rem; }
+    .max-h-80 { max-height: 20rem; }
+    .max-h-\[90dvh\] { max-height: 90dvh; }
+    .max-h-\[92dvh\] { max-height: 92dvh; }
+    .max-h-\[60dvh\] { max-height: 60dvh; }
+    .max-h-\[64dvh\] { max-height: 64dvh; }
+    .max-h-\[66dvh\] { max-height: 66dvh; }
+    .min-w-0 { min-width: 0; }
+    .p-2 { padding: 0.5rem; }
+    .p-2\.5 { padding: 0.625rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-3\.5 { padding: 0.875rem; }
+    .p-4 { padding: 1rem; }
+    .p-5 { padding: 1.25rem; }
+    .p-6 { padding: 1.5rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+    .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-2xl { border-radius: 1rem; }
+    .rounded-3xl { border-radius: 1.5rem; }
+    .rounded-full { border-radius: 9999px; }
+    .border { border-width: 1px; border-style: solid; border-color: rgba(148,163,184,0.28); }
+    .border-2 { border-width: 2px; border-style: solid; }
+    .border-b { border-bottom-width: 1px; border-bottom-style: solid; border-color: rgba(148,163,184,0.25); }
+    .border-t { border-top-width: 1px; border-top-style: solid; border-color: rgba(148,163,184,0.25); }
+    .bg-slate-950\/85 { background-color: rgba(2, 6, 23, 0.85); }
+    .bg-slate-900 { background-color: #0f172a; }
+    .bg-slate-900\/90, .bg-slate-900\/95 { background-color: rgba(15, 23, 42, 0.92); }
+    .bg-slate-800 { background-color: #1e293b; }
+    .bg-slate-700 { background-color: #334155; }
+    .bg-emerald-500 { background-color: #10b981; }
+    .bg-sky-500 { background-color: #0ea5e9; }
+    .bg-amber-500 { background-color: #f59e0b; }
+    .bg-cyan-500 { background-color: #06b6d4; }
+    .bg-purple-500 { background-color: #a855f7; }
+    .bg-rose-500 { background-color: #f43f5e; }
+    .text-white { color: #ffffff; }
+    .text-slate-950 { color: #020617; }
+    .text-slate-200 { color: #e2e8f0; }
+    .text-slate-300 { color: #cbd5e1; }
+    .text-slate-400 { color: #94a3b8; }
+    .text-amber-200, .text-amber-300, .text-amber-400 { color: #fcd34d; }
+    .text-emerald-200, .text-emerald-300, .text-emerald-400 { color: #6ee7b7; }
+    .text-sky-200, .text-sky-300 { color: #7dd3fc; }
+    .text-rose-200, .text-rose-300 { color: #fda4af; }
+    .text-purple-300 { color: #d8b4fe; }
+    .text-cyan-300 { color: #67e8f9; }
+    .text-yellow-300 { color: #fde047; }
+    .text-indigo-300 { color: #a5b4fc; }
+    .text-pink-300 { color: #f9a8d4; }
+    .text-\[9px\] { font-size: 9px; }
+    .text-\[10px\] { font-size: 10px; }
+    .text-\[11px\] { font-size: 11px; }
+    .text-xs { font-size: 0.75rem; line-height: 1rem; }
+    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-base { font-size: 1rem; line-height: 1.5rem; }
+    .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+    .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
+    .font-black { font-weight: 900; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pointer-events-none { pointer-events: none; }
+    .pointer-events-auto { pointer-events: auto; }
+    .cursor-pointer { cursor: pointer; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    @media (min-width: 640px) {
+      .sm\:inline { display: inline !important; }
+      .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .sm\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
   </style>
 </head>
 <body>
@@ -132,7 +277,8 @@
             <span class="text-xs font-extrabold text-amber-300" id="hudProfileName">מאמן: אש</span>
             <span id="hudZoneBadge" class="text-[10px] px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-200 border border-sky-400/30 font-bold">עיירת פאלט</span>
             <span id="hudMoneyInfo" class="text-[11px] font-black text-emerald-300">₽ 1,500</span>
-            <span id="hudBadgesInfo" class="text-[10px] font-extrabold text-amber-200">🏅 0/4</span>
+            <span id="hudBadgesInfo" class="text-[10px] font-extrabold text-amber-200">🏅 0/8</span>
+            <span id="hudClockInfo" class="text-[10px] font-bold text-cyan-200">🕒 --:--</span>
             <span id="saveIndicator" class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 hidden">נשמר ✓</span>
           </div>
           <div class="flex items-center gap-2 text-[11px] text-slate-200 font-semibold mt-0.5">
@@ -176,8 +322,17 @@
           <span>🪪</span>
           <span class="hidden lg:inline">מאמן</span>
         </button>
-        <button id="btnWeatherHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-sky-200 hover:bg-slate-800/80 active:scale-95 transition" title="החלף זמן ומזג אוויר (יום / שקיעה / לילה / גשם)">
-          <span id="weatherIcon">☀️</span>
+        <button id="btnExitInteriorHud" class="glass-hud px-2.5 py-1.5 rounded-xl text-xs font-black text-rose-300 border border-rose-400/50 hover:bg-rose-900/50 active:scale-95 transition hidden" title="צא מהאולם אל מפת קאנטו">
+          <span>🚪 צא החוצה</span>
+        </button>
+        <button id="btnArtModeHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-amber-200 hover:bg-slate-800/80 active:scale-95 transition" title="החלף סגנון גרפיקה: מאויר HD 🎨 מול צורות קלאסי 🔷">
+          <span id="artModeIcon">🎨</span>
+        </button>
+        <button id="btnKidModeHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-emerald-300 hover:bg-slate-800/80 active:scale-95 transition" title="מצב מותאם לילדים (רמזי אפקטיביות בקרב ובונוס לכידה)">
+          <span id="kidModeIcon">🌟</span>
+        </button>
+        <button id="btnWeatherHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-sky-200 hover:bg-slate-800/80 active:scale-95 transition" title="שעון אמת / החלף מזג אוויר (שעון אמת / יום / שקיעה / לילה / גשם)">
+          <span id="weatherIcon">🕒</span>
         </button>
         <button id="btnSaveMenu" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-emerald-300 hover:bg-slate-800/80 active:scale-95 transition" title="שמירות">
           <span>💾</span>
@@ -336,6 +491,19 @@
           <div id="saveSlotsList" class="space-y-2 max-h-48 scroll-y pr-1"></div>
         </div>
 
+        <div class="bg-slate-900/90 border border-sky-500/30 rounded-2xl p-3 space-y-2">
+          <div class="text-xs font-extrabold text-sky-300">☁️ גיבוי וסנכרון שמירות (אופליין ובין מכשירים):</div>
+          <div class="flex gap-2">
+            <button id="btnExportSavesJson" class="flex-1 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs">
+              ⬇️ הורד גיבוי שמירות (.json)
+            </button>
+            <label class="flex-1 py-2 rounded-xl bg-purple-500 hover:bg-purple-400 text-slate-950 font-black text-xs text-center cursor-pointer">
+              ⬆️ שחזר מקובץ גיבוי
+              <input id="inputImportSavesJson" type="file" accept=".json,application/json" class="hidden" />
+            </label>
+          </div>
+        </div>
+
         <div class="pt-2 border-t border-slate-700/80 flex items-center justify-between gap-2">
           <button id="btnOpenNewGameScreen" class="w-full py-2.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 hover:bg-amber-500/30 font-extrabold text-xs transition">
             ✨ פתיחת משחק חדש משלב ההתחלה
@@ -486,7 +654,21 @@
       </div>
     </div>
 
-        <!-- Trainer License Card & Badges Modal -->
+            <!-- Designed Species Dossier Inspector Modal -->
+    <div id="speciesDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+      <div class="glass-modal rounded-3xl max-w-lg w-full p-5 space-y-3.5 border-2 border-sky-400/50 scroll-y max-h-[92dvh]">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+          <div>
+            <div class="text-[10px] font-black text-sky-300 uppercase tracking-widest">POKéDEX SPECIES DOSSIER</div>
+            <h2 class="text-base font-black text-white">📖 כרטיס מידע מאויר ונתוני מין</h2>
+          </div>
+          <button id="btnCloseSpeciesDetail" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">סגור ✕</button>
+        </div>
+        <div id="speciesDetailBody" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- Trainer License Card & Badges Modal -->
     <div id="trainerCardModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
       <div class="glass-modal rounded-3xl max-w-md w-full p-5 space-y-4 border-2 border-amber-400/50 scroll-y max-h-[92dvh]">
         <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
@@ -1064,6 +1246,9 @@
         spd: Math.floor(sp.baseSpd + (level - 1) * 1.8),
         xp: 0,
         nextXp: level * 22,
+        status: null,
+        sleepTurns: 0,
+        heldItem: null,
         moves: sp.moves.map(m => ({ ...m, maxPp: m.pp }))
       };
     }
@@ -1321,6 +1506,10 @@
         ctx.beginPath();
         ctx.arc(0, r * 0.13, r * 0.18, 0.15 * Math.PI, 0.85 * Math.PI);
         ctx.stroke();
+      }
+
+      if (typeof drawIllustratedFeatures === 'function') {
+        drawIllustratedFeatures(ctx, sp, r, tick, isBack);
       }
 
       ctx.restore();
@@ -1643,6 +1832,730 @@
       }
     ];
 
+
+    /********************************************************************
+     * V3 ULTIMATE EXPANSION:
+     * - 8 GYMS + INTERIOR MAPS (HOUSES, CENTERS, MARTS, 8 GYM HALLS, CAVES, INDIGO HALL)
+     * - BATTLE STATUS CONDITIONS (BURN, POISON, PARALYZE, SLEEP, FREEZE)
+     * - HELD ITEMS SYSTEM (6 EQUIPABLE ITEMS IN PARTY)
+     * - ILLUSTRATED 2D-HD GRAPHICS VS PROCEDURAL SHAPES + SPECIES DOSSIER CARD
+     * - REAL-TIME CLOCK, KID-FRIENDLY BALANCE MODE, 20 QUESTS & OFFLINE SYNC
+     ********************************************************************/
+
+    // 1. Offline Service Worker + IndexedDB Dual Backup
+    function setupTrueOfflineAndIDB() {
+      if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+        const swCode = `
+          const CACHE_NAME = 'pokemon-hd-151-v3-offline';
+          self.addEventListener('install', (e) => {
+            self.skipWaiting();
+            e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./', './index.html']).catch(() => {})));
+          });
+          self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+          self.addEventListener('fetch', (e) => {
+            e.respondWith(
+              caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+                const clone = res.clone();
+                caches.open(CACHE_NAME).then(c => c.put(e.request, clone)).catch(() => {});
+                return res;
+              }).catch(() => cached))
+            );
+          });
+        `;
+        try {
+          const blob = new Blob([swCode], { type: 'application/javascript' });
+          navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+        } catch (_) {}
+      }
+    }
+    setupTrueOfflineAndIDB();
+
+    function syncSavesToIndexedDB(allSavesObj) {
+      try {
+        const req = indexedDB.open('PokemonHD151_OfflineDB', 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('saves')) db.createObjectStore('saves');
+        };
+        req.onsuccess = (e) => {
+          const db = e.target.result;
+          const tx = db.transaction('saves', 'readwrite');
+          tx.objectStore('saves').put(allSavesObj, 'ALL_SAVES');
+        };
+      } catch (_) {}
+    }
+
+    // 2. Battle Status Effects Metadata
+    const STATUS_META = {
+      BURN:     { id: 'BURN',     name: 'כוויה 🔥',  short: '🔥 כוויה',  color: '#f97316', moveTypes: ['FIRE'], chance: 0.24 },
+      POISON:   { id: 'POISON',   name: 'רעל ☠️',    short: '☠️ רעל',    color: '#a855f7', moveTypes: ['POISON', 'BUG'], chance: 0.26 },
+      PARALYZE: { id: 'PARALYZE', name: 'שיתוק ⚡',  short: '⚡ שיתוק',  color: '#eab308', moveTypes: ['ELECTRIC', 'GRASS'], chance: 0.24 },
+      SLEEP:    { id: 'SLEEP',    name: 'שינה 💤',   short: '💤 ישן',    color: '#38bdf8', moveTypes: ['PSYCHIC', 'GHOST'], chance: 0.20 },
+      FREEZE:   { id: 'FREEZE',   name: 'קיפאון ❄️', short: '❄️ קפוא',   color: '#06b6d4', moveTypes: ['ICE'], chance: 0.22 }
+    };
+
+    // 3. Held Items Database
+    const HELD_ITEMS_DB = {
+      leftovers:      { key: 'leftovers',      name: 'שאריות תפוח 🍎', icon: '🍎', desc: 'מרפא 10% מהחיים של הפוקימון בסוף כל תור בקרב!' },
+      mystic_gem:     { key: 'mystic_gem',     name: 'יהלום עוצמה 💎', icon: '💎', desc: 'מחזק את כל מתקפות הפוקימון המחזיק ב-+22%!' },
+      sitrus_berry:   { key: 'sitrus_berry',   name: 'פרי סיטרוס 🍊',  icon: '🍊', desc: 'מרפא אוטומטית 35% חיים כשהחיים יורדים מתחת לחצי!' },
+      quick_claw:     { key: 'quick_claw',     name: 'טופר מהיר ⚡',   icon: '⚡', desc: 'מעלה סיכוי למכה קריטית ב-+20% ומגביר מהירות!' },
+      lucky_egg:      { key: 'lucky_egg',      name: 'ביצת מזל 🥚',    icon: '🥚', desc: 'מעניקה +45% תוספת XP וכסף מכל ניצחון בקרב!' },
+      safety_goggles: { key: 'safety_goggles', name: 'משקפי מגן 🛡️',   icon: '🛡️', desc: 'מגן מפני פגיעות סטטוס (רעל/כוויה/שיתוק) ומפחית נזק ב-15%!' }
+    };
+
+    // Add Status Cure & Held Items to SHOP_CATALOG if not already present
+    const EXTRA_SHOP_ITEMS = [
+      { key: 'full_heal',      name: 'ריפוי-כל (סטטוסים)', icon: '💊', price: 250,  desc: 'מרפא מיד כוויה, רעל, שיתוק, שינה וקיפאון!' },
+      { key: 'leftovers',      name: 'חפץ מוחזק: שאריות תפוח', icon: '🍎', price: 1400, desc: 'תן לפוקימון להחזיק: מרפא 10% חיים בכל תור!' },
+      { key: 'mystic_gem',     name: 'חפץ מוחזק: יהלום עוצמה', icon: '💎', price: 1600, desc: 'תן לפוקימון להחזיק: +22% עוצמת התקפה!' },
+      { key: 'sitrus_berry',   name: 'חפץ מוחזק: פרי סיטרוס', icon: '🍊', price: 900,  desc: 'תן לפוקימון להחזיק: ריפוי אוטומטי של 35% בחצי חיים!' },
+      { key: 'quick_claw',     name: 'חפץ מוחזק: טופר מהיר',  icon: '⚡', price: 1400, desc: 'תן לפוקימון להחזיק: +20% סיכוי למכה קריטית!' },
+      { key: 'lucky_egg',      name: 'חפץ מוחזק: ביצת מזל',   icon: '🥚', price: 1800, desc: 'תן לפוקימון להחזיק: +45% נקודות ניסיון (XP) וכסף!' },
+      { key: 'safety_goggles', name: 'חפץ מוחזק: משקפי מגן',  icon: '🛡️', price: 1500, desc: 'תן לפוקימון להחזיק: חסינות מסטטוסים והפחתת נזק!' }
+    ];
+    EXTRA_SHOP_ITEMS.forEach(it => {
+      if (!SHOP_CATALOG.some(s => s.key === it.key)) SHOP_CATALOG.push(it);
+    });
+
+    // 4. All 8 Kanto Gym Leaders + Badges Metadata
+    const ALL_8_BADGES = [
+      { id: 'boulder',  name: 'תג הסלע',  icon: '🪨', leader: 'ברוק (Brock)',     city: 'פיוטר / וירידיאן', tip: 'השתמש במים 💧 או עשב 🌿!' },
+      { id: 'cascade',  name: 'תג המפל',  icon: '💧', leader: 'מיסטי (Misty)',    city: 'עיר סרוליאן',     tip: 'השתמש בחשמל ⚡ או עשב 🌿!' },
+      { id: 'thunder',  name: 'תג הרעם',  icon: '⚡', leader: 'סרג׳ (Lt. Surge)', city: 'עיר ורמיליון',    tip: 'השתמש באדמה 🏜️ או אבן 🪨!' },
+      { id: 'rainbow',  name: 'תג הקשת',  icon: '🌿', leader: 'אריקה (Erika)',    city: 'עיר סלדון',       tip: 'השתמש באש 🔥, קרח ❄️ או מעופף 🦅!' },
+      { id: 'soul',     name: 'תג הנשמה', icon: '☠️', leader: 'קוגה (Koga)',      city: 'עיר פuschia / ספארי', tip: 'השתמש בעל-חושי 🔮 או אדמה 🏜️!' },
+      { id: 'marsh',    name: 'תג הביצה', icon: '🔮', leader: 'סברינה (Sabrina)', city: 'עיר ספרון',       tip: 'השתמש ברוח 👻 או חרק 🐛!' },
+      { id: 'volcano',  name: 'תג הלבה',  icon: '🔥', leader: 'בליין (Blaine)',   city: 'אי סיניבר',       tip: 'השתמש במים 💧, אדמה 🏜️ או אבן 🪨!' },
+      { id: 'earth',    name: 'תג האדמה', icon: '🏜️', leader: 'ג׳ובאני (Giovanni)',city: 'מכון וירידיאן העליון', tip: 'השתמש במים 💧, עשב 🌿 או קרח ❄️!' }
+    ];
+
+    // Add the 4 missing Gym Leaders + Legendary Birds & Mew to Overworld NPCS
+    const EXTRA_NPCS = [
+      { id: 'erika',    name: 'אריקה (מכון העשב #4)',    x: 26, y: 31, dir: 'down', shirt: '#22c55e', hat: '#f43f5e', role: 'gym', gymInteriorId: 'GYM_ERIKA',    badgeId: 'rainbow', badgeName: 'תג הקשת 🌿',  rewardMoney: 2800, team: [ ['tangela', 26], ['weepinbell', 28], ['vileplume', 30] ] },
+      { id: 'koga',     name: 'קוגה (מכון הרעל #5)',     x: 49, y: 28, dir: 'down', shirt: '#9333ea', hat: '#1e1b4b', role: 'gym', gymInteriorId: 'GYM_KOGA',     badgeId: 'soul',    badgeName: 'תג הנשמה ☠️', rewardMoney: 3100, team: [ ['koffing', 30], ['muk', 32], ['venomoth', 33], ['weezing', 35] ] },
+      { id: 'sabrina',  name: 'סברינה (מכון על-חושי #6)', x: 37, y: 28, dir: 'down', shirt: '#ec4899', hat: '#500724', role: 'gym', gymInteriorId: 'GYM_SABRINA',  badgeId: 'marsh',   badgeName: 'תג הביצה 🔮', rewardMoney: 3400, team: [ ['kadabra', 34], ['mr_mime', 35], ['venomoth', 36], ['alakazam', 38] ] },
+      { id: 'giovanni', name: 'ג׳ובאני (מכון האדמה #8)', x: 16, y: 12, dir: 'down', shirt: '#1c1917', hat: '#dc2626', role: 'gym', gymInteriorId: 'GYM_GIOVANNI', badgeId: 'earth',   badgeName: 'תג האדמה 🏜️', rewardMoney: 4500, team: [ ['rhyhorn', 38], ['dugtrio', 40], ['nidoqueen', 41], ['nidoking', 42], ['rhydon', 44] ] },
+      { id: 'cave_guide', name: 'כניסה למערת הר הירח 🕳️', x: 47, y: 7, dir: 'down', shirt: '#78716c', hat: '#facc15', role: 'enter_interior', targetInterior: 'CAVE_MT_MOON' }
+    ];
+    EXTRA_NPCS.forEach(n => {
+      if (!NPCS.some(existing => existing.id === n.id)) NPCS.push(n);
+    });
+
+    // Attach gymInteriorId to existing 4 gym leaders
+    NPCS.forEach(n => {
+      if (n.id === 'brock') n.gymInteriorId = 'GYM_BROCK';
+      if (n.id === 'misty') n.gymInteriorId = 'GYM_MISTY';
+      if (n.id === 'surge') n.gymInteriorId = 'GYM_SURGE';
+      if (n.id === 'blaine') n.gymInteriorId = 'GYM_BLAINE';
+    });
+
+    // 5. Interior Halls, Houses, Gyms & Caves System
+    function buildInteriorGrid(cols, rows, floorTile, accentTile) {
+      const g = Array.from({ length: rows }, () => Array(cols).fill(floorTile));
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (r === 0 || r === rows - 1 || c === 0 || c === cols - 1) g[r][c] = 5; // Wall
+        }
+      }
+      // Decorative statues / pillars / pools on sides
+      for (let r = 2; r < rows - 2; r += 3) {
+        g[r][2] = accentTile;
+        g[r][cols - 3] = accentTile;
+      }
+      // Red/Gold carpet up the center to the leader/counter
+      const mid = Math.floor(cols / 2);
+      for (let r = 2; r < rows - 1; r++) {
+        g[r][mid] = 9;
+        if (cols > 12) g[r][mid - 1] = 9;
+      }
+      // Exit mat at bottom center (tile 20 = Exit Door Mat)
+      g[rows - 1][mid] = 20;
+      g[rows - 1][mid - 1] = 20;
+      return g;
+    }
+
+    const INTERIOR_MAPS = {
+      POKECENTER: {
+        id: 'POKECENTER',
+        name: '🏥 אולם מרכז הפוקימונים והריפוי',
+        cols: 14, rows: 11,
+        grid: buildInteriorGrid(14, 11, 0, 4),
+        spawnX: 6.5, spawnY: 8.8,
+        floorColor1: '#1e293b', floorColor2: '#334155',
+        npcs: [
+          { id: 'in_nurse', name: 'האחות ג׳וי (ריפוי מלא)', x: 6.5, y: 2.2, dir: 'down', shirt: '#ec4899', hat: '#fbcfe8', role: 'healer' },
+          { id: 'in_pc',    name: '💻 מחשב פרופסור אוק (PC)', x: 10.5, y: 2.5, dir: 'down', shirt: '#38bdf8', hat: '#e0f2fe', role: 'pc_terminal' },
+          { id: 'in_trade', name: '🔄 עמדת החלפות קאנטו',     x: 2.5,  y: 2.5, dir: 'down', shirt: '#06b6d4', hat: '#cffafe', role: 'trader' }
+        ]
+      },
+      POKEMART: {
+        id: 'POKEMART',
+        name: '🏪 קניון הפוקימונים וכלבו סלדון',
+        cols: 14, rows: 11,
+        grid: buildInteriorGrid(14, 11, 0, 9),
+        spawnX: 6.5, spawnY: 8.8,
+        floorColor1: '#0f172a', floorColor2: '#1e3a8a',
+        npcs: [
+          { id: 'in_clerk1', name: 'מוכר כדורים ושיקויים', x: 4.5, y: 2.5, dir: 'down', shirt: '#10b981', hat: '#a7f3d0', role: 'shop' },
+          { id: 'in_clerk2', name: 'מומחה אבני התפתחות ופריטים מוחזקים', x: 8.5, y: 2.5, dir: 'down', shirt: '#f59e0b', hat: '#fef08a', role: 'shop' }
+        ]
+      },
+      LAB: {
+        id: 'LAB',
+        name: '🔬 מעבדת המחקר של פרופסור אוק',
+        cols: 14, rows: 12,
+        grid: buildInteriorGrid(14, 12, 0, 8),
+        spawnX: 6.5, spawnY: 9.8,
+        floorColor1: '#1e293b', floorColor2: '#0f172a',
+        npcs: [
+          { id: 'in_oak',  name: 'פרופסור אוק', x: 6.5, y: 2.5, dir: 'down', shirt: '#3b82f6', hat: '#e2e8f0', role: 'prof' },
+          { id: 'in_aide', name: 'עוזר מחקר (מתנת פריט מוחזק!)', x: 3.5, y: 5.5, dir: 'right', shirt: '#10b981', hat: '#ffffff', role: 'aide_gift' }
+        ]
+      },
+      CAVE_MT_MOON: {
+        id: 'CAVE_MT_MOON',
+        name: '🕳️ מעמקי מערת הר הירח ומקדש האגדיים',
+        cols: 20, rows: 16,
+        grid: (() => {
+          const g = buildInteriorGrid(20, 16, 15, 16);
+          g[3][4] = 10; g[3][15] = 10; g[8][10] = 10;
+          return g;
+        })(),
+        spawnX: 9.5, spawnY: 13.8,
+        floorColor1: '#292524', floorColor2: '#44403c',
+        npcs: [
+          { id: 'leg_articuno', name: 'ארטיקונו האגדי ❄️', x: 4,  y: 3, dir: 'down', role: 'legendary', speciesId: 'articuno', level: 45 },
+          { id: 'leg_zapdos',   name: 'זאפדוס האגדי ⚡',   x: 15, y: 3, dir: 'down', role: 'legendary', speciesId: 'zapdos',   level: 45 },
+          { id: 'leg_moltres',  name: 'מולטרס האגדי 🔥',   x: 9.5,y: 2.2,dir:'down', role: 'legendary', speciesId: 'moltres',  level: 45 },
+          { id: 'leg_mew',      name: 'מיו המסתורי 🌟',    x: 9.5,y: 6.5,dir:'down', role: 'legendary', speciesId: 'mew',      level: 50 }
+        ]
+      },
+      INDIGO_HALL: {
+        id: 'INDIGO_HALL',
+        name: '👑 היכל ליגת אינדיגו ואולם האלופים',
+        cols: 16, rows: 14,
+        grid: buildInteriorGrid(16, 14, 9, 4),
+        spawnX: 7.5, spawnY: 11.8,
+        floorColor1: '#311042', floorColor2: '#4c1d95',
+        npcs: [
+          { id: 'in_champ',  name: 'האלוף גארי 👑',   x: 7.5, y: 2.5, dir: 'down', shirt: '#7e22ce', hat: '#facc15', role: 'champion', rewardMoney: 6000, team: [ ['pidgeot', 42], ['alakazam', 43], ['rhydon', 44], ['gyarados', 45], ['arcanine', 46], ['charizard', 48] ] },
+          { id: 'in_mewtwo', name: 'מיוטו האגדי 🔮', x: 3.5, y: 3.5, dir: 'down', role: 'legendary', speciesId: 'mewtwo', level: 52 }
+        ]
+      }
+    };
+
+    // Dynamically create the 8 Gym Interior Halls!
+    const GYM_HALL_DEFS = [
+      ['GYM_BROCK',    '🪨 אולם מכון האבן — ברוק',      16, '#44403c', '#57534e', 'brock',    'טיפ: מתקפות מים 💧 או עשב 🌿 עושות נזק כפול לסלעים של ברוק!'],
+      ['GYM_MISTY',    '💧 אולם מכון המים — מיסטי',     3,  '#0c4a6e', '#0369a1', 'misty',    'טיפ: מתקפות חשמל ⚡ או עשב 🌿 מנצחות בקלות פוקימוני מים!'],
+      ['GYM_SURGE',    '⚡ אולם מכון החשמל — סרג׳',     9,  '#422006', '#713f12', 'surge',    'טיפ: פוקימוני אדמה 🏜️ חסינים לחשמל ופוגעים בו בעוצמה!'],
+      ['GYM_ERIKA',    '🌿 חממת מכון העשב — אריקה',     4,  '#052e16', '#14532d', 'erika',    'טיפ: מתקפות אש 🔥, קרח ❄️ או מעופף 🦅 חזקות מאוד נגד עשב!'],
+      ['GYM_KOGA',     '☠️ דוג׳ו מכון הרעל — קוגה',      2,  '#2e1065', '#4c1d95', 'koga',     'טיפ: מתקפות על-חושיות 🔮 ואדמה 🏜️ ממוטטות את פוקימוני הרעל!'],
+      ['GYM_SABRINA',  '🔮 היכל מכון העל-חושי — סברינה', 4,  '#500724', '#831843', 'sabrina',  'טיפ: פוקימוני רוח 👻 וחרק 🐛 חזקים במיוחד מול על-חושי!'],
+      ['GYM_BLAINE',   '🔥 לוע מכון הלבה — בליין',      16, '#450a0a', '#7f1d1d', 'blaine',   'טיפ: מתקפות מים 💧, אדמה 🏜️ ואבן 🪨 מכבות את להבות האש!'],
+      ['GYM_GIOVANNI', '🏜️ מבצר מכון האדמה — ג׳ובאני',  16, '#1c1917', '#292524', 'giovanni', 'טיפ: מים 💧, עשב 🌿 וקרח ❄️ הם המפתח לניצחון על ג׳ובאני!']
+    ];
+
+    GYM_HALL_DEFS.forEach(([gid, title, accentTile, col1, col2, leaderNpcId, tipText]) => {
+      const leaderObj = NPCS.find(n => n.id === leaderNpcId);
+      INTERIOR_MAPS[gid] = {
+        id: gid,
+        name: title,
+        cols: 14, rows: 13,
+        grid: buildInteriorGrid(14, 13, 0, accentTile),
+        spawnX: 6.5, spawnY: 10.8,
+        floorColor1: col1, floorColor2: col2,
+        npcs: [
+          { ...leaderObj, x: 6.5, y: 2.5, dir: 'down', insideGymHall: true },
+          { id: gid + '_guide', name: 'מדריך המכון 💡', x: 4.2, y: 9.5, dir: 'right', shirt: '#f59e0b', hat: '#fef08a', role: 'gym_guide', tip: tipText }
+        ]
+      };
+    });
+
+    // 6. Expand Quests Catalog to 20 Quests!
+    const EXTRA_10_QUESTS = [
+      {
+        id: 'q_enter_room',
+        title: 'חוקר פנים: היכנס לבניין או מכון',
+        desc: 'היכנס לתוך מרכז פוקימונים, חנות, מעבדה, מכון או מערת הר הירח.',
+        check: (s) => (s.stats.interiorsVisited || 0) >= 1,
+        progressText: (s) => `${Math.min(1, s.stats.interiorsVisited || 0)} / 1 כניסות`,
+        rewardMoney: 700,
+        rewardItems: { sitrus_berry: 1, pokeball: 5 },
+        rewardLabel: '₽700 + פרי סיטרוס 🍊 + 5 פוקדורים'
+      },
+      {
+        id: 'q_hold_item',
+        title: 'אסטרטג: צייד פוקימון בפריט מוחזק',
+        desc: 'פתח את חלון הצוות (🐾) ותן לאחד הפוקימונים שלך להחזיק פריט (כמו שאריות תפוח או פרי סיטרוס).',
+        check: (s) => s.party.some(m => !!m.heldItem),
+        progressText: (s) => s.party.some(m => !!m.heldItem) ? 'צויד ✓' : 'טרם צויד',
+        rewardMoney: 1000,
+        rewardItems: { leftovers: 1 },
+        rewardLabel: '₽1,000 + שאריות תפוח 🍎'
+      },
+      {
+        id: 'q_status_hit',
+        title: 'אמן האלמנטים: גרום לסטטוס בקרב',
+        desc: 'הפעל כוויה 🔥, רעל ☠️, שיתוק ⚡, שינה 💤 או קיפאון ❄️ על יריב במהלך קרב.',
+        check: (s) => (s.stats.statusInflicted || 0) >= 1,
+        progressText: (s) => `${Math.min(1, s.stats.statusInflicted || 0)} / 1 סטטוסים`,
+        rewardMoney: 1100,
+        rewardItems: { mystic_gem: 1, full_heal: 2 },
+        rewardLabel: '₽1,100 + יהלום עוצמה 💎 + 2 ריפוי-כל'
+      },
+      {
+        id: 'q_gym_erika',
+        title: 'תג הקשת (#4): נצח את אריקה',
+        desc: 'היכנס למכון העשב בעיר סלדון ונצח את אריקה.',
+        check: (s) => !!s.badges.rainbow,
+        progressText: (s) => s.badges.rainbow ? 'הושלם ✓' : 'טרם הושלם',
+        rewardMoney: 2600,
+        rewardItems: { leaf_stone: 1, rare_candy: 2 },
+        rewardLabel: '₽2,600 + אבן עלה 🌿 + 2 סוכריות נדירות'
+      },
+      {
+        id: 'q_gym_koga',
+        title: 'תג הנשמה (#5): נצח את קוגה',
+        desc: 'מצא את קוגה באזור הספארי המזרחי ונצח אותו במכון הרעל.',
+        check: (s) => !!s.badges.soul,
+        progressText: (s) => s.badges.soul ? 'הושלם ✓' : 'טרם הושלם',
+        rewardMoney: 3000,
+        rewardItems: { quick_claw: 1, ultraball: 4 },
+        rewardLabel: '₽3,000 + טופר מהיר ⚡ + 4 אולטרה-בול'
+      },
+      {
+        id: 'q_gym_sabrina',
+        title: 'תג הביצה (#6): נצח את סברינה',
+        desc: 'היכנס למכון העל-חושי בספרון/סלדון ונצח את סברינה.',
+        check: (s) => !!s.badges.marsh,
+        progressText: (s) => s.badges.marsh ? 'הושלם ✓' : 'טרם הושלם',
+        rewardMoney: 3400,
+        rewardItems: { lucky_egg: 1, rare_candy: 2 },
+        rewardLabel: '₽3,400 + ביצת מזל 🥚 + 2 סוכריות נדירות'
+      },
+      {
+        id: 'q_gym_giovanni',
+        title: 'תג האדמה (#8): נצח את ג׳ובאני',
+        desc: 'נצח את מנהיג המכון השמיני ג׳ובאני בצפון-מערב קאנטו.',
+        check: (s) => !!s.badges.earth,
+        progressText: (s) => s.badges.earth ? 'הושלם ✓' : 'טרם הושלם',
+        rewardMoney: 4500,
+        rewardItems: { masterball: 1, rare_candy: 3 },
+        rewardLabel: '₽4,500 + מאסטר-בול 🟣 + 3 סוכריות נדירות'
+      },
+      {
+        id: 'q_all_8_badges',
+        title: 'שליט 8 המכונים של קאנטו!',
+        desc: 'אסוף את כל 8 תגי המכונים הרשמיים של מחוז קאנטו.',
+        check: (s) => Object.keys(s.badges).length >= 8,
+        progressText: (s) => `${Object.keys(s.badges).length} / 8 תגים`,
+        rewardMoney: 7500,
+        rewardItems: { masterball: 2, rare_candy: 5 },
+        rewardLabel: '₽7,500 + 2 מאסטר-בול + 5 סוכריות נדירות'
+      },
+      {
+        id: 'q_catch_legendary',
+        title: 'צייד האגדות: תפוס פוקימון אגדי!',
+        desc: 'תפוס אחד מהאגדיים במערת הר הירח או בהיכל אינדיגו (ארטיקונו, זאפדוס, מולטרס, מיוטו או מיו).',
+        check: (s) => ['articuno', 'zapdos', 'moltres', 'mewtwo', 'mew'].some(id => !!s.pokedexCaught[id]),
+        progressText: (s) => ['articuno', 'zapdos', 'moltres', 'mewtwo', 'mew'].some(id => !!s.pokedexCaught[id]) ? 'נתפס אגדי! ✓' : 'טרם נתפס',
+        rewardMoney: 5000,
+        rewardItems: { masterball: 1, mystic_gem: 1 },
+        rewardLabel: '₽5,000 + מאסטר-בול + יהלום עוצמה'
+      },
+      {
+        id: 'q_catch_100',
+        title: 'מאסטר הפוקידע: 100 מינים!',
+        desc: 'השלם 100 מיני פוקימונים שונים מתוך 151 בפוקידע של קאנטו!',
+        check: (s) => Object.keys(s.pokedexCaught).length >= 100,
+        progressText: (s) => `${Object.keys(s.pokedexCaught).length} / 100 מינים`,
+        rewardMoney: 15000,
+        rewardItems: { masterball: 3, rare_candy: 10 },
+        rewardLabel: '₽15,000 + 3 מאסטר-בול + 10 סוכריות נדירות'
+      }
+    ];
+    EXTRA_10_QUESTS.forEach(q => {
+      if (!QUESTS_CATALOG.some(existing => existing.id === q.id)) QUESTS_CATALOG.push(q);
+    });
+
+
+    // 7. Illustrated 2D-HD Artwork Renderer (vs. Procedural Shapes)
+    function drawIllustratedFeatures(ctx, sp, r, tick, isBack) {
+      if (state.graphicsMode === 'PROCEDURAL') return; // Skip illustrated anatomical layers in classic mode
+
+      // A) Anatomical Legs / Feet / Paws with Claws (for non-floating/non-serpent)
+      if (sp.shape !== 'floating' && sp.shape !== 'serpent' && sp.shape !== 'aquatic') {
+        const step = Math.sin(tick * 0.1) * (r * 0.05);
+        [-1, 1].forEach(side => {
+          ctx.fillStyle = sp.secondary;
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.ellipse(side * r * 0.46, r * 0.72 + side * step, r * 0.24, r * 0.18, side * 0.15, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Cute white claws
+          ctx.fillStyle = '#f8fafc';
+          [-0.08, 0, 0.08].forEach(off => {
+            ctx.beginPath();
+            ctx.arc(side * r * 0.46 + off * r, r * 0.84 + side * step, r * 0.045, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        });
+      }
+
+      // B) Anatomical Arms / Forelimbs
+      if (sp.shape === 'biped' || sp.shape === 'golem' || sp.shape === 'dragon' || sp.shape === 'tailflame' || sp.shape === 'pikachu') {
+        const armWave = Math.sin(tick * 0.12 + sp.dex) * (r * 0.08);
+        [-1, 1].forEach(side => {
+          ctx.fillStyle = sp.primary;
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.ellipse(side * r * 0.78, r * 0.06 + side * armWave, r * 0.22, r * 0.14, side * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        });
+      }
+
+      // C) Illustrated Belly Patch & Body Markings (Stripes / Spots / Shell Hexes)
+      if (!isBack) {
+        ctx.fillStyle = sp.accent;
+        ctx.globalAlpha = 0.55;
+        ctx.beginPath();
+        ctx.ellipse(0, r * 0.24, r * 0.46, r * 0.38, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+
+        // Pattern markings based on dex number / type
+        if (sp.type === 'FIRE' || sp.type === 'ELECTRIC' || sp.dex % 4 === 0) {
+          // Tiger / Lightning Stripes on torso
+          ctx.strokeStyle = sp.secondary;
+          ctx.lineWidth = 2.5;
+          [-1, 1].forEach(side => {
+            ctx.beginPath();
+            ctx.moveTo(side * r * 0.65, -r * 0.25);
+            ctx.lineTo(side * r * 0.38, -r * 0.18);
+            ctx.moveTo(side * r * 0.68, -r * 0.05);
+            ctx.lineTo(side * r * 0.42, 0);
+            ctx.stroke();
+          });
+        } else if (sp.type === 'GRASS' || sp.type === 'POISON' || sp.dex % 3 === 0) {
+          // Organic Spots
+          ctx.fillStyle = sp.secondary;
+          [ [-0.45, -0.35, 0.1], [0.48, -0.3, 0.09], [-0.52, 0.1, 0.08] ].forEach(([sx, sy, sr]) => {
+            ctx.beginPath();
+            ctx.arc(sx * r, sy * r, sr * r, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+
+        // Expressive Illustrated Iris & Brow + Snout/Fangs
+        [-1, 1].forEach(side => {
+          const ex = side * r * 0.33;
+          const ey = -r * 0.12;
+          // Colored iris ring
+          ctx.strokeStyle = sp.badgeColor;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.ellipse(ex, ey, r * 0.10, r * 0.14, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Expressive eyebrow for stage 2/3
+          if (sp.stage >= 2) {
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.moveTo(ex - side * r * 0.14, ey - r * 0.22);
+            ctx.lineTo(ex + side * r * 0.08, ey - r * 0.16);
+            ctx.stroke();
+          }
+        });
+
+        // Cute nose / snout highlight
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.ellipse(0, r * 0.02, r * 0.06, r * 0.04, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // 8. Rich Species Lore, Habitat & Evolution Chain Generator for all 151 Species
+    const TYPE_LORE_TEMPLATES = {
+      GRASS:    'פוקימון צמח וטבע הסופג אנרגיית שמש דרך העלים והפקעת שעל גבו כדי לשחרר מתקפות עשב מרפאות וחזקות.',
+      FIRE:     'פוקימון להבה לוהט שלבו בוער בחום עצום. ככל שהוא מתחזק בקרב, הלהבות שלו זוהרות בעוצמה רבה יותר.',
+      WATER:    'פוקימון מים זריז השוחה בזרמים חזקים ומסוגל לשגר סילוני מים בלחץ גבוה במיוחד.',
+      ELECTRIC: 'פוקימון חשמלי האוגר מטעני ברק בלחייו ובגופו, ומשחרר מכות רעם מהירות כברק.',
+      BUG:      'פוקימון חרק חרוץ החי ביערות קאנטו ומתפתח במהירות מפתיעה לצורתו הבוגרת.',
+      FLYING:   'פוקימון מעופף בעל כנפיים אדירות וראייה חדה המסוגל לחצות את שמי קאנטו במהירות על-קולית.',
+      POISON:   'פוקימון רעיל המשתמש ברעלנים טבעיים להגנה ולהחלשת יריבים לאורך זמן בקרב.',
+      GROUND:   'פוקימון אדמה חסון החופר מחילות עמוקות וחזק במיוחד מול פוקימוני חשמל, אש ואבן.',
+      ROCK:     'פוקימון סלע משוריין בעל הגנה גבוהה במיוחד השוכן בהר הירח ובמנהרות האבן של קאנטו.',
+      FIGHTING: 'פוקימון אמנויות לחימה המאמן את שריריו יומם ולילה כדי להנחית מכות קראטה מדויקות.',
+      PSYCHIC:  'פוקימון על-חושי מסתורי בעל אינטליגנציה עילאית וכוחות טלקינזיס המכופפים את המציאות.',
+      GHOST:    'פוקימון רוח וצללים החומק דרך קירות ומופיע בלילות זרועי כוכבים כדי להפתיע מאמנים.',
+      ICE:      'פוקימון קרח נדיר המקפיא את האוויר סביבו לסופת שלגים מרהיבה.',
+      DRAGON:   'פוקימון דרקון עתיק ונדיר ביותר בעל כוחות אגדיים השוכן במעמקים ובפסגות של קאנטו.',
+      NORMAL:   'פוקימון נאמן, רב-גוני ומלא אנרגיה המסתגל לכל סביבה ולכל סגנון קרב.'
+    };
+
+    function getSpeciesFullEvolutionChain(speciesId) {
+      const norm = normalizeSpeciesId(speciesId);
+      // Find root stage-1 species
+      let rootId = norm;
+      for (const id of DEX_ORDER) {
+        if (SPECIES_DB[id].evoTo === rootId) {
+          rootId = id;
+          for (const id2 of DEX_ORDER) {
+            if (SPECIES_DB[id2].evoTo === rootId) rootId = id2;
+          }
+        }
+      }
+      if ( ['vaporeon', 'jolteon', 'flareon'].includes(norm) ) rootId = 'eevee';
+
+      if (rootId === 'eevee') {
+        return [
+          { id: 'eevee', req: 'בסיס' },
+          { id: 'vaporeon', req: 'אבן מים 💧' },
+          { id: 'jolteon', req: 'אבן ברק ⚡' },
+          { id: 'flareon', req: 'אבן אש 🔥' }
+        ];
+      }
+
+      const chain = [{ id: rootId, req: 'שלב בסיס' }];
+      let curr = SPECIES_DB[rootId];
+      while (curr && curr.evoTo && SPECIES_DB[curr.evoTo]) {
+        const nextSp = SPECIES_DB[curr.evoTo];
+        let reqLabel = '';
+        if (typeof curr.evoMethod === 'number') reqLabel = `רמה ${curr.evoMethod}`;
+        else if (curr.evoMethod === 'TRADE') reqLabel = 'החלפה / כבל 🔗';
+        else if (curr.evoMethod === 'FIRE_STONE') reqLabel = 'אבן אש 🔥';
+        else if (curr.evoMethod === 'WATER_STONE') reqLabel = 'אבן מים 💧';
+        else if (curr.evoMethod === 'THUNDER_STONE') reqLabel = 'אבן ברק ⚡';
+        else if (curr.evoMethod === 'LEAF_STONE') reqLabel = 'אבן עלה 🌿';
+        else if (curr.evoMethod === 'MOON_STONE') reqLabel = 'אבן ירח 🌙';
+        chain.push({ id: nextSp.id, req: reqLabel });
+        curr = nextSp;
+      }
+      return chain;
+    }
+
+    function findSpeciesHabitatName(dexNum) {
+      if (dexNum >= 144) return 'מקדש האגדיים (מערת הר הירח / היכל אינדיגו)';
+      if (dexNum <= 25) return 'עיירת פאלט ויער וירידיאן';
+      if (dexNum <= 55) return 'יער וירידיאן והר הירח';
+      if (dexNum <= 85) return 'עיר סרוליאן ומרכז קאנטו';
+      if (dexNum <= 115) return 'עיר סלדון ואזור הספארי';
+      return 'אי סיניבר ורמת אינדיגו';
+    }
+
+
+    // 9. Interior Room Navigation (Houses, Labs, Centers, Marts, 8 Gyms, Caves, Indigo Hall)
+    function enterInteriorMap(interiorId) {
+      const room = INTERIOR_MAPS[interiorId];
+      if (!room) return;
+      if (!state.currentMap || state.currentMap === 'OVERWORLD') {
+        state.savedOverworldPos = {
+          x: state.player.x,
+          y: state.player.y + TILE_SIZE * 0.55,
+          dir: 'down'
+        };
+      }
+      state.currentMap = interiorId;
+      state.player.x = room.spawnX * TILE_SIZE;
+      state.player.y = room.spawnY * TILE_SIZE;
+      state.player.dir = 'up';
+      state.partnerTrail = [];
+      state.stats.interiorsVisited = (state.stats.interiorsVisited || 0) + 1;
+      sfx.playConfirm();
+
+      const exitBtn = document.getElementById('btnExitInteriorHud');
+      if (exitBtn) exitBtn.classList.remove('hidden');
+      updateHud();
+    }
+
+    function exitInteriorToOverworld() {
+      if (!state.currentMap || state.currentMap === 'OVERWORLD') return;
+      state.currentMap = 'OVERWORLD';
+      if (state.savedOverworldPos) {
+        state.player.x = state.savedOverworldPos.x;
+        state.player.y = state.savedOverworldPos.y;
+        state.player.dir = state.savedOverworldPos.dir || 'down';
+      } else {
+        state.player.x = 11.5 * TILE_SIZE;
+        state.player.y = 44.5 * TILE_SIZE;
+      }
+      state.partnerTrail = [];
+      sfx.playConfirm();
+      const exitBtn = document.getElementById('btnExitInteriorHud');
+      if (exitBtn) exitBtn.classList.add('hidden');
+      updateHud();
+    }
+
+    function getActiveMapData() {
+      if (state.currentMap && state.currentMap !== 'OVERWORLD' && INTERIOR_MAPS[state.currentMap]) {
+        const rm = INTERIOR_MAPS[state.currentMap];
+        return { isInterior: true, cols: rm.cols, rows: rm.rows, grid: rm.grid, npcs: rm.npcs, name: rm.name, room: rm };
+      }
+      return { isInterior: false, cols: MAP_COLS, rows: MAP_ROWS, grid: WORLD_MAP, npcs: NPCS, name: null, room: null };
+    }
+
+    // 10. Real-Time Clock Sync Helper
+    function getEffectiveWeatherMode() {
+      if (state.realTimeClockSync) {
+        const hr = new Date().getHours();
+        if (hr >= 6 && hr < 17) return 0; // Sunny Day
+        if (hr >= 17 && hr < 20) return 1; // Golden Sunset
+        return 2; // Starry Night
+      }
+      return state.weatherMode || 0;
+    }
+
+    // 11. Species Dossier Inspector Modal (Clicked from Pokedex)
+    let activeDossierSpecies = 'pikachu';
+    let dossierPreviewShiny = false;
+
+    function openSpeciesDetailModal(speciesId) {
+      activeDossierSpecies = normalizeSpeciesId(speciesId);
+      const sp = SPECIES_DB[activeDossierSpecies] || SPECIES_DB.pikachu;
+      const modal = document.getElementById('speciesDetailModal');
+      if (!modal) return;
+
+      const isCaught = !!state.pokedexCaught[sp.id];
+      const lore = TYPE_LORE_TEMPLATES[sp.type] || TYPE_LORE_TEMPLATES.NORMAL;
+      const habitat = findSpeciesHabitatName(sp.dex);
+      const chain = getSpeciesFullEvolutionChain(sp.id);
+
+      const statBar = (label, val, maxVal, color) => {
+        const pct = Math.min(100, Math.round((val / maxVal) * 100));
+        return `
+          <div class="space-y-0.5">
+            <div class="flex justify-between text-[11px] font-bold">
+              <span class="text-slate-300">${label}</span>
+              <span class="text-white">${val}</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div style="width:${pct}%; background:${color}; height:100%; border-radius:9999px;"></div>
+            </div>
+          </div>
+        `;
+      };
+
+      const body = document.getElementById('speciesDetailBody');
+      body.innerHTML = `
+        <div class="flex flex-col sm:flex-row items-center gap-4 bg-slate-900/95 border border-slate-700 rounded-2xl p-3.5">
+          <div class="flex flex-col items-center gap-2 shrink-0">
+            <canvas id="dossierCanvas" width="136" height="136" class="rounded-2xl bg-slate-950 border border-slate-700"></canvas>
+            <div class="flex gap-1.5">
+              <button id="btnToggleDossierShiny" class="px-2.5 py-1 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-black">
+                ${dossierPreviewShiny ? '✨ תצוגת שייני' : '✨ הצג שייני'}
+              </button>
+              <button id="btnToggleArtStyleModal" class="px-2.5 py-1 rounded-xl bg-sky-500/20 border border-sky-400/50 text-sky-300 text-[10px] font-black">
+                ${state.graphicsMode === 'PROCEDURAL' ? '🔷 מצב: מחושב' : '🎨 מצב: מאויר HD'}
+              </button>
+            </div>
+          </div>
+          <div class="flex-1 space-y-2 w-full">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-black text-amber-300">#${String(sp.dex).padStart(3, '0')}</span>
+                <h3 class="text-lg font-black text-white inline mr-1">${sp.name}</h3>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-black text-slate-950" style="background:${sp.primary}">${sp.typeName}</span>
+            </div>
+            <p class="text-xs text-slate-200 leading-relaxed">${lore}</p>
+            <div class="text-[11px] text-emerald-300 font-bold">🗺️ אזור מחיה: <span class="text-white">${habitat}</span> • ${isCaught ? '🔴 נתפס בפוקידע!' : '👁️ טרם נתפס'}</div>
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              ${statBar('❤️ חיים (HP)', sp.baseHp, 100, '#22c55e')}
+              ${statBar('⚔️ התקפה (ATK)', sp.baseAtk, 45, '#f97316')}
+              ${statBar('🛡️ הגנה (DEF)', sp.baseDef, 40, '#38bdf8')}
+              ${statBar('⚡ מהירות (SPD)', sp.baseSpd, 45, '#eab308')}
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-3 space-y-2">
+          <div class="text-xs font-extrabold text-amber-300">🧬 שרשרת התפתחות (לחץ למעבר בין שלבים):</div>
+          <div id="dossierEvoChain" class="flex items-center justify-around flex-wrap gap-2"></div>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-3 space-y-1.5">
+          <div class="text-xs font-extrabold text-sky-300">⚔️ מהלכים אופייניים למין זה:</div>
+          <div class="grid grid-cols-2 gap-2">
+            ${sp.moves.map(m => `
+              <div class="p-2 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
+                <span class="font-bold text-white">${m.name}</span>
+                <span class="text-[10px] text-amber-300 font-bold">עוצמה ${m.power} • PP ${m.pp}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const evoContainer = document.getElementById('dossierEvoChain');
+      chain.forEach((stageObj, idx) => {
+        const stSp = SPECIES_DB[stageObj.id];
+        const stageBtn = document.createElement('button');
+        stageBtn.className = `p-2 rounded-xl border text-center transition flex flex-col items-center ${
+          stSp.id === sp.id ? 'bg-amber-500/20 border-amber-400' : 'bg-slate-950 border-slate-800 hover:border-sky-400'
+        }`;
+        const c = document.createElement('canvas');
+        c.width = 44; c.height = 44;
+        drawHDMonster(c.getContext('2d'), stSp.id, 22, 24, 34, 10, false);
+        stageBtn.appendChild(c);
+        const lbl = document.createElement('div');
+        lbl.innerHTML = `<div class="text-[11px] font-black text-white">#${stSp.dex} ${stSp.name}</div><div class="text-[9px] text-emerald-300 font-bold">${stageObj.req}</div>`;
+        stageBtn.appendChild(lbl);
+        stageBtn.addEventListener('click', () => {
+          sfx.playConfirm();
+          openSpeciesDetailModal(stSp.id);
+        });
+        evoContainer.appendChild(stageBtn);
+      });
+
+      document.getElementById('btnToggleDossierShiny').addEventListener('click', () => {
+        dossierPreviewShiny = !dossierPreviewShiny;
+        sfx.playConfirm();
+        openSpeciesDetailModal(activeDossierSpecies);
+      });
+
+      document.getElementById('btnToggleArtStyleModal').addEventListener('click', () => {
+        state.graphicsMode = state.graphicsMode === 'PROCEDURAL' ? 'ILLUSTRATED' : 'PROCEDURAL';
+        const hudArtBtn = document.getElementById('artModeIcon');
+        if (hudArtBtn) hudArtBtn.textContent = state.graphicsMode === 'PROCEDURAL' ? '🔷' : '🎨';
+        sfx.playConfirm();
+        openSpeciesDetailModal(activeDossierSpecies);
+        renderPokedexModal();
+      });
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      renderDossierAnimatedCanvas();
+    }
+
+    function renderDossierAnimatedCanvas() {
+      const c = document.getElementById('dossierCanvas');
+      if (!c || document.getElementById('speciesDetailModal').classList.contains('hidden')) return;
+      const dctx = c.getContext('2d');
+      dctx.clearRect(0, 0, c.width, c.height);
+      const sp = SPECIES_DB[activeDossierSpecies] || SPECIES_DB.pikachu;
+      const grad = dctx.createRadialGradient(68, 68, 8, 68, 68, 66);
+      grad.addColorStop(0, dossierPreviewShiny ? 'rgba(250, 204, 21, 0.38)' : (sp.primary + '44'));
+      grad.addColorStop(1, 'rgba(2, 6, 23, 0.95)');
+      dctx.fillStyle = grad;
+      dctx.fillRect(0, 0, c.width, c.height);
+      drawHDMonster(dctx, activeDossierSpecies, 68, 72, 92, state.tick, false);
+      if (dossierPreviewShiny) {
+        dctx.fillStyle = '#fde047';
+        dctx.font = 'bold 14px sans-serif';
+        dctx.fillText('✨', 20 + Math.sin(state.tick * 0.1) * 6, 28);
+        dctx.fillText('✨', 105 - Math.cos(state.tick * 0.1) * 6, 36);
+      }
+    }
+
     /********************************************************************
      * 5. GAME STATE & MULTI-SLOT NAMED SAVE SYSTEM (localStorage)
      ********************************************************************/
@@ -1665,7 +2578,12 @@
       },
       pokedexSeen: { pikachu: true, bulbasaur: true },
       pokedexCaught: { pikachu: true, bulbasaur: true },
-      weatherMode: 0, // 0: Sunny Day, 1: Golden Sunset, 2: Starry Night, 3: Rainstorm
+      weatherMode: 0,
+      realTimeClockSync: true,
+      graphicsMode: 'ILLUSTRATED',
+      kidFriendlyMode: true,
+      currentMap: 'OVERWORLD',
+      savedOverworldPos: null,
       partnerTrail: [],
       player: {
         x: 11.5 * TILE_SIZE,
@@ -1767,6 +2685,7 @@
       };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+        syncSavesToIndexedDB(all);
         localStorage.setItem(ACTIVE_SLOT_KEY, cleanName);
       } catch (_) {}
 
@@ -1890,13 +2809,19 @@
 
     function updateHud() {
       document.getElementById('hudProfileName').textContent = `מאמן: ${state.saveName}`;
+      const activeMap = getActiveMapData();
       const tx = Math.floor(state.player.x / TILE_SIZE);
       const ty = Math.floor(state.player.y / TILE_SIZE);
       const zInfo = getZoneInfoAt(tx, ty);
-      document.getElementById('hudZoneBadge').textContent = zInfo.name;
+      document.getElementById('hudZoneBadge').textContent = activeMap.isInterior ? activeMap.name : zInfo.name;
       document.getElementById('hudMoneyInfo').textContent = `₽ ${state.money.toLocaleString()}`;
       const badgeCount = Object.keys(state.badges).length;
-      document.getElementById('hudBadgesInfo').textContent = `🏅 ${badgeCount}/4`;
+      document.getElementById('hudBadgesInfo').textContent = `🏅 ${badgeCount}/8`;
+      const now = new Date();
+      const clockEl = document.getElementById('hudClockInfo');
+      if (clockEl) {
+        clockEl.textContent = `🕒 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      }
 
       const lead = state.party[0];
       if (lead) {
@@ -1949,13 +2874,14 @@
     };
 
     function isPointSolid(worldX, worldY) {
+      const mData = getActiveMapData();
       const tx = Math.floor(worldX / TILE_SIZE);
       const ty = Math.floor(worldY / TILE_SIZE);
-      if (tx < 0 || ty < 0 || tx >= MAP_COLS || ty >= MAP_ROWS) return true;
-      const tile = WORLD_MAP[ty][tx];
+      if (tx < 0 || ty < 0 || tx >= mData.cols || ty >= mData.rows) return true;
+      const tile = mData.grid[ty][tx];
       if (tile === 1 || tile === 3 || tile === 5 || tile === 6 || tile === 8 || tile === 11 || tile === 13 || tile === 16) return true;
-      if (tile === 10 && !state.collectedItems[`${tx},${ty}`]) return true;
-      for (const npc of NPCS) {
+      if (tile === 10 && !state.collectedItems[`${state.currentMap || 'OW'}_${tx},${ty}`] && !state.collectedItems[`${tx},${ty}`]) return true;
+      for (const npc of mData.npcs) {
         const nx = (npc.x + 0.5) * TILE_SIZE;
         const ny = (npc.y + 0.5) * TILE_SIZE;
         if (Math.hypot(worldX - nx, worldY - ny) < TILE_SIZE * 0.42) return true;
@@ -2023,9 +2949,27 @@
       if (moved) {
         state.partnerTrail.push({ x: state.player.x, y: state.player.y });
         if (state.partnerTrail.length > 14) state.partnerTrail.shift();
+        const mData = getActiveMapData();
         const tx = Math.floor(state.player.x / TILE_SIZE);
         const ty = Math.floor(state.player.y / TILE_SIZE);
-        const tile = WORLD_MAP[ty]?.[tx];
+        const tile = mData.grid[ty]?.[tx];
+
+        // Step on Exit Mat (tile 20) inside an interior room -> Return to Overworld!
+        if (mData.isInterior && tile === 20) {
+          exitInteriorToOverworld();
+          return;
+        }
+        // Step directly onto a building door in Overworld -> Enter the interior hall!
+        if (!mData.isInterior && (tile === 7 || tile === 12 || tile === 14)) {
+          if (tile === 7) enterInteriorMap(ty >= 38 && tx <= 20 ? 'LAB' : 'POKECENTER');
+          else if (tile === 12) enterInteriorMap('POKEMART');
+          else if (tile === 14) {
+            if (ty <= 8 && tx <= 20) enterInteriorMap('INDIGO_HALL');
+            else if (ty <= 14 && tx >= 30) enterInteriorMap('GYM_MISTY');
+            else enterInteriorMap('GYM_SURGE');
+          }
+          return;
+        }
 
         if (state.tick % 20 === 0) updateHud();
 
@@ -2101,13 +3045,43 @@
       const lookX = state.player.x + ox;
       const lookY = state.player.y + oy;
 
-      // 1. Check nearby NPCs
-      for (const npc of NPCS) {
+      const mData = getActiveMapData();
+      // 1. Check nearby NPCs in active map (Overworld or Interior Hall)
+      for (const npc of mData.npcs) {
         const nx = (npc.x + 0.5) * TILE_SIZE;
         const ny = (npc.y + 0.5) * TILE_SIZE;
         if (Math.hypot(state.player.x - nx, state.player.y - ny) < TILE_SIZE * 1.55) {
           if (npc.role === 'healer') {
             healEntireParty();
+            return;
+          }
+          if (npc.role === 'pc_terminal') {
+            openPartyBagModal(false);
+            document.getElementById('tabBtnPcBox').click();
+            return;
+          }
+          if (npc.role === 'aide_gift') {
+            if (!state.collectedItems.aide_gift) {
+              state.collectedItems.aide_gift = true;
+              state.inventory.leftovers = (state.inventory.leftovers || 0) + 1;
+              state.inventory.sitrus_berry = (state.inventory.sitrus_berry || 0) + 2;
+              saveGameToSlot(state.saveName, true);
+              sfx.playVictory();
+              showDialogue(npc.name, [
+                'שלום! אני עוזר המחקר של פרופסור אוק! הנה מתנה מיוחדת למסע שלך:',
+                'קיבלת חפץ מוחזק: שאריות תפוח 🍎 ו-2 פירות סיטרוס 🍊! פתח את תפריט הצוות (🐾) כדי לתת לפוקימון שלך להחזיק אותם בקרב!'
+              ]);
+            } else {
+              showDialogue(npc.name, ['אל תשכח לצייד את הפוקימונים שלך בפריטים מוחזקים בחלון הצוות (🐾)!']);
+            }
+            return;
+          }
+          if (npc.role === 'gym_guide') {
+            showDialogue(npc.name, [npc.tip || 'בהצלחה בקרב המכון!']);
+            return;
+          }
+          if (npc.role === 'enter_interior' && npc.targetInterior) {
+            enterInteriorMap(npc.targetInterior);
             return;
           }
           if (npc.role === 'shop') {
@@ -2127,11 +3101,17 @@
             return;
           }
           if (npc.role === 'gym') {
+            if (!mData.isInterior && npc.gymInteriorId && INTERIOR_MAPS[npc.gymInteriorId]) {
+              showDialogue(npc.name, [
+                `ברוך הבא אל ${INTERIOR_MAPS[npc.gymInteriorId].name}! היכנס פנימה אל זירת המכון הרשמית!`
+              ], () => enterInteriorMap(npc.gymInteriorId));
+              return;
+            }
             const already = !!state.badges[npc.badgeId];
             showDialogue(npc.name, [
               already
                 ? `כבר זכית ב-${npc.badgeName} שלי! מוכן לקרב אימון חוזר מול מכון הפוקימונים?`
-                : `ברוך הבא למכון! אם תנצח אותי תעניק לעצמך את ${npc.badgeName} ופרס של ₽${npc.rewardMoney}!`
+                : `ברוך הבא לזירת המכון! אם תנצח אותי תעניק לעצמך את ${npc.badgeName} ופרס של ₽${npc.rewardMoney}!`
             ], () => triggerTrainerBattle(npc));
             return;
           }
@@ -2191,6 +3171,8 @@
     function healEntireParty() {
       state.party.forEach(mon => {
         mon.hp = mon.maxHp;
+        mon.status = null;
+        mon.sleepTurns = 0;
         mon.moves.forEach(m => { m.pp = m.maxPp; });
       });
       if (state.inventory.pokeball < 5) state.inventory.pokeball = 6;
@@ -2399,10 +3381,37 @@
       b.enemyShake = 16;
       spawnBattleParticles(canvas.width * 0.68, canvas.height * 0.28, SPECIES_DB[pMon.speciesId]?.primary || '#38bdf8');
 
+      // Check sleep / freeze / paralysis on player Pokemon before attacking
+      if (pMon.status === 'SLEEP') {
+        if ((pMon.sleepTurns || 0) > 0) {
+          pMon.sleepTurns--;
+          showBattleMessages([`💤 ${pMon.name} ישן חזק ולא יכול לתקוף בתור הזה!`], 'ENEMY_TURN');
+          return;
+        } else {
+          pMon.status = null;
+        }
+      }
+      if (pMon.status === 'FREEZE') {
+        if (move.type !== 'FIRE' && Math.random() < 0.5) {
+          showBattleMessages([`❄️ ${pMon.name} קפוא בקרח ולא הצליח לזוז!`], 'ENEMY_TURN');
+          return;
+        } else {
+          pMon.status = null;
+        }
+      }
+      if (pMon.status === 'PARALYZE' && Math.random() < 0.25) {
+        showBattleMessages([`⚡ ${pMon.name} משותק מזרם חשמלי ואיבד את התור!`], 'ENEMY_TURN');
+        return;
+      }
+
       const mult = TYPE_CHART[move.type]?.[eMon.type] ?? 1.0;
-      const isCrit = Math.random() < 0.15;
+      const critChance = pMon.heldItem === 'quick_claw' ? 0.35 : 0.15;
+      const isCrit = Math.random() < critChance;
       const critMult = isCrit ? 1.5 : 1.0;
-      const raw = ((pMon.atk * move.power) / Math.max(8, eMon.def)) * 0.58;
+      const heldAtkBoost = pMon.heldItem === 'mystic_gem' ? 1.22 : 1.0;
+      const burnPenalty = pMon.status === 'BURN' ? 0.85 : 1.0;
+      const kidBoost = state.kidFriendlyMode ? 1.15 : 1.0;
+      const raw = ((pMon.atk * move.power * heldAtkBoost * burnPenalty * kidBoost) / Math.max(8, eMon.def)) * 0.58;
       const dmg = Math.max(3, Math.round(raw * mult * critMult * (0.92 + Math.random() * 0.16)));
       eMon.hp = Math.max(0, eMon.hp - dmg);
 
@@ -2419,6 +3428,31 @@
       if (mult > 1.2) msgs.push('🔥 זה אפקטיבי במיוחד!');
       else if (mult < 0.85) msgs.push('זה לא מאוד אפקטיבי...');
 
+      // Check if move inflicts a Status Condition on Enemy
+      if (eMon.hp > 0 && !eMon.status) {
+        for (const stKey of Object.keys(STATUS_META)) {
+          const st = STATUS_META[stKey];
+          if (st.moveTypes.includes(move.type) && Math.random() < st.chance) {
+            eMon.status = st.id;
+            if (st.id === 'SLEEP') eMon.sleepTurns = 2;
+            state.stats.statusInflicted = (state.stats.statusInflicted || 0) + 1;
+            msgs.push(`${eMon.name} היריב נדבק בסטטוס ${st.name}!`);
+            break;
+          }
+        }
+      }
+
+      // Check Player Sitrus Berry / Leftovers
+      if (pMon.hp > 0 && pMon.heldItem === 'leftovers' && pMon.hp < pMon.maxHp) {
+        const hAmt = Math.max(2, Math.floor(pMon.maxHp * 0.10));
+        pMon.hp = Math.min(pMon.maxHp, pMon.hp + hAmt);
+        msgs.push(`🍎 שאריות התפוח חידשו ל-${pMon.name} ${hAmt} נק׳ חיים!`);
+      } else if (pMon.hp > 0 && pMon.heldItem === 'sitrus_berry' && pMon.hp <= pMon.maxHp * 0.5) {
+        const hAmt = Math.max(8, Math.floor(pMon.maxHp * 0.35));
+        pMon.hp = Math.min(pMon.maxHp, pMon.hp + hAmt);
+        msgs.push(`🍊 פרי הסיטרוס הופעל אוטומטית וחידש ל-${pMon.name} ${hAmt} נק׳ חיים!`);
+      }
+
       if (eMon.hp <= 0) {
         onEnemyDefeated(msgs);
       } else {
@@ -2430,8 +3464,9 @@
       const b = state.battle;
       const pMon = state.party[b.playerIndex];
       const eMon = b.enemy;
-      const xpGain = eMon.level * 16 + (b.isTrainer ? 30 : 12);
-      const moneyGain = eMon.level * 22 + (b.isTrainer ? 250 : 35);
+      const eggBoost = (pMon.heldItem === 'lucky_egg' ? 1.45 : 1.0) * (state.kidFriendlyMode ? 1.35 : 1.0);
+      const xpGain = Math.round((eMon.level * 16 + (b.isTrainer ? 30 : 12)) * eggBoost);
+      const moneyGain = Math.round((eMon.level * 22 + (b.isTrainer ? 250 : 35)) * eggBoost);
 
       sfx.playVictory();
       state.money += moneyGain;
@@ -2485,6 +3520,33 @@
       if (!b) return;
       const pMon = state.party[b.playerIndex];
       const eMon = b.enemy;
+      const msgs = [];
+      // End-of-turn Burn / Poison damage on Enemy
+      if (eMon.status === 'BURN' || eMon.status === 'POISON') {
+        const dot = Math.max(2, Math.floor(eMon.maxHp * 0.12));
+        eMon.hp = Math.max(0, eMon.hp - dot);
+        msgs.push(`${eMon.name} היריב נפגע מ-${STATUS_META[eMon.status].name} (-${dot} HP)!`);
+        if (eMon.hp <= 0) {
+          onEnemyDefeated(msgs);
+          return;
+        }
+      }
+      if (eMon.status === 'SLEEP') {
+        if ((eMon.sleepTurns || 0) > 0) {
+          eMon.sleepTurns--;
+          msgs.push(`💤 ${eMon.name} היריב ישן ולא תקף!`);
+          showBattleMessages(msgs, 'MENU');
+          return;
+        } else {
+          eMon.status = null;
+        }
+      }
+      if (eMon.status === 'PARALYZE' && Math.random() < 0.3) {
+        msgs.push(`⚡ ${eMon.name} היריב משותק ולא הצליח לזוז!`);
+        showBattleMessages(msgs, 'MENU');
+        return;
+      }
+
       const atkMoves = eMon.moves.filter(m => m.type !== 'HEAL');
       const move = atkMoves[Math.floor(Math.random() * atkMoves.length)];
 
@@ -2493,12 +3555,27 @@
       spawnBattleParticles(canvas.width * 0.32, canvas.height * 0.52, SPECIES_DB[eMon.speciesId]?.primary || '#ef4444');
 
       const mult = TYPE_CHART[move.type]?.[pMon.type] ?? 1.0;
-      const raw = ((eMon.atk * move.power) / Math.max(8, pMon.def)) * 0.45;
+      const gogglesRed = pMon.heldItem === 'safety_goggles' ? 0.85 : 1.0;
+      const kidDef = state.kidFriendlyMode ? 0.82 : 1.0;
+      const raw = ((eMon.atk * move.power * gogglesRed * kidDef) / Math.max(8, pMon.def)) * 0.45;
       const dmg = Math.max(2, Math.round(raw * mult * (0.9 + Math.random() * 0.18)));
       pMon.hp = Math.max(0, pMon.hp - dmg);
 
-      const msgs = [`${eMon.name} היריב השתמש ב-${move.name}!`];
+      msgs.push(`${eMon.name} היריב השתמש ב-${move.name}!`);
       if (mult > 1.2) msgs.push('זה אפקטיבי במיוחד!');
+
+      // Inflict status on player unless wearing safety_goggles
+      if (pMon.hp > 0 && !pMon.status && pMon.heldItem !== 'safety_goggles') {
+        for (const stKey of Object.keys(STATUS_META)) {
+          const st = STATUS_META[stKey];
+          if (st.moveTypes.includes(move.type) && Math.random() < st.chance * 0.65) {
+            pMon.status = st.id;
+            if (st.id === 'SLEEP') pMon.sleepTurns = 1;
+            msgs.push(`אוי! ${pMon.name} שלך נדבק ב-${st.name}! (ניתן לרפא עם ריפוי-כל 💊)`);
+            break;
+          }
+        }
+      }
 
       if (pMon.hp <= 0) {
         msgs.push(`${pMon.name} שלך התעייף!`);
@@ -2540,7 +3617,8 @@
         caught = true;
       } else {
         const bonus = ballKey === 'ultraball' ? 0.52 : ballKey === 'greatball' ? 0.36 : 0.18;
-        const chance = Math.min(0.97, (1 - hpRatio * 0.72) + bonus);
+        const kidBonus = state.kidFriendlyMode ? 0.22 : 0;
+        const chance = Math.min(0.98, (1 - hpRatio * 0.72) + bonus + kidBonus);
         caught = Math.random() < chance;
       }
 
@@ -2792,21 +3870,41 @@
       ctx.fillStyle = '#064e3b';
       ctx.fillRect(0, 0, w, h);
 
+      const mData = getActiveMapData();
+      if (mData.isInterior) {
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(0, 0, w, h);
+      }
+
       const startCol = Math.max(0, Math.floor(camX / TILE_SIZE) - 1);
-      const endCol = Math.min(MAP_COLS - 1, Math.ceil((camX + w) / TILE_SIZE) + 1);
+      const endCol = Math.min(mData.cols - 1, Math.ceil((camX + w) / TILE_SIZE) + 1);
       const startRow = Math.max(0, Math.floor(camY / TILE_SIZE) - 1);
-      const endRow = Math.min(MAP_ROWS - 1, Math.ceil((camY + h) / TILE_SIZE) + 1);
+      const endRow = Math.min(mData.rows - 1, Math.ceil((camY + h) / TILE_SIZE) + 1);
 
       for (let r = startRow; r <= endRow; r++) {
         for (let c = startCol; c <= endCol; c++) {
           const sx = Math.floor(c * TILE_SIZE - camX);
           const sy = Math.floor(r * TILE_SIZE - camY);
-          drawHDTile(WORLD_MAP[r][c], sx, sy, c, r);
+          const tVal = mData.grid[r][c];
+          if (mData.isInterior && tVal === 0) {
+            ctx.fillStyle = ((c + r) % 2 === 0) ? mData.room.floorColor1 : mData.room.floorColor2;
+            ctx.fillRect(sx, sy, TILE_SIZE + 0.6, TILE_SIZE + 0.6);
+          } else if (tVal === 20) {
+            // Glowing Exit Door Mat
+            ctx.fillStyle = '#e11d48';
+            ctx.fillRect(sx, sy, TILE_SIZE + 0.6, TILE_SIZE + 0.6);
+            ctx.fillStyle = '#fde047';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🚪 יציאה', sx + TILE_SIZE / 2, sy + 26);
+          } else {
+            drawHDTile(tVal, sx, sy, c, r);
+          }
         }
       }
 
-      // Draw NPCs
-      for (const npc of NPCS) {
+      // Draw NPCs in active map
+      for (const npc of mData.npcs) {
         const sx = (npc.x + 0.5) * TILE_SIZE - camX;
         const sy = (npc.y + 0.5) * TILE_SIZE - camY;
         if (sx < -80 || sx > w + 80 || sy < -80 || sy > h + 80) continue;
@@ -2859,11 +3957,12 @@
       }
 
       // Dynamic Day/Night & Weather Atmospheric Lighting
-      if (state.weatherMode === 1) {
+      const effWeather = getEffectiveWeatherMode();
+      if (effWeather === 1) {
         // Golden Sunset
         ctx.fillStyle = 'rgba(249, 115, 22, 0.18)';
         ctx.fillRect(0, 0, w, h);
-      } else if (state.weatherMode === 2) {
+      } else if (effWeather === 2) {
         // Starry Night + Firefly Particles
         ctx.fillStyle = 'rgba(15, 23, 42, 0.46)';
         ctx.fillRect(0, 0, w, h);
@@ -2875,7 +3974,7 @@
           ctx.arc(fx, fy, 2.2, 0, Math.PI * 2);
           ctx.fill();
         }
-      } else if (state.weatherMode === 3) {
+      } else if (effWeather === 3) {
         // Rainstorm + Falling Raindrops
         ctx.fillStyle = 'rgba(30, 58, 138, 0.26)';
         ctx.fillRect(0, 0, w, h);
@@ -2934,7 +4033,16 @@
       ctx.fillStyle = '#cbd5e1';
       ctx.font = 'bold 11px system-ui, sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText(`חיים: ${mon.hp} / ${mon.maxHp}`, x + cardW - 14, y + 56);
+      const heldIcon = (mon.heldItem && HELD_ITEMS_DB[mon.heldItem]) ? ` ${HELD_ITEMS_DB[mon.heldItem].icon}` : '';
+      ctx.fillText(`חיים: ${mon.hp} / ${mon.maxHp}${heldIcon}`, x + cardW - 14, y + 56);
+
+      if (mon.status && STATUS_META[mon.status]) {
+        const st = STATUS_META[mon.status];
+        ctx.fillStyle = st.color;
+        ctx.font = 'bold 10px system-ui, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(st.short, x + 14, y + 56);
+      }
 
       if (isPlayer) {
         const xpRatio = Math.min(1, mon.xp / mon.nextXp);
@@ -3099,6 +4207,7 @@
       if (state.evoAnim) {
         renderEvolutionCanvas();
       }
+      renderDossierAnimatedCanvas();
 
       requestAnimationFrame(gameLoop);
     }
@@ -3220,21 +4329,79 @@
     });
 
     document.getElementById('btnWeatherHud').addEventListener('click', () => {
-      state.weatherMode = ((state.weatherMode || 0) + 1) % 4;
+      if (state.realTimeClockSync) {
+        state.realTimeClockSync = false;
+        state.weatherMode = 0;
+      } else if (state.weatherMode === 3) {
+        state.realTimeClockSync = true;
+      } else {
+        state.weatherMode = ((state.weatherMode || 0) + 1) % 4;
+      }
       const icons = ['☀️', '🌅', '🌙', '🌧️'];
-      document.getElementById('weatherIcon').textContent = icons[state.weatherMode];
+      document.getElementById('weatherIcon').textContent = state.realTimeClockSync ? '🕒' : icons[state.weatherMode];
       sfx.playConfirm();
+    });
+
+    document.getElementById('btnExitInteriorHud').addEventListener('click', exitInteriorToOverworld);
+
+    document.getElementById('btnArtModeHud').addEventListener('click', () => {
+      state.graphicsMode = state.graphicsMode === 'PROCEDURAL' ? 'ILLUSTRATED' : 'PROCEDURAL';
+      document.getElementById('artModeIcon').textContent = state.graphicsMode === 'PROCEDURAL' ? '🔷' : '🎨';
+      sfx.playConfirm();
+    });
+
+    document.getElementById('btnKidModeHud').addEventListener('click', () => {
+      state.kidFriendlyMode = !state.kidFriendlyMode;
+      document.getElementById('kidModeIcon').textContent = state.kidFriendlyMode ? '🌟' : '⚔️';
+      sfx.playConfirm();
+    });
+
+    document.getElementById('btnCloseSpeciesDetail').addEventListener('click', () => {
+      document.getElementById('speciesDetailModal').classList.add('hidden');
+      document.getElementById('speciesDetailModal').classList.remove('flex');
+    });
+
+    // Offline Save Export & Import (.json)
+    document.getElementById('btnExportSavesJson').addEventListener('click', () => {
+      saveGameToSlot(state.saveName, false);
+      const all = getAllSaves();
+      const blob = new Blob([JSON.stringify(all, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pokemon_hd_saves_${state.saveName}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      sfx.playVictory();
+    });
+
+    document.getElementById('inputImportSavesJson').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const imported = JSON.parse(reader.result);
+          const all = { ...getAllSaves(), ...imported };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+          syncSavesToIndexedDB(all);
+          const firstKey = Object.keys(imported)[0];
+          if (firstKey) loadGameFromSlot(firstKey);
+          renderSaveSlotsList();
+          sfx.playVictory();
+        } catch (_) {
+          sfx.playCancel();
+        }
+      };
+      reader.readAsText(file);
     });
 
     function openTrainerCardModal() {
       const body = document.getElementById('trainerCardBody');
       const caughtCount = Object.keys(state.pokedexCaught).length;
-      const badgeList = [
-        { id: 'boulder', name: 'תג הסלע', icon: '🪨', leader: 'ברוק' },
-        { id: 'cascade', name: 'תג המפל', icon: '💧', leader: 'מיסטי' },
-        { id: 'thunder', name: 'תג הרעם', icon: '⚡', leader: 'סרג׳' },
-        { id: 'volcano', name: 'תג הלבה', icon: '🔥', leader: 'בליין' }
-      ];
+      const badgeList = ALL_8_BADGES;
       const shinyCount = [...state.party, ...state.pcBox].filter(m => m.shiny).length;
       body.innerHTML = `
         <div class="bg-slate-900/95 border border-slate-700 rounded-2xl p-3.5 space-y-2">
@@ -3335,8 +4502,20 @@
           pMon.moves.forEach((m, idx) => {
             const mBtn = document.createElement('button');
             mBtn.className = 'p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-right flex flex-col justify-between';
+            const eType = b.enemy.type;
+            const eff = m.type === 'HEAL' ? 1 : (TYPE_CHART[m.type]?.[eType] ?? 1.0);
+            const effLabel = m.type === 'HEAL'
+              ? '<span class="text-emerald-300">💚 ריפוי עצמי</span>'
+              : eff > 1.2
+                ? '<span class="text-emerald-300 font-black">🔥 סופר אפקטיבי!</span>'
+                : eff < 0.85
+                  ? '<span class="text-rose-300">⚠️ פחות אפקטיבי</span>'
+                  : '<span class="text-sky-200">⚡ נזק רגיל</span>';
             mBtn.innerHTML = `
-              <span class="text-xs font-extrabold text-white">${m.name}</span>
+              <div class="flex items-center justify-between w-full">
+                <span class="text-xs font-extrabold text-white">${m.name}</span>
+                ${state.kidFriendlyMode ? `<span class="text-[9px]">${effLabel}</span>` : ''}
+              </div>
               <span class="text-[10px] text-amber-300 font-semibold">עוצמה ${m.power} | PP ${m.pp}/${m.maxPp}</span>
             `;
             mBtn.addEventListener('click', () => usePlayerMove(idx));
@@ -3352,7 +4531,8 @@
             { key: 'ultraball', name: 'אולטרה-בול', icon: '🟡', count: state.inventory.ultraball || 0 },
             { key: 'masterball', name: 'מאסטר-בול', icon: '🟣', count: state.inventory.masterball || 0 },
             { key: 'potion', name: 'שיקוי +40', icon: '🧪', count: state.inventory.potion || 0 },
-            { key: 'super_potion', name: 'סופר-שיקוי +100', icon: '🧴', count: state.inventory.super_potion || 0 }
+            { key: 'super_potion', name: 'סופר-שיקוי +100', icon: '🧴', count: state.inventory.super_potion || 0 },
+            { key: 'full_heal', name: 'ריפוי-כל (סטטוס)', icon: '💊', count: state.inventory.full_heal || 0 }
           ];
           bagCont.innerHTML = '';
           battleItems.forEach(it => {
@@ -3364,7 +4544,19 @@
               <div class="text-[10px] text-sky-300 font-bold">x${it.count}</div>
             `;
             ib.addEventListener('click', () => {
-              if (it.key === 'potion' || it.key === 'super_potion') {
+              if (it.key === 'full_heal') {
+                if ((state.inventory.full_heal || 0) <= 0) {
+                  sfx.playCancel();
+                  showBattleMessages(['אין לך ריפוי-כל בתיק!'], 'MENU');
+                  return;
+                }
+                state.inventory.full_heal--;
+                const pMon = state.party[b.playerIndex];
+                pMon.status = null;
+                pMon.sleepTurns = 0;
+                sfx.playHealJingle();
+                showBattleMessages([`💊 השתמשת בריפוי-כל! ${pMon.name} נרפא מכל פגיעות הסטטוס!`], 'ENEMY_TURN');
+              } else if (it.key === 'potion' || it.key === 'super_potion') {
                 if ((state.inventory[it.key] || 0) <= 0) {
                   sfx.playCancel();
                   showBattleMessages(['נגמר פריט זה בתיק!'], 'MENU');
@@ -3429,11 +4621,15 @@
         row.className = 'p-2.5 rounded-2xl bg-slate-900/90 border border-slate-700 flex items-center justify-between gap-2';
         row.innerHTML = `
           <div class="min-w-0 flex-1">
-            <div class="text-xs font-black text-white">${idx === 0 ? '⭐ ' : ''}#${mon.dex} ${mon.name} <span class="text-amber-300">רמ׳ ${mon.level}</span></div>
+            <div class="text-xs font-black text-white">${idx === 0 ? '⭐ ' : ''}#${mon.dex} ${mon.name} <span class="text-amber-300">רמ׳ ${mon.level}</span> ${mon.status ? `<span class="text-rose-400">(${STATUS_META[mon.status]?.short || ''})</span>` : ''}</div>
             <div class="text-[11px] text-slate-300">${mon.typeName} | ♥ ${mon.hp}/${mon.maxHp} | XP ${mon.xp}/${mon.nextXp}</div>
             <div class="text-[10px] text-emerald-300 font-semibold">${getEvolutionHintText(mon)}</div>
+            <div class="text-[10px] text-cyan-300 font-bold mt-0.5">
+              חפץ מוחזק: ${mon.heldItem && HELD_ITEMS_DB[mon.heldItem] ? `${HELD_ITEMS_DB[mon.heldItem].name}` : 'ללא (לחץ לציוד 🎒)'}
+            </div>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
+            ${!fromBattle ? `<button data-hold="${idx}" class="px-2 py-1.5 rounded-xl bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 text-[10px] font-bold" title="צייד או החלף פריט מוחזק">🎒 חפץ</button>` : ''}
             <button data-lead="${idx}" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[11px] font-bold">
               ${fromBattle ? 'שלח לקרב' : (idx === 0 ? 'מוביל ★' : 'קבע כמוביל')}
             </button>
@@ -3459,6 +4655,33 @@
             openPartyBagModal(false);
           }
         });
+        const holdBtn = row.querySelector('[data-hold]');
+        if (holdBtn) {
+          holdBtn.addEventListener('click', () => {
+            const availKeys = Object.keys(HELD_ITEMS_DB).filter(k => (state.inventory[k] || 0) > 0);
+            if (mon.heldItem && availKeys.length === 0) {
+              state.inventory[mon.heldItem] = (state.inventory[mon.heldItem] || 0) + 1;
+              mon.heldItem = null;
+              sfx.playConfirm();
+              saveGameToSlot(state.saveName, false);
+              openPartyBagModal(false);
+              return;
+            }
+            if (availKeys.length === 0) {
+              // Give player a starter Sitrus Berry if they have no held items yet so they can try it immediately!
+              state.inventory.sitrus_berry = 1;
+              availKeys.push('sitrus_berry');
+            }
+            const curIdx = mon.heldItem ? availKeys.indexOf(mon.heldItem) : -1;
+            const nextKey = availKeys[(curIdx + 1) % availKeys.length];
+            if (mon.heldItem) state.inventory[mon.heldItem] = (state.inventory[mon.heldItem] || 0) + 1;
+            state.inventory[nextKey]--;
+            mon.heldItem = nextKey;
+            sfx.playConfirm();
+            saveGameToSlot(state.saveName, false);
+            openPartyBagModal(false);
+          });
+        }
         const pcBtn = row.querySelector('[data-topc]');
         if (pcBtn) {
           pcBtn.addEventListener('click', () => {
@@ -3642,6 +4865,12 @@
           <div class="text-[9px] text-slate-400 truncate">${evoInfo}</div>
         `;
 
+        card.classList.add('cursor-pointer', 'hover:border-sky-400', 'transition');
+        card.title = 'לחץ לפתיחת כרטיס מידע מאויר ושרשרת התפתחות!';
+        card.addEventListener('click', () => {
+          sfx.playConfirm();
+          openSpeciesDetailModal(id);
+        });
         card.appendChild(miniCanvas);
         card.appendChild(infoDiv);
         grid.appendChild(card);

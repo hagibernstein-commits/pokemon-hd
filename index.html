@@ -292,7 +292,7 @@
       </div>
 
       <!-- Top Right Quick Controls -->
-      <div class="flex items-center gap-1 flex-wrap pointer-events-auto">
+      <div id="topHudControls" class="flex items-center gap-1 flex-wrap pointer-events-auto">
         <button id="btnPartyHud" class="glass-hud px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-200 hover:bg-slate-800/80 active:scale-95 transition flex items-center gap-1" title="צוות, תיק ומחשב אחסון">
           <span>🐾</span>
           <span id="hudPartyCount">1/6</span>
@@ -645,14 +645,14 @@
       <div class="glass-modal rounded-3xl max-w-xl w-full p-5 space-y-3.5 scroll-y max-h-[92dvh]">
         <div class="flex items-center justify-between border-b border-slate-700 pb-2">
           <div>
-            <h2 class="text-base font-black text-white">🗺️ מפת מחוז קאנטו ושיגור מהיר (Fly)</h2>
-            <p class="text-xs text-indigo-300 font-bold">לחץ על יעד כדי להשתגר אליו מיד, או עיין במפה המלאה (64x56)</p>
+            <h2 class="text-base font-black text-white">🗺️ מפת מחוז קאנטו המקורית ושיגור מהיר (Fly)</h2>
+            <p class="text-xs text-indigo-300 font-bold">לחץ על עיר או אזור לשיגור מהיר, או עיין במפת קאנטו המלאה (160x144)</p>
           </div>
           <button id="btnCloseMap" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">סגור ✕</button>
         </div>
 
         <div class="flex justify-center bg-slate-950 p-2 rounded-2xl border border-slate-700">
-          <canvas id="minimapCanvas" width="320" height="280" class="rounded-xl max-w-full h-auto"></canvas>
+          <canvas id="minimapCanvas" width="320" height="288" class="rounded-xl max-w-full h-auto"></canvas>
         </div>
 
         <div>
@@ -1593,30 +1593,29 @@
     }
 
     /********************************************************************
-     * 3. EXPANDED KANTO WORLD MAP (64x56 TILES) & BIOME ZONES
+     * 3. AUTHENTIC KANTO WORLD MAP (160x144 TILES) & BIOME ZONES
      ********************************************************************/
     // Tile types:
     // 0: Grass, 1: Pine Tree (Solid), 2: Tall Wild Grass (Encounters),
-    // 3: Crystal Water (Solid/Fish), 4: Blooming Flowers, 5: Building Wall (Solid),
-    // 6: PokeCenter Red Roof (Solid), 7: PokeCenter Healing Door (Interact),
+    // 3: Crystal Water (Surf/Fish), 4: Blooming Flowers, 5: Building Wall (Solid),
+    // 6: PokeCenter Red Roof (Solid), 7: PokeCenter/Lab Door (Interact),
     // 8: Info Sign (Interact), 9: Cobblestone/Sand Path, 10: Treasure Pokéball,
     // 11: PokeMart Blue Roof (Solid), 12: PokeMart Shop Door (Interact),
-    // 13: Gym Gold Roof (Solid), 14: Gym/Trade Door (Interact),
+    // 13: Gym Gold Roof (Solid), 14: Gym/Special Door (Interact),
     // 15: Mountain Cave Ground (Cave Encounters), 16: Rock Boulder Wall (Solid),
     // 17: Sandy Beach
-    const MAP_COLS = 64;
-    const MAP_ROWS = 56;
+    const MAP_COLS = 160;
+    const MAP_ROWS = 144;
     const TILE_SIZE = 44;
 
-    const WORLD_MAP = Array.from({ length: MAP_ROWS }, () => Array(MAP_COLS).fill(0));
+    const WORLD_MAP = Array.from({ length: MAP_ROWS }, () => Array(MAP_COLS).fill(1));
+    const DOOR_TARGETS = {};
 
     function buildExpandedKantoMap() {
-      // 1. Outer border trees
+      // Base: Forest wilderness (1) across Kanto land, Ocean water (3) in the southern sea basin
       for (let r = 0; r < MAP_ROWS; r++) {
         for (let c = 0; c < MAP_COLS; c++) {
-          if (r === 0 || r === MAP_ROWS - 1 || c === 0 || c === MAP_COLS - 1) {
-            WORLD_MAP[r][c] = 1;
-          }
+          WORLD_MAP[r][c] = 1;
         }
       }
 
@@ -1628,152 +1627,492 @@
         }
       };
 
-      const placeBuilding = (c, r, w, roofTile, doorTile) => {
+      const placeBuilding = (c, r, w, roofTile, doorTile, interiorId = null) => {
         fillRect(c, r, c + w - 1, r, roofTile);
         fillRect(c, r + 1, c + w - 1, r + 2, 5);
-        WORLD_MAP[r + 2][c + Math.floor(w / 2)] = doorTile;
+        const doorCol = c + Math.floor(w / 2);
+        const doorRow = r + 2;
+        WORLD_MAP[doorRow][doorCol] = doorTile;
+        if (interiorId) {
+          DOOR_TARGETS[`${doorCol},${doorRow}`] = interiorId;
+        }
       };
 
-      // 2. Regional Biomes:
-      // NE Corner: Mt. Moon & Rock Tunnel (Cols 40..61, Rows 3..18)
-      fillRect(40, 3, 61, 18, 15);
-      fillRect(40, 3, 61, 4, 16);
-      fillRect(60, 3, 61, 18, 16);
-      fillRect(44, 8, 48, 10, 16);
-      fillRect(52, 11, 56, 13, 16);
+      // 0. Southern Ocean Basin (Sea Routes 19, 20, 21 & Vermilion Bay)
+      fillRect(22, 115, 142, 140, 3);
 
-      // SE & South: Cinnabar Coast & Sea Route (Cols 34..62, Rows 42..54)
-      fillRect(34, 42, 62, 44, 17); // Sandy beach
-      fillRect(34, 45, 62, 54, 3);  // Ocean water
-      fillRect(44, 47, 56, 52, 17); // Cinnabar Island beach
-      fillRect(46, 48, 54, 51, 2);  // Cinnabar tall grass
+      // =====================================================================
+      // 1. PALLET TOWN (עיירת פאלט) — Southwest (Cols 26..42, Rows 102..114)
+      // =====================================================================
+      fillRect(26, 102, 42, 114, 0);
+      fillRect(30, 114, 38, 114, 17); // South beach to Route 21 water
+      fillRect(28, 107, 40, 108, 9);  // North residential street
+      fillRect(33, 102, 35, 114, 9);  // Main North-South avenue
+      fillRect(33, 112, 40, 113, 9);  // Lab street
+      fillRect(28, 110, 31, 112, 4);  // Pallet flower garden
+      placeBuilding(28, 104, 4, 6, 7, 'POKECENTER');  // Player's Home (Rest/Heal)
+      placeBuilding(36, 104, 4, 11, 7, 'POKECENTER'); // Rival Gary's Home
+      placeBuilding(35, 109, 6, 13, 7, 'LAB');        // Prof. Oak's Research Lab
 
-      // West: Viridian Forest (Cols 3..20, Rows 18..34)
-      fillRect(3, 18, 20, 34, 2);
-      fillRect(6, 21, 9, 25, 1);
-      fillRect(13, 24, 16, 29, 1);
-      fillRect(6, 29, 10, 31, 4);
+      // =====================================================================
+      // 2. ROUTE 1 (דרך 1: פאלט ⬅ וירידיאן) — (Cols 30..39, Rows 80..102)
+      // =====================================================================
+      fillRect(30, 80, 39, 102, 0);
+      fillRect(33, 95, 35, 102, 9);
+      fillRect(35, 89, 37, 96, 9);
+      fillRect(32, 84, 36, 90, 9);
+      fillRect(33, 80, 35, 85, 9);
+      // Route 1 Tall Wild Grass & Tree Ledges
+      fillRect(30, 96, 32, 99, 2);
+      fillRect(31, 90, 38, 93, 2);
+      fillRect(30, 83, 38, 86, 2);
+      fillRect(30, 94, 32, 94, 1);
+      fillRect(37, 87, 39, 87, 1);
+      fillRect(36, 97, 38, 98, 4);
 
-      // Central: Celadon & Saffron Metropolis (Cols 23..42, Rows 21..35)
-      fillRect(23, 21, 42, 35, 0);
-      fillRect(25, 23, 40, 33, 9);
+      // =====================================================================
+      // 3. VIRIDIAN CITY (עיר וירידיאן) — West (Cols 24..44, Rows 62..80)
+      // =====================================================================
+      fillRect(24, 62, 44, 80, 0);
+      fillRect(33, 62, 35, 80, 9);  // Main North-South avenue
+      fillRect(24, 71, 42, 72, 9);  // West-East street to Route 22 & Gym
+      fillRect(27, 77, 41, 78, 9);  // South commercial street
+      fillRect(38, 68, 40, 71, 9);  // Approach to Viridian Gym
+      fillRect(26, 65, 30, 68, 4);  // City flowers
+      placeBuilding(27, 74, 5, 6, 7, 'POKECENTER');     // Viridian PokéCenter
+      placeBuilding(37, 74, 4, 11, 12, 'POKEMART');     // Viridian PokéMart
+      placeBuilding(36, 65, 6, 13, 14, 'GYM_GIOVANNI'); // Viridian Gym (#8 Giovanni)
 
-      // North-West: Indigo Plateau & Victory Road (Cols 4..24, Rows 2..14)
-      fillRect(4, 2, 24, 14, 0);
-      fillRect(6, 4, 22, 7, 2);
-      fillRect(8, 8, 20, 11, 9);
+      // =====================================================================
+      // 4. ROUTE 22, ROUTE 23 & VICTORY ROAD — Far West (Cols 8..24, Rows 20..75)
+      // =====================================================================
+      fillRect(10, 68, 24, 75, 0);  // Route 22 (West of Viridian)
+      fillRect(12, 71, 24, 72, 9);
+      fillRect(14, 68, 21, 70, 2);
+      fillRect(15, 73, 21, 75, 2);
+      fillRect(10, 73, 13, 75, 3);  // Route 22 Pond
 
-      // Main Roads Network connecting all towns
-      fillRect(10, 8, 13, 48, 9);   // Western North-South Highway (Pallet -> Viridian -> Indigo)
-      fillRect(10, 44, 48, 46, 9);  // Southern Coastal Road (Pallet -> Cinnabar Bridge)
-      fillRect(47, 44, 50, 49, 9);  // Bridge to Cinnabar Island
-      fillRect(10, 26, 52, 28, 9);  // Central East-West Highway (Viridian -> Celadon -> Lavender)
-      fillRect(31, 10, 34, 45, 9);  // Central North-South Highway (Cerulean -> Celadon -> Coast)
-      fillRect(12, 10, 48, 12, 9);  // Northern Highway (Indigo -> Cerulean -> Mt. Moon)
+      // Route 23 & Victory Road Mountain Pass (Cols 9..18, Rows 20..68)
+      fillRect(9, 53, 18, 68, 0);
+      fillRect(9, 28, 18, 52, 15);  // Victory Road Cave/Mountain Ground
+      fillRect(9, 20, 18, 27, 0);
+      fillRect(12, 20, 15, 68, 9);  // Victory Road Main Trail
+      fillRect(10, 56, 17, 61, 2);
+      fillRect(9, 30, 10, 50, 16);  // West Cliff Wall
+      fillRect(17, 30, 18, 50, 16); // East Cliff Wall
 
-      // 3. Towns & Buildings:
-      // A) Pallet Town (SW: Cols 6..18, Rows 40..50)
-      fillRect(7, 41, 17, 43, 4);
-      placeBuilding(14, 39, 5, 6, 7);  // Pallet Lab / Healing Center
-      placeBuilding(4, 40, 4, 11, 12); // Pallet PokéMart
+      // =====================================================================
+      // 5. INDIGO PLATEAU (רמת אינדיגו — ליגת הפוקימונים) — Far NW (Cols 6..22, Rows 6..20)
+      // =====================================================================
+      fillRect(6, 6, 22, 20, 0);
+      fillRect(9, 10, 20, 20, 9);
+      fillRect(7, 12, 8, 17, 4);
+      fillRect(21, 12, 21, 17, 4);
+      placeBuilding(10, 7, 7, 13, 14, 'INDIGO_HALL'); // Indigo League Hall (Elite Four & Champion)
+      placeBuilding(18, 7, 4, 6, 7, 'POKECENTER');    // Indigo PokéCenter
 
-      // B) Cerulean City (North-Center: Cols 26..38, Rows 6..16)
-      placeBuilding(25, 6, 5, 6, 7);   // Cerulean PokéCenter
-      placeBuilding(35, 6, 5, 13, 14); // Cerulean Gym
-      placeBuilding(25, 13, 4, 11, 12);// Cerulean Shop
+      // =====================================================================
+      // 6. ROUTE 2 & VIRIDIAN FOREST (דרך 2 ויער וירידיאן) — (Cols 26..42, Rows 34..62)
+      // =====================================================================
+      fillRect(26, 34, 42, 62, 0);
+      fillRect(27, 40, 41, 56, 2);  // Dense Viridian Forest tall grass
+      // Winding labyrinth footpaths inside Viridian Forest
+      fillRect(33, 55, 35, 62, 9);
+      fillRect(28, 54, 39, 55, 9);
+      fillRect(38, 46, 39, 55, 9);
+      fillRect(29, 46, 39, 47, 9);
+      fillRect(29, 39, 30, 47, 9);
+      fillRect(29, 39, 35, 40, 9);
+      fillRect(33, 34, 35, 40, 9);
+      // Forest internal tree rows creating authentic maze corridors
+      fillRect(27, 51, 36, 52, 1);
+      fillRect(32, 43, 41, 44, 1);
 
-      // C) Celadon & Saffron City (Center: Cols 24..41, Rows 21..34)
-      placeBuilding(25, 20, 5, 6, 7);   // Celadon PokéCenter
-      placeBuilding(31, 20, 5, 11, 12); // Celadon Department Store (Big Shop!)
-      placeBuilding(37, 20, 5, 13, 14); // Trade & Link Center
-      fillRect(27, 30, 30, 32, 4);
-      fillRect(35, 30, 38, 32, 4);
+      // =====================================================================
+      // 7. PEWTER CITY (עיר פיוטר — מכון האבן #1) — NW (Cols 24..45, Rows 16..34)
+      // =====================================================================
+      fillRect(24, 16, 45, 34, 0);
+      fillRect(33, 21, 35, 34, 9);
+      fillRect(27, 26, 45, 27, 9);
+      fillRect(27, 32, 41, 33, 9);
+      fillRect(29, 25, 31, 26, 9);
+      fillRect(35, 20, 38, 21, 9);
+      fillRect(40, 18, 43, 21, 4);
+      placeBuilding(27, 22, 6, 13, 14, 'GYM_BROCK');  // Pewter Gym (#1 Brock)
+      placeBuilding(34, 17, 6, 11, 7, 'LAB');         // Pewter Museum of Science
+      placeBuilding(27, 29, 5, 6, 7, 'POKECENTER');   // Pewter PokéCenter
+      placeBuilding(36, 29, 4, 11, 12, 'POKEMART');   // Pewter PokéMart
 
-      // D) Indigo Plateau (NW: Cols 8..20, Rows 2..9)
-      placeBuilding(11, 2, 6, 13, 14); // Indigo League Hall
-      placeBuilding(18, 3, 4, 6, 7);   // Indigo PokéCenter
+      // =====================================================================
+      // 8. ROUTE 3, MT. MOON & ROUTE 4 — Northern Mountains (Cols 45..85, Rows 16..31)
+      // =====================================================================
+      // Route 3 (Cols 45..58)
+      fillRect(45, 23, 58, 30, 0);
+      fillRect(45, 26, 58, 27, 9);
+      fillRect(47, 23, 52, 25, 2);
+      fillRect(51, 28, 57, 30, 2);
 
-      // 4. Extra Wild Grass Patches across routes
-      fillRect(19, 36, 28, 42, 2); // Route 1 & 2 Grass
-      fillRect(36, 14, 43, 20, 2); // Route 4 Mountain Grass
-      fillRect(45, 22, 57, 36, 2); // East Lavender & Safari Zone Grass
-      fillRect(20, 13, 25, 19, 2); // Cerulean Cape Grass
+      // Mt. Moon Mountain & Cave (Cols 58..73, Rows 16..30)
+      fillRect(58, 16, 73, 30, 15);
+      fillRect(58, 16, 73, 17, 16);
+      fillRect(68, 21, 70, 23, 16);
+      fillRect(58, 26, 73, 27, 9);
+      fillRect(64, 19, 66, 26, 9);
+      placeBuilding(59, 22, 4, 6, 7, 'POKECENTER');   // Mt. Moon Rest Center
 
-      // 5. Signposts (Tile 8)
+      // Route 4 (Cols 73..85)
+      fillRect(73, 23, 85, 30, 0);
+      fillRect(73, 26, 85, 27, 9);
+      fillRect(75, 23, 82, 25, 2);
+
+      // =====================================================================
+      // 9. CERULEAN CITY, NUGGET BRIDGE (R24) & CAPE (R25) — North (Cols 85..118, Rows 6..36)
+      // =====================================================================
+      fillRect(85, 20, 105, 36, 0);
+      fillRect(85, 25, 105, 27, 9);
+      fillRect(94, 20, 96, 36, 9);
+      fillRect(88, 32, 102, 33, 9);
+      placeBuilding(88, 22, 5, 6, 7, 'POKECENTER');   // Cerulean PokéCenter
+      placeBuilding(97, 22, 6, 13, 14, 'GYM_MISTY');  // Cerulean Gym (#2 Misty)
+      placeBuilding(88, 29, 4, 11, 12, 'POKEMART');   // Cerulean PokéMart
+
+      // Route 24 (Nugget Bridge over river) & Route 25 (Bill's Cape)
+      fillRect(92, 6, 118, 19, 0);
+      fillRect(88, 12, 93, 17, 3);  // River West of Nugget Bridge
+      fillRect(97, 12, 103, 17, 3); // River East of Nugget Bridge
+      fillRect(94, 8, 96, 20, 9);   // Nugget Bridge
+      fillRect(94, 9, 115, 10, 9);  // Route 25 Cape Road
+      fillRect(99, 6, 108, 8, 2);
+      fillRect(101, 11, 110, 13, 2);
+      placeBuilding(112, 6, 5, 6, 7, 'LAB');          // Bill's Sea Cottage
+
+      // =====================================================================
+      // 10. ROUTE 9, ROUTE 10 & ROCK TUNNEL — Northeast (Cols 105..140, Rows 23..52)
+      // =====================================================================
+      fillRect(105, 23, 130, 30, 0);
+      fillRect(105, 26, 134, 27, 9);
+      fillRect(109, 23, 118, 25, 2);
+      fillRect(116, 28, 125, 30, 2);
+
+      // Route 10 & Rock Tunnel (Cols 128..140, Rows 25..52)
+      fillRect(128, 25, 140, 30, 0);
+      fillRect(128, 30, 140, 48, 15);
+      fillRect(128, 48, 140, 52, 0);
+      fillRect(132, 26, 134, 52, 9);
+      fillRect(128, 33, 130, 45, 16);
+      fillRect(137, 33, 139, 45, 16);
+      placeBuilding(135, 26, 4, 6, 7, 'POKECENTER');  // Rock Tunnel PokéCenter
+      fillRect(134, 29, 138, 29, 9);
+
+      // =====================================================================
+      // 11. LAVENDER TOWN (עיירת לוונדר ומגדל הרוחות) — East (Cols 125..142, Rows 52..66)
+      // =====================================================================
+      fillRect(125, 52, 142, 66, 0);
+      fillRect(125, 58, 139, 59, 9);
+      fillRect(132, 52, 134, 66, 9);
+      fillRect(136, 56, 139, 58, 9);
+      fillRect(127, 57, 129, 58, 9);
+      fillRect(127, 64, 133, 64, 9);
+      placeBuilding(135, 53, 6, 13, 14, 'ROCKET_TOWER'); // Pokémon Tower (Lavender)
+      placeBuilding(126, 54, 5, 6, 7, 'POKECENTER');     // Lavender PokéCenter
+      placeBuilding(126, 61, 4, 11, 12, 'POKEMART');     // Lavender PokéMart
+
+      // =====================================================================
+      // 12. ROUTE 5, SAFFRON CITY, ROUTE 6 & ROUTE 8 — Center (Cols 85..125, Rows 36..78)
+      // =====================================================================
+      // Route 5 & Daycare Center (Cols 90..100, Rows 36..48)
+      fillRect(90, 36, 100, 48, 0);
+      fillRect(94, 36, 96, 48, 9);
+      fillRect(90, 39, 93, 44, 2);
+      placeBuilding(97, 40, 3, 6, 7, 'POKECENTER');   // Kanto Daycare House
+
+      // Saffron City (עיר ספרון — לב קאנטו) (Cols 85..106, Rows 48..66)
+      fillRect(85, 48, 106, 66, 0);
+      fillRect(85, 57, 106, 59, 9);
+      fillRect(94, 48, 96, 66, 9);
+      fillRect(88, 52, 103, 54, 9);
+      fillRect(88, 63, 103, 64, 9);
+      placeBuilding(97, 49, 6, 13, 14, 'GYM_SABRINA'); // Saffron Gym (#6 Sabrina)
+      placeBuilding(88, 49, 5, 11, 14, 'TRADE');       // Silph Co. & Link Trade HQ
+      placeBuilding(88, 60, 5, 6, 7, 'POKECENTER');    // Saffron PokéCenter
+      placeBuilding(98, 60, 4, 11, 12, 'POKEMART');    // Saffron PokéMart
+
+      // Route 8 (Saffron <-> Lavender) (Cols 106..125, Rows 55..61)
+      fillRect(106, 55, 125, 61, 0);
+      fillRect(106, 58, 125, 59, 9);
+      fillRect(110, 55, 120, 57, 2);
+      fillRect(112, 60, 121, 61, 2);
+
+      // Route 6 (Saffron <-> Vermilion) (Cols 90..100, Rows 66..78)
+      fillRect(90, 66, 100, 78, 0);
+      fillRect(94, 66, 96, 78, 9);
+      fillRect(90, 69, 93, 75, 2);
+      fillRect(97, 69, 100, 75, 2);
+
+      // =====================================================================
+      // 13. VERMILION CITY & ROUTE 11 — South Harbor (Cols 84..131, Rows 78..93)
+      // =====================================================================
+      fillRect(84, 78, 105, 90, 0);
+      fillRect(84, 91, 105, 91, 17); // Harbor beach
+      fillRect(84, 92, 105, 93, 3);  // Vermilion Port bay water
+      fillRect(94, 91, 96, 93, 9);   // S.S. Anne Harbor Pier
+      fillRect(94, 78, 96, 91, 9);
+      fillRect(86, 83, 105, 85, 9);
+      fillRect(86, 89, 96, 90, 9);
+      placeBuilding(87, 80, 5, 6, 7, 'POKECENTER');   // Vermilion PokéCenter
+      placeBuilding(98, 80, 4, 11, 12, 'POKEMART');   // Vermilion PokéMart
+      placeBuilding(87, 86, 6, 13, 14, 'GYM_SURGE');  // Vermilion Gym (#3 Lt. Surge)
+
+      // Route 11 (Vermilion <-> Route 12) (Cols 105..131, Rows 82..88)
+      fillRect(105, 82, 131, 88, 0);
+      fillRect(105, 84, 131, 85, 9);
+      fillRect(109, 82, 125, 83, 2);
+      fillRect(111, 86, 126, 88, 2);
+
+      // =====================================================================
+      // 14. CELADON CITY & ROUTE 7 — Central-West (Cols 56..85, Rows 48..66)
+      // =====================================================================
+      fillRect(79, 55, 85, 61, 0);  // Route 7
+      fillRect(79, 57, 85, 59, 9);
+      fillRect(80, 55, 84, 56, 2);
+
+      fillRect(56, 48, 79, 66, 0);  // Celadon Metropolis
+      fillRect(56, 57, 79, 59, 9);
+      fillRect(58, 52, 77, 54, 9);
+      fillRect(67, 53, 69, 64, 9);
+      fillRect(60, 63, 74, 64, 9);
+      fillRect(58, 60, 60, 62, 4);
+      fillRect(71, 60, 75, 62, 4);
+      placeBuilding(58, 49, 6, 11, 12, 'POKEMART');    // Celadon Department Store
+      placeBuilding(66, 49, 5, 6, 7, 'POKECENTER');    // Celadon PokéCenter
+      placeBuilding(72, 49, 6, 13, 14, 'GAME_CORNER'); // Celadon Game Corner & Casino
+      placeBuilding(61, 60, 6, 13, 14, 'GYM_ERIKA');   // Celadon Gym (#4 Erika)
+
+      // =====================================================================
+      // 15. CYCLING ROAD (Routes 16, 17, 18) — West-South (Cols 48..74, Rows 55..109)
+      // =====================================================================
+      fillRect(48, 55, 56, 61, 0);   // Route 16
+      fillRect(48, 61, 56, 108, 0);  // Route 17 (Cycling Road)
+      fillRect(54, 103, 74, 109, 0); // Route 18 (East to Fuchsia)
+      fillRect(50, 57, 56, 59, 9);
+      fillRect(51, 58, 54, 107, 9);
+      fillRect(51, 105, 74, 107, 9);
+      fillRect(48, 66, 50, 98, 2);
+      fillRect(55, 66, 56, 98, 2);
+      fillRect(58, 103, 68, 104, 2);
+
+      // =====================================================================
+      // 16. SILENCE BRIDGE & ROUTES 12, 13, 14, 15 — Southeast (Cols 96..138, Rows 66..109)
+      // =====================================================================
+      fillRect(129, 66, 137, 96, 3);  // Route 12 Fishing River / Bay
+      fillRect(132, 66, 134, 98, 9);  // Silence Bridge Wooden Pier
+      fillRect(129, 84, 133, 85, 9);  // Junction with Route 11
+      fillRect(96, 97, 136, 109, 0);  // Routes 13, 14, 15 Coastal Maze
+      fillRect(122, 97, 134, 99, 9);
+      fillRect(122, 98, 124, 106, 9);
+      fillRect(96, 105, 124, 107, 9);
+      fillRect(102, 99, 118, 103, 2);
+      fillRect(126, 101, 134, 107, 2);
+
+      // =====================================================================
+      // 17. FUCHSIA CITY & SAFARI ZONE — South-Center (Cols 74..96, Rows 95..114)
+      // =====================================================================
+      // Safari Zone (Cols 74..95, Rows 95..100)
+      fillRect(74, 95, 95, 100, 0);
+      fillRect(75, 96, 94, 99, 2);   // Safari Tall Grass
+      fillRect(78, 97, 81, 99, 3);   // Safari West Pond
+      fillRect(89, 97, 92, 99, 3);   // Safari East Pond
+      fillRect(84, 95, 86, 101, 9);  // Safari Central Trail
+      fillRect(83, 97, 87, 99, 4);
+
+      // Fuchsia City (Cols 74..96, Rows 101..114)
+      fillRect(74, 101, 96, 114, 0);
+      fillRect(78, 114, 92, 114, 17); // South beach to Sea Route 19
+      fillRect(74, 105, 96, 107, 9);
+      fillRect(84, 100, 86, 114, 9);
+      fillRect(77, 111, 93, 112, 9);
+      fillRect(78, 104, 80, 105, 9);
+      fillRect(89, 104, 91, 105, 9);
+      placeBuilding(77, 101, 5, 6, 7, 'POKECENTER');   // Fuchsia PokéCenter
+      placeBuilding(87, 101, 6, 13, 14, 'GYM_KOGA');   // Fuchsia Gym (#5 Koga)
+      placeBuilding(77, 108, 4, 11, 12, 'POKEMART');   // Fuchsia PokéMart
+
+      // =====================================================================
+      // 18. SEA ROUTES 19–21, SEAFOAM ISLANDS & CINNABAR ISLAND (Rows 115..138)
+      // =====================================================================
+      // Seafoam Islands (איי קצף הים) in the middle of Route 20 (Cols 58..68, Rows 125..133)
+      fillRect(58, 125, 68, 133, 17);
+      fillRect(60, 127, 66, 131, 15);
+      fillRect(62, 126, 64, 127, 16);
+
+      // Route 21 Stepping Islets between Pallet Town (Row 114) and Cinnabar Island (Row 124)
+      fillRect(33, 118, 36, 120, 17);
+      fillRect(34, 119, 35, 119, 2);
+
+      // Cinnabar Island (אי סיניבר) — Southwest Ocean (Cols 27..44, Rows 124..136)
+      fillRect(27, 124, 44, 136, 17); // Sandy perimeter beach
+      fillRect(28, 125, 43, 135, 0);  // Island interior
+      fillRect(28, 125, 33, 128, 2);  // Pokémon Mansion wild grass
+      fillRect(29, 128, 42, 130, 9);
+      fillRect(35, 124, 36, 135, 9);
+      fillRect(29, 134, 42, 135, 9);
+      placeBuilding(37, 125, 6, 13, 14, 'GYM_BLAINE'); // Cinnabar Gym (#7 Blaine)
+      placeBuilding(29, 131, 5, 6, 7, 'POKECENTER');   // Cinnabar PokéCenter
+      placeBuilding(37, 131, 5, 11, 12, 'POKEMART');   // Cinnabar Lab & PokéMart
+
+      // =====================================================================
+      // 19. SIGNPOSTS (Tile 8) ACROSS ALL KANTO TOWNS & LANDMARKS
+      // =====================================================================
       const signCoords = [
-        [9, 43], [11, 25], [30, 25], [30, 10], [43, 11], [13, 6], [48, 47]
+        [32, 108], // Pallet Town
+        [32, 71],  // Viridian City
+        [32, 57],  // Viridian Forest Entrance
+        [32, 26],  // Pewter City
+        [63, 25],  // Mt. Moon
+        [93, 25],  // Cerulean City
+        [131, 58], // Lavender Town
+        [93, 56],  // Saffron City
+        [66, 56],  // Celadon City
+        [93, 84],  // Vermilion City
+        [83, 104], // Fuchsia City & Safari Zone
+        [34, 129], // Cinnabar Island
+        [11, 14]   // Indigo Plateau
       ];
       signCoords.forEach(([c, r]) => { WORLD_MAP[r][c] = 8; });
 
-      // 6. Hidden & Visible Pokéball Treasures (Tile 10)
+      // =====================================================================
+      // 20. TREASURE POKÉBALL ITEMS (Tile 10) ACROSS ROUTES & CAVES
+      // =====================================================================
       const itemCoords = [
-        [5, 33], [18, 20], [55, 6], [58, 15], [52, 25],
-        [56, 34], [52, 50], [7, 5], [22, 49], [39, 39],
-        [28, 16], [49, 17]
+        [38, 92],  // Route 1
+        [40, 49],  // Viridian Forest East
+        [28, 42],  // Viridian Forest NW
+        [54, 24],  // Route 3
+        [71, 19],  // Mt. Moon Crater
+        [110, 7],  // Route 25 Cape
+        [135, 38], // Rock Tunnel
+        [49, 78],  // Cycling Road (Route 17)
+        [130, 99], // Route 13 Coastal Maze
+        [80, 96],  // Safari Zone West
+        [91, 96],  // Safari Zone East
+        [63, 129], // Seafoam Islands
+        [30, 126], // Cinnabar Mansion Grounds
+        [11, 38]   // Victory Road
       ];
       itemCoords.forEach(([c, r]) => { WORLD_MAP[r][c] = 10; });
     }
     buildExpandedKantoMap();
 
     const FAST_TRAVEL_POINTS = [
-      { id: 'pallet',   name: '🏠 עיירת פאלט (התחלה)', x: 11.5, y: 44.5, desc: 'רמות 2–8 • מעבדת פרופסור אוק' },
-      { id: 'viridian', name: '🌲 יער וירידיאן',       x: 11.5, y: 27.5, desc: 'רמות 6–14 • חרקים, עשב ופיקאצ׳ו' },
-      { id: 'cerulean', name: '💧 עיר סרוליאן',        x: 32.5, y: 11.5, desc: 'רמות 12–22 • מכון המים של מיסטי' },
-      { id: 'mtmoon',   name: '⛰️ הר הירח ומערת הסלע', x: 46.5, y: 11.5, desc: 'רמות 16–28 • פוקימוני אבן, דרקון ומאובנים' },
-      { id: 'celadon',  name: '🏙️ עיר סלדון (כלבו והחלפות)', x: 32.5, y: 26.5, desc: 'רמות 20–34 • קניון אבני התפתחות ומרכז החלפות' },
-      { id: 'safari',   name: '🌿 אזור הספארי המזרחי', x: 49.5, y: 27.5, desc: 'רמות 24–38 • פוקימונים נדירים' },
-      { id: 'cinnabar', name: '🌋 אי סיניבר והחוף',    x: 48.5, y: 48.5, desc: 'רמות 28–42 • אש, מים וקרח' },
-      { id: 'indigo',   name: '👑 רמת אינדיגו (ליגת האלופים)', x: 13.5, y: 8.5, desc: 'רמות 35–55 • האלוף גארי ופוקימונים אגדיים!' }
+      { id: 'pallet',    name: '🏠 עיירת פאלט (התחלה)',       x: 34.5,  y: 108.5, desc: 'רמות 2–7 • בית השחקן ומעבדת פרופסור אוק' },
+      { id: 'viridian',  name: '🌿 עיר וירידיאן',             x: 34.5,  y: 72.5,  desc: 'רמות 5–12 • דרך 1, דרך 22 ומכון האדמה (#8)' },
+      { id: 'vforest',   name: '🌲 יער וירידיאן (מבוך העצים)', x: 34.5,  y: 58.5,  desc: 'רמות 6–14 • פיקאצ׳ו, חרקים ומאמני יער' },
+      { id: 'pewter',    name: '🪨 עיר פיוטר (מכון #1 ברוק)', x: 34.5,  y: 27.5,  desc: 'רמות 10–16 • מכון הסלע של ברוק ומוזיאון המדע' },
+      { id: 'mtmoon',    name: '⛰️ הר הירח (דרך 3–4)',        x: 65.5,  y: 26.5,  desc: 'רמות 14–22 • מערת הר הירח, מאובנים וצוות רוקט' },
+      { id: 'cerulean',  name: '💧 עיר סרוליאן (מכון #2 מיסטי)', x: 95.5, y: 26.5, desc: 'רמות 16–25 • מכון המים, גשר הזהב (24) והכף (25)' },
+      { id: 'vermilion', name: '⚓ עיר ורמיליון (מכון #3 סרג׳)', x: 95.5, y: 84.5, desc: 'רמות 20–29 • נמל הספינה ומכון החשמל של סרג׳' },
+      { id: 'lavender',  name: '👻 עיירת לוונדר ומגדל הרוחות', x: 133.5, y: 58.5,  desc: 'רמות 22–32 • מנהרת הסלע, מגדל הרוחות וגשר הדממה' },
+      { id: 'celadon',   name: '🏙️ עיר סלדון (מכון #4 אריקה)', x: 68.5,  y: 57.5,  desc: 'רמות 24–34 • כלבו אבני התפתחות, קזינו ושביל האופניים' },
+      { id: 'fuchsia',   name: '🦓 עיר פושיה ואזור הספארי (#5)', x: 85.5, y: 106.5, desc: 'רמות 28–38 • מכון הרעל של קוגה ושמורת הספארי' },
+      { id: 'saffron',   name: '🔮 עיר ספרון (מכון #6 סברינה)', x: 95.5,  y: 57.5,  desc: 'רמות 30–40 • מרכז קאנטו, סילף קו ומכון העל-חושי' },
+      { id: 'cinnabar',  name: '🌋 אי סיניבר (מכון #7 בליין)', x: 35.5,  y: 129.5, desc: 'רמות 34–45 • מכון הלבה, מעבדת מאובנים ואיי קצף הים' },
+      { id: 'indigo',    name: '👑 רמת אינדיגו ודרך הניצחון',  x: 13.5,  y: 14.5,  desc: 'רמות 40–55 • רביעיית העילית, האלוף גארי ומיוטו!' }
     ];
 
     function getZoneInfoAt(tx, ty) {
-      if (ty >= 37 && tx <= 26) {
-        return { name: 'עיירת פאלט ודרך 1', minLv: 3, maxLv: 8, pool: [1, 4, 7, 10, 13, 16, 19, 21, 25, 29, 32, 43, 69] };
+      // 1. Indigo Plateau & Victory Road (NW West Ridge)
+      if (tx <= 23 && ty <= 66) {
+        return { name: ty <= 21 ? 'רמת אינדיגו (ליגת הפוקימונים)' : 'דרך הניצחון ודרך 23', minLv: 36, maxLv: 52, pool: [3, 6, 9, 18, 26, 31, 34, 59, 65, 67, 68, 75, 76, 94, 95, 105, 112, 130, 131, 142, 143, 148, 149] };
       }
-      if (tx <= 22 && ty >= 16 && ty < 37) {
-        return { name: 'יער וירידיאן', minLv: 6, maxLv: 15, pool: [10, 11, 12, 13, 14, 15, 16, 17, 23, 25, 43, 46, 48, 56, 63, 123, 127] };
+      // 2. Pallet Town & Route 1
+      if (tx >= 24 && tx <= 45 && ty >= 81 && ty <= 115) {
+        return { name: ty >= 102 ? 'עיירת פאלט' : 'דרך 1 (פאלט – וירידיאן)', minLv: 2, maxLv: 7, pool: [16, 19, 21, 10, 13, 25, 29, 32, 1, 4, 7] };
       }
-      if (tx >= 39 && ty <= 20) {
-        return { name: 'הר הירח ומערת הסלע', minLv: 15, maxLv: 28, pool: [27, 35, 41, 42, 50, 66, 67, 74, 75, 92, 93, 95, 104, 109, 111, 138, 140, 142] };
+      // 3. Viridian City & Route 22
+      if (tx <= 45 && ty >= 62 && ty <= 80) {
+        return { name: tx < 24 ? 'דרך 22 (מערב לווירידיאן)' : 'עיר וירידיאן', minLv: 4, maxLv: 11, pool: [16, 19, 21, 22, 23, 29, 32, 56, 60] };
       }
-      if (tx >= 22 && tx < 39 && ty <= 19) {
-        return { name: 'עיר סרוליאן והכף הצפוני', minLv: 11, maxLv: 22, pool: [52, 54, 60, 61, 63, 69, 72, 79, 81, 83, 84, 90, 98, 116, 118, 120, 129] };
+      // 4. Route 2 & Viridian Forest
+      if (tx >= 24 && tx <= 45 && ty >= 35 && ty < 62) {
+        return { name: 'יער וירידיאן ודרך 2', minLv: 5, maxLv: 13, pool: [10, 11, 12, 13, 14, 15, 16, 17, 25, 43, 46, 48, 69] };
       }
-      if (tx >= 22 && tx <= 43 && ty >= 20 && ty <= 36) {
-        return { name: 'עיר סלדון וספרון', minLv: 18, maxLv: 32, pool: [37, 39, 52, 58, 63, 64, 77, 81, 88, 96, 100, 106, 107, 108, 122, 125, 132, 133, 137] };
+      // 5. Pewter City & Route 3
+      if (tx >= 24 && tx < 58 && ty <= 34) {
+        return { name: tx <= 45 ? 'עיר פיוטר' : 'דרך 3 (לעבר הר הירח)', minLv: 8, maxLv: 16, pool: [16, 21, 27, 35, 39, 56, 74, 95] };
       }
-      if (tx > 43 && ty >= 20 && ty <= 39) {
-        return { name: 'אזור הספארי ומגדל הרוחות', minLv: 23, maxLv: 38, pool: [24, 30, 33, 44, 47, 49, 55, 70, 85, 92, 93, 102, 111, 113, 114, 115, 123, 127, 128, 143, 147] };
+      // 6. Mt. Moon & Route 4
+      if (tx >= 58 && tx < 85 && ty <= 34) {
+        return { name: tx <= 73 ? 'הר הירח' : 'דרך 4', minLv: 12, maxLv: 22, pool: [27, 35, 41, 42, 46, 50, 66, 74, 75, 95, 104, 109, 138, 140] };
       }
-      if (ty >= 40 && tx > 26) {
-        return { name: 'אי סיניבר וחוף הים', minLv: 26, maxLv: 44, pool: [58, 72, 73, 77, 78, 80, 86, 87, 89, 91, 99, 110, 117, 119, 121, 124, 126, 130, 131, 146] };
+      // 7. Cerulean City, Nugget Bridge (24) & Cape (25)
+      if (tx >= 85 && tx <= 120 && ty <= 36) {
+        return { name: ty < 20 ? 'גשר הזהב (24) וכף סרוליאן (25)' : 'עיר סרוליאן', minLv: 14, maxLv: 24, pool: [43, 52, 54, 60, 61, 63, 69, 72, 79, 81, 90, 98, 116, 118, 120, 129] };
       }
-      return { name: 'רמת אינדיגו ודרך הניצחון', minLv: 34, maxLv: 52, pool: [3, 6, 9, 18, 26, 31, 34, 59, 65, 68, 76, 94, 112, 130, 131, 142, 143, 144, 145, 146, 148, 149, 150, 151] };
+      // 8. Route 9, Route 10 & Rock Tunnel
+      if (tx > 105 && ty <= 51) {
+        return { name: 'דרך 9–10 ומנהרת הסלע', minLv: 18, maxLv: 29, pool: [21, 22, 41, 42, 66, 67, 74, 75, 81, 82, 95, 100, 104, 111, 125] };
+      }
+      // 9. Lavender Town & Route 8
+      if (tx >= 106 && ty >= 52 && ty <= 66) {
+        return { name: tx >= 125 ? 'עיירת לוונדר ומגדל הרוחות' : 'דרך 8', minLv: 20, maxLv: 32, pool: [37, 52, 58, 63, 64, 92, 93, 94, 96, 97, 104, 105] };
+      }
+      // 10. Celadon City & Route 7
+      if (tx >= 48 && tx < 85 && ty >= 48 && ty <= 66) {
+        return { name: 'עיר סלדון ודרך 7', minLv: 20, maxLv: 32, pool: [37, 39, 43, 44, 52, 58, 69, 70, 88, 108, 114, 123, 127, 132, 133, 137] };
+      }
+      // 11. Saffron City, Route 5 & Route 6
+      if (tx >= 85 && tx <= 106 && ty >= 37 && ty <= 77) {
+        return { name: ty < 48 ? 'דרך 5 ובית הגידול' : (ty > 66 ? 'דרך 6' : 'עיר ספרון'), minLv: 22, maxLv: 35, pool: [52, 56, 63, 64, 65, 96, 97, 106, 107, 122, 124, 132] };
+      }
+      // 12. Vermilion City & Route 11
+      if (tx >= 84 && tx <= 131 && ty >= 78 && ty <= 93) {
+        return { name: tx <= 105 ? 'עיר ורמיליון והנמל' : 'דרך 11', minLv: 18, maxLv: 29, pool: [21, 25, 26, 50, 51, 60, 72, 81, 82, 83, 90, 96, 98, 100, 101, 118, 129] };
+      }
+      // 13. Cycling Road (Routes 16, 17, 18)
+      if (tx >= 48 && tx < 74 && ty > 66 && ty <= 112) {
+        return { name: 'שביל האופניים (דרכים 16–18)', minLv: 24, maxLv: 35, pool: [22, 77, 78, 84, 85, 88, 89, 100, 101, 108, 109, 110, 143] };
+      }
+      // 14. Safari Zone & Fuchsia City
+      if (tx >= 74 && tx <= 96 && ty >= 95 && ty <= 114) {
+        return { name: ty <= 100 ? 'שמורת אזור הספארי' : 'עיר פושיה', minLv: 25, maxLv: 38, pool: [24, 30, 33, 44, 47, 49, 55, 70, 85, 102, 103, 111, 112, 113, 114, 115, 123, 127, 128, 147, 148] };
+      }
+      // 15. Silence Bridge & Routes 12–15
+      if (tx > 96 && ty >= 67 && ty <= 112) {
+        return { name: 'גשר הדממה ודרכים 12–15', minLv: 24, maxLv: 36, pool: [17, 18, 43, 44, 48, 49, 54, 55, 69, 70, 79, 80, 83, 98, 99, 116, 117, 131, 132, 143] };
+      }
+      // 16. Cinnabar Island, Seafoam Islands & Sea Routes 19–21
+      return { name: tx <= 45 && ty >= 123 ? 'אי סיניבר' : 'דרכי הים 19–21 ואיי קצף הים', minLv: 28, maxLv: 44, pool: [37, 38, 58, 59, 72, 73, 77, 78, 79, 80, 86, 87, 88, 89, 90, 91, 109, 110, 116, 117, 120, 121, 126, 130, 131] };
     }
 
     const SIGNS = {
-      '9,43': '🏠 עיירת פאלט: ברוכים הבאים! לחץ על כפתור ה-🗺️ מפה למעלה לשיגור מהיר בין ערים.',
-      '11,25': '🌲 יער וירידיאן: ביתם של פוקימוני חרק, עשב ופיקאצ׳ו נדירים!',
-      '30,25': '🏙️ עיר סלדון: בקرو בכלבו הגדול לרכישת אבני התפתחות ובמרכז ההחלפות!',
-      '30,10': '💧 עיר סרוליאן: מכון המים של מיסטי נמצא ממזרח למרכז הפוקימונים.',
-      '43,11': '⛰️ הר הירח: זהירות! פוקימוני אבן, מאובנים ודרקונים שוכנים במערה.',
-      '13,6': '👑 רמת אינדיגו: ליגת הפוקימונים העליונה והאלוף גארי ממתינים כאן!',
-      '48,47': '🌋 אי סיניבר: מכון האש של בליין ובית הגידול של פוקימוני אש וקרח.'
+      '32,108': '🏠 עיירת פאלט: צא צפונה בדרך 1 אל עיר וירידיאן, או דרומה בדרך ימית 21 לאי סיניבר!',
+      '32,71':  '🌿 עיר וירידיאן: צפונה ליער וירידיאן ופיוטר, מערבה לדרך 22 וליגת אינדיגו. מכון #8 של ג׳ובאני נמצא בצפון העיר!',
+      '32,57':  '🌲 יער וירידיאן: מבוך טבעי המוביל צפונה לעיר פיוטר. היזהר מלוכדי החרקים וחפש פיקאצ׳ו!',
+      '32,26':  '🪨 עיר פיוטר: מכון האבן (#1) של ברוק ומוזיאון המדע. המשך מזרחה בדרך 3 אל הר הירח!',
+      '63,25':  '⛰️ הר הירח (Mt. Moon): היכנס למערה בצפון או המשך מזרחה בדרך 4 לעיר סרוליאן!',
+      '93,25':  '💧 עיר סרוליאן: מכון המים (#2) של מיסטי! צפונה לגשר הזהב וכף סרוליאן, מזרחה למנהרת הסלע, דרומה לספרון.',
+      '131,58': '👻 עיירת לוונדר: ביתו של מגדל הרוחות. מערבה לספרון, דרומה על גשר הדממה (דרך 12) לפושיה.',
+      '93,56':  '🔮 עיר ספרון: לב מחוז קאנטו! מכון העל-חושי (#6) של סברינה ובניין סילף קו.',
+      '66,56':  '🏙️ עיר סלדון: כלבו הענק, קזינו סלדון ומכון העשב (#4) של אריקה! מערבה לשביל האופניים (דרך 16–18).',
+      '93,84':  '⚓ עיר ורמיליון: עיר הנמל ומכון החשמל (#3) של לוטננט סרג׳!',
+      '83,104': '🦓 עיר פושיה: מכון הרעל (#5) של קוגה, ובקצה הצפוני של העיר — שמורת הספארי המפורסמת!',
+      '34,129': '🌋 אי סיניבר: מכון הלבה (#7) של בליין, מעבדת החייאת המאובנים ואחוזת הפוקימונים!',
+      '11,14':  '👑 רמת אינדיגו: היכל ליגת הפוקימונים, רביעיית העילית (Elite Four) והאלוף גארי!'
     };
 
     const NPCS = [
-      { id: 'prof',     name: 'פרופסור אוק',    x: 16, y: 43, dir: 'down', shirt: '#3b82f6', hat: '#e2e8f0', role: 'prof' },
-      { id: 'nurse1',   name: 'האחות ג׳וי',     x: 15, y: 42, dir: 'down', shirt: '#ec4899', hat: '#fbcfe8', role: 'healer' },
-      { id: 'clerk1',   name: 'מוכר פאלט',      x: 6,  y: 43, dir: 'down', shirt: '#10b981', hat: '#a7f3d0', role: 'shop' },
-      { id: 'brock',    name: 'ברוק (מכון האבן)', x: 14, y: 27, dir: 'down', shirt: '#a8a29e', hat: '#78350f', role: 'gym', badgeId: 'boulder', badgeName: 'תג הסלע 🪨', rewardMoney: 1200, team: [ ['geodude', 12], ['onix', 14] ] },
-      { id: 'misty',    name: 'מיסטי (מכון המים)', x: 37, y: 9,  dir: 'down', shirt: '#0ea5e9', hat: '#f97316', role: 'gym', badgeId: 'cascade', badgeName: 'תג המפל 💧', rewardMoney: 1800, team: [ ['staryu', 18], ['psyduck', 19], ['starmie', 21] ] },
-      { id: 'nurse2',   name: 'האחות ג׳וי',     x: 27, y: 9,  dir: 'down', shirt: '#ec4899', hat: '#fbcfe8', role: 'healer' },
-      { id: 'surge',    name: 'סרג׳ (מכון החשמל)', x: 28, y: 28, dir: 'down', shirt: '#eab308', hat: '#15803d', role: 'gym', badgeId: 'thunder', badgeName: 'תג הרעם ⚡', rewardMoney: 2500, team: [ ['voltorb', 24], ['pikachu', 25], ['raichu', 28] ] },
-      { id: 'clerk2',   name: 'מנהל כלבו סלדון', x: 33, y: 23, dir: 'down', shirt: '#10b981', hat: '#fef08a', role: 'shop' },
-      { id: 'trader1',  name: 'מומחה ההחלפות',   x: 39, y: 23, dir: 'down', shirt: '#06b6d4', hat: '#cffafe', role: 'trader' },
-      { id: 'blaine',   name: 'בליין (מכון האש)', x: 50, y: 49, dir: 'down', shirt: '#ef4444', hat: '#f8fafc', role: 'gym', badgeId: 'volcano', badgeName: 'תג הלבה 🔥', rewardMoney: 3500, team: [ ['growlithe', 34], ['rapidash', 36], ['arcanine', 39] ] },
-      { id: 'champion', name: 'האלוף גארי',     x: 13, y: 5,  dir: 'down', shirt: '#7e22ce', hat: '#facc15', role: 'champion', rewardMoney: 6000, team: [ ['pidgeot', 42], ['alakazam', 43], ['rhydon', 44], ['gyarados', 45], ['arcanine', 46], ['charizard', 48] ] },
-      { id: 'mewtwo_npc', name: 'מיוטו האגדי 🔮', x: 7,  y: 4,  dir: 'down', shirt: '#c084fc', hat: '#f472b6', role: 'legendary', speciesId: 'mewtwo', level: 50 }
+      { id: 'prof',       name: 'פרופסור אוק',           x: 36,  y: 112, dir: 'down', shirt: '#3b82f6', hat: '#e2e8f0', role: 'prof' },
+      { id: 'nurse1',     name: 'האחות ג׳וי (פאלט)',     x: 29,  y: 107, dir: 'down', shirt: '#ec4899', hat: '#fbcfe8', role: 'healer' },
+      { id: 'clerk1',     name: 'עוזר חנות פאלט',        x: 32,  y: 107, dir: 'down', shirt: '#10b981', hat: '#a7f3d0', role: 'shop' },
+      { id: 'brock',      name: 'ברוק (מכון האבן #1)',    x: 29,  y: 25,  dir: 'down', shirt: '#a8a29e', hat: '#78350f', role: 'gym', badgeId: 'boulder', badgeName: 'תג הסלע 🪨', rewardMoney: 1200, team: [ ['geodude', 12], ['onix', 14] ] },
+      { id: 'misty',      name: 'מיסטי (מכון המים #2)',   x: 99,  y: 25,  dir: 'down', shirt: '#0ea5e9', hat: '#f97316', role: 'gym', badgeId: 'cascade', badgeName: 'תג המפל 💧', rewardMoney: 1800, team: [ ['staryu', 18], ['psyduck', 19], ['starmie', 21] ] },
+      { id: 'nurse2',     name: 'האחות ג׳וי (סרוליאן)',  x: 89,  y: 25,  dir: 'down', shirt: '#ec4899', hat: '#fbcfe8', role: 'healer' },
+      { id: 'surge',      name: 'סרג׳ (מכון החשמל #3)',  x: 89,  y: 89,  dir: 'down', shirt: '#eab308', hat: '#15803d', role: 'gym', badgeId: 'thunder', badgeName: 'תג הרעם ⚡', rewardMoney: 2500, team: [ ['voltorb', 24], ['pikachu', 25], ['raichu', 28] ] },
+      { id: 'clerk2',     name: 'מנהל כלבו סלדון',       x: 60,  y: 52,  dir: 'down', shirt: '#10b981', hat: '#fef08a', role: 'shop' },
+      { id: 'trader1',    name: 'מומחה ההחלפות והקזינו', x: 74,  y: 52,  dir: 'down', shirt: '#06b6d4', hat: '#cffafe', role: 'trader' },
+      { id: 'blaine',     name: 'בליין (מכון האש #7)',    x: 39,  y: 128, dir: 'down', shirt: '#ef4444', hat: '#f8fafc', role: 'gym', badgeId: 'volcano', badgeName: 'תג הלבה 🔥', rewardMoney: 3500, team: [ ['growlithe', 34], ['rapidash', 36], ['arcanine', 39] ] },
+      { id: 'champion',   name: 'האלוף גארי',            x: 12,  y: 10,  dir: 'down', shirt: '#7e22ce', hat: '#facc15', role: 'champion', rewardMoney: 6000, team: [ ['pidgeot', 42], ['alakazam', 43], ['rhydon', 44], ['gyarados', 45], ['arcanine', 46], ['charizard', 48] ] },
+      { id: 'mewtwo_npc', name: 'מיוטו האגדי 🔮',        x: 8,   y: 10,  dir: 'down', shirt: '#c084fc', hat: '#f472b6', role: 'legendary', speciesId: 'mewtwo', level: 50 }
     ];
 
     /********************************************************************
@@ -2009,11 +2348,11 @@
 
     // Add the 4 missing Gym Leaders + Legendary Birds & Mew to Overworld NPCS
     const EXTRA_NPCS = [
-      { id: 'erika',    name: 'אריקה (מכון העשב #4)',    x: 26, y: 31, dir: 'down', shirt: '#22c55e', hat: '#f43f5e', role: 'gym', gymInteriorId: 'GYM_ERIKA',    badgeId: 'rainbow', badgeName: 'תג הקשת 🌿',  rewardMoney: 2800, team: [ ['tangela', 26], ['weepinbell', 28], ['vileplume', 30] ] },
-      { id: 'koga',     name: 'קוגה (מכון הרעל #5)',     x: 49, y: 28, dir: 'down', shirt: '#9333ea', hat: '#1e1b4b', role: 'gym', gymInteriorId: 'GYM_KOGA',     badgeId: 'soul',    badgeName: 'תג הנשמה ☠️', rewardMoney: 3100, team: [ ['koffing', 30], ['muk', 32], ['venomoth', 33], ['weezing', 35] ] },
-      { id: 'sabrina',  name: 'סברינה (מכון על-חושי #6)', x: 37, y: 28, dir: 'down', shirt: '#ec4899', hat: '#500724', role: 'gym', gymInteriorId: 'GYM_SABRINA',  badgeId: 'marsh',   badgeName: 'תג הביצה 🔮', rewardMoney: 3400, team: [ ['kadabra', 34], ['mr_mime', 35], ['venomoth', 36], ['alakazam', 38] ] },
-      { id: 'giovanni', name: 'ג׳ובאני (מכון האדמה #8)', x: 16, y: 12, dir: 'down', shirt: '#1c1917', hat: '#dc2626', role: 'gym', gymInteriorId: 'GYM_GIOVANNI', badgeId: 'earth',   badgeName: 'תג האדמה 🏜️', rewardMoney: 4500, team: [ ['rhyhorn', 38], ['dugtrio', 40], ['nidoqueen', 41], ['nidoking', 42], ['rhydon', 44] ] },
-      { id: 'cave_guide', name: 'כניסה למערת הר הירח 🕳️', x: 47, y: 7, dir: 'down', shirt: '#78716c', hat: '#facc15', role: 'enter_interior', targetInterior: 'CAVE_MT_MOON' }
+      { id: 'erika',      name: 'אריקה (מכון העשב #4)',    x: 63,  y: 63, dir: 'down', shirt: '#22c55e', hat: '#f43f5e', role: 'gym', gymInteriorId: 'GYM_ERIKA',    badgeId: 'rainbow', badgeName: 'תג הקשת 🌿',  rewardMoney: 2800, team: [ ['tangela', 26], ['weepinbell', 28], ['vileplume', 30] ] },
+      { id: 'koga',       name: 'קוגה (מכון הרעל #5)',     x: 89,  y: 104,dir: 'down', shirt: '#9333ea', hat: '#1e1b4b', role: 'gym', gymInteriorId: 'GYM_KOGA',     badgeId: 'soul',    badgeName: 'תג הנשמה ☠️', rewardMoney: 3100, team: [ ['koffing', 30], ['muk', 32], ['venomoth', 33], ['weezing', 35] ] },
+      { id: 'sabrina',    name: 'סברינה (מכון על-חושי #6)', x: 99,  y: 52, dir: 'down', shirt: '#ec4899', hat: '#500724', role: 'gym', gymInteriorId: 'GYM_SABRINA',  badgeId: 'marsh',   badgeName: 'תג הביצה 🔮', rewardMoney: 3400, team: [ ['kadabra', 34], ['mr_mime', 35], ['venomoth', 36], ['alakazam', 38] ] },
+      { id: 'giovanni',   name: 'ג׳ובאני (מכון האדמה #8)', x: 38,  y: 68, dir: 'down', shirt: '#1c1917', hat: '#dc2626', role: 'gym', gymInteriorId: 'GYM_GIOVANNI', badgeId: 'earth',   badgeName: 'תג האדמה 🏜️', rewardMoney: 4500, team: [ ['rhyhorn', 38], ['dugtrio', 40], ['nidoqueen', 41], ['nidoking', 42], ['rhydon', 44] ] },
+      { id: 'cave_guide', name: 'כניסה למערת הר הירח 🕳️', x: 65,  y: 19, dir: 'down', shirt: '#78716c', hat: '#facc15', role: 'enter_interior', targetInterior: 'CAVE_MT_MOON' }
     ];
     EXTRA_NPCS.forEach(n => {
       if (!NPCS.some(existing => existing.id === n.id)) NPCS.push(n);
@@ -2463,8 +2802,8 @@
         state.player.y = state.savedOverworldPos.y;
         state.player.dir = state.savedOverworldPos.dir || 'down';
       } else {
-        state.player.x = 11.5 * TILE_SIZE;
-        state.player.y = 44.5 * TILE_SIZE;
+        state.player.x = 34.5 * TILE_SIZE;
+        state.player.y = 108.5 * TILE_SIZE;
       }
       state.partnerTrail = [];
       sfx.playConfirm();
@@ -2722,8 +3061,8 @@
 
     // 2. Overworld HM Obstacles: Cuttable Bushes (Tile 21) & Strength Boulders (Tile 22)
     function placeHMObstaclesOnWorldMap() {
-      const cutBushes = [ [12, 22], [25, 31], [36, 9], [44, 27] ];
-      const strengthBoulders = [ [42, 11], [48, 12], [13, 7] ];
+      const cutBushes = [ [40, 50], [62, 63], [88, 89], [106, 26] ];
+      const strengthBoulders = [ [67, 24], [133, 36], [13, 35] ];
       cutBushes.forEach(([c, r]) => { if (WORLD_MAP[r]) WORLD_MAP[r][c] = 21; });
       strengthBoulders.forEach(([c, r]) => { if (WORLD_MAP[r]) WORLD_MAP[r][c] = 22; });
     }
@@ -2732,17 +3071,17 @@
     // 3. Route Trainers with Line-of-Sight ('!'), Team Rocket, Fossil Scientist & Daycare NPCs
     const V4_NPCS = [
       // Route Trainers (Line-of-Sight!)
-      { id: 'rt_bug1',     name: 'לוכד החרקים סמי 👀', x: 9,  y: 23, dir: 'right', shirt: '#84cc16', hat: '#fef08a', role: 'route_trainer', sightRange: 3.6, rewardMoney: 450,  team: [ ['caterpie', 8], ['weedle', 8], ['butterfree', 10] ], intro: 'היי! המבטים שלנו נפגשו! חרקי היער שלי בלתי מנוצחים!' },
-      { id: 'rt_lass1',    name: 'המאמנת ליסה 👀',     x: 22, y: 38, dir: 'left',  shirt: '#f43f5e', hat: '#fbcfe8', role: 'route_trainer', sightRange: 3.6, rewardMoney: 550,  team: [ ['pidgey', 9], ['jigglypuff', 10] ], intro: 'ראיתי אותך עובר בדרך 2! בוא נראה כמה הפוקימונים שלך חזקים!' },
-      { id: 'rt_hiker1',   name: 'המטייל דניאל 👀',    x: 41, y: 15, dir: 'down',  shirt: '#d97706', hat: '#78350f', role: 'route_trainer', sightRange: 3.6, rewardMoney: 800,  team: [ ['geodude', 16], ['machop', 17], ['onix', 18] ], intro: 'אף מאמן לא חוצה את הר הירח בלי קרב סלעים אמיתי!' },
-      { id: 'rt_rocket1',  name: 'חייל צוות רוקט R 👀', x: 51, y: 10, dir: 'left',  shirt: '#1e293b', hat: '#ef4444', role: 'route_trainer', sightRange: 3.8, rewardMoney: 950,  team: [ ['ekans', 18], ['zubat', 18], ['koffing', 20] ], intro: 'צוות רוקט ישתלט על כל המאובנים והפוקימונים הנדירים בהר הירח!' },
-      { id: 'rt_swimmer1', name: 'השחיין רון 👀',      x: 42, y: 45, dir: 'up',    shirt: '#0ea5e9', hat: '#fde047', role: 'route_trainer', sightRange: 3.6, rewardMoney: 1100, team: [ ['horsea', 26], ['shellder', 27], ['starmie', 29] ], intro: 'אתה גולש על המים לעבר אי סיניבר? בוא לקרב מים!' },
-      // Rival Gary on Route 22 / Cerulean Bridge
-      { id: 'rival_mid',   name: 'היריב גארי (מפגש דרך) 👀', x: 32, y: 17, dir: 'down', shirt: '#7e22ce', hat: '#facc15', role: 'route_trainer', sightRange: 3.8, rewardMoney: 1500, team: [ ['pidgeotto', 19], ['kadabra', 20], ['gyarados', 22] ], intro: 'יו! ידעתי שתגיע לסרוליאן! אני כבר תפסתי מעל 20 מינים, בוא נבדוק אם השתפרת!' },
+      { id: 'rt_bug1',     name: 'לוכד החרקים סמי 👀',       x: 38,  y: 50,  dir: 'left',  shirt: '#84cc16', hat: '#fef08a', role: 'route_trainer', sightRange: 3.6, rewardMoney: 450,  team: [ ['caterpie', 8], ['weedle', 8], ['butterfree', 10] ], intro: 'היי! המבטים שלנו נפגשו! חרקי יער וירידיאן שלי בלתי מנוצחים!' },
+      { id: 'rt_lass1',    name: 'המאמנת ליסה 👀',           x: 33,  y: 37,  dir: 'down',  shirt: '#f43f5e', hat: '#fbcfe8', role: 'route_trainer', sightRange: 3.6, rewardMoney: 550,  team: [ ['pidgey', 9], ['jigglypuff', 10] ], intro: 'ראיתי אותך יוצא מיער וירידיאן בדרך 2! בוא נראה כמה הפוקימונים שלך חזקים!' },
+      { id: 'rt_hiker1',   name: 'המטייל דניאל 👀',          x: 50,  y: 26,  dir: 'left',  shirt: '#d97706', hat: '#78350f', role: 'route_trainer', sightRange: 3.6, rewardMoney: 800,  team: [ ['geodude', 14], ['machop', 15], ['onix', 16] ], intro: 'אף מאמן לא חוצה את דרך 3 להר הירח בלי קרב סלעים אמיתי!' },
+      { id: 'rt_rocket1',  name: 'חייל צוות רוקט R 👀',       x: 69,  y: 26,  dir: 'left',  shirt: '#1e293b', hat: '#ef4444', role: 'route_trainer', sightRange: 3.8, rewardMoney: 950,  team: [ ['ekans', 17], ['zubat', 17], ['koffing', 19] ], intro: 'צוות רוקט ישתלט על כל המאובנים והפוקימונים הנדירים בהר הירח!' },
+      { id: 'rt_swimmer1', name: 'השחיין רון 👀',            x: 63,  y: 124, dir: 'left',  shirt: '#0ea5e9', hat: '#fde047', role: 'route_trainer', sightRange: 3.6, rewardMoney: 1100, team: [ ['horsea', 26], ['shellder', 27], ['starmie', 29] ], intro: 'אתה גולש בדרך ימית 20 ליד איי קצף הים? בוא לקרב מים!' },
+      // Rival Gary on Nugget Bridge (Route 24)
+      { id: 'rival_mid',   name: 'היריב גארי (גשר הזהב) 👀',  x: 95,  y: 15,  dir: 'down',  shirt: '#7e22ce', hat: '#facc15', role: 'route_trainer', sightRange: 3.8, rewardMoney: 1500, team: [ ['pidgeotto', 19], ['kadabra', 20], ['gyarados', 22] ], intro: 'יו! הגעת לגשר הזהב בסרוליאן! אני כבר תפסתי מעל 20 מינים, בוא נבדוק אם השתפרת!' },
       // Special Classic Kanto Feature NPCs:
-      { id: 'fossil_doc',  name: 'מדען החייאת מאובנים 🧬', x: 47, y: 50, dir: 'down', shirt: '#f8fafc', hat: '#38bdf8', role: 'fossil_lab' },
-      { id: 'daycare_npc', name: 'בעלת בית הגידול 🏡',     x: 29, y: 15, dir: 'down', shirt: '#ec4899', hat: '#fef08a', role: 'daycare' },
-      { id: 'rocket_door', name: 'מפקדת צוות רוקט ולוונדר 👻', x: 52, y: 27, dir: 'down', shirt: '#1e293b', hat: '#ef4444', role: 'enter_interior', targetInterior: 'ROCKET_TOWER' }
+      { id: 'fossil_doc',  name: 'מדען החייאת מאובנים 🧬',    x: 41,  y: 134, dir: 'down',  shirt: '#f8fafc', hat: '#38bdf8', role: 'fossil_lab' },
+      { id: 'daycare_npc', name: 'בעלת בית הגידול 🏡',       x: 98,  y: 43,  dir: 'down',  shirt: '#ec4899', hat: '#fef08a', role: 'daycare' },
+      { id: 'rocket_door', name: 'כניסה למגדל הרוחות 👻',     x: 137, y: 56,  dir: 'down',  shirt: '#1e293b', hat: '#ef4444', role: 'enter_interior', targetInterior: 'ROCKET_TOWER' }
     ];
     V4_NPCS.forEach(n => {
       if (!NPCS.some(e => e.id === n.id)) NPCS.push(n);
@@ -2945,8 +3284,8 @@
       savedOverworldPos: null,
       partnerTrail: [],
       player: {
-        x: 11.5 * TILE_SIZE,
-        y: 44.5 * TILE_SIZE,
+        x: 34.5 * TILE_SIZE,
+        y: 108.5 * TILE_SIZE,
         dir: 'down',
         moving: false,
         walkCycle: 0,
@@ -3026,7 +3365,7 @@
       all[cleanName] = {
         saveName: cleanName,
         updatedAt: Date.now(),
-        mapVersion: 2,
+        mapVersion: 3,
         playerX: state.player.x,
         playerY: state.player.y,
         playerDir: state.player.dir,
@@ -3069,12 +3408,12 @@
       const data = all[slotName];
       if (!data) return false;
       state.saveName = data.saveName || slotName;
-      if (data.mapVersion === 2 && data.playerX && data.playerY) {
+      if (data.mapVersion === 3 && data.playerX && data.playerY) {
         state.player.x = data.playerX;
         state.player.y = data.playerY;
       } else {
-        state.player.x = 11.5 * TILE_SIZE;
-        state.player.y = 44.5 * TILE_SIZE;
+        state.player.x = 34.5 * TILE_SIZE;
+        state.player.y = 108.5 * TILE_SIZE;
       }
       state.player.dir = data.playerDir || 'down';
       state.money = typeof data.money === 'number' ? data.money : 1500;
@@ -3128,8 +3467,8 @@
       const cleanName = (customName || 'אש').trim() || 'אש';
       const normStarter = normalizeSpeciesId(starterId || 'pikachu');
       state.saveName = cleanName;
-      state.player.x = 11.5 * TILE_SIZE;
-      state.player.y = 44.5 * TILE_SIZE;
+      state.player.x = 34.5 * TILE_SIZE;
+      state.player.y = 108.5 * TILE_SIZE;
       state.player.dir = 'down';
       state.money = 1800;
       state.badges = {};
@@ -3170,8 +3509,8 @@
       showDialogue(
         'פרופסור אוק',
         [
-          `ברוך הבא למחוז קאנטו המורחב, ${cleanName}! בחרת את ${SPECIES_DB[normStarter].name} בתור השותף שלך!`,
-          'במחוז חיים 151 מיני פוקימונים עם התפתחויות! תוכל לבקר בחנויות (🏪), להשלים משימות (📜), להחליף פוקימונים (🔄) ולהשתגר בין ערים במפה (🗺️)!'
+          `ברוך הבא למחוז קאנטו המקורי, ${cleanName}! בחרת את ${SPECIES_DB[normStarter].name} בתור השותף שלך!`,
+          'צא מעיירת פאלט צפונה בדרך 1 אל עיר וירידיאן, יער וירידיאן ועיר פיוטר (מכון #1 של ברוק), או פתח את ה-🗺️ מפה למעלה!'
         ]
       );
     }
@@ -3217,20 +3556,22 @@
 
       const banner = document.getElementById('activeQuestBanner');
       if (banner) {
+        const isBattle = state.mode === 'BATTLE';
         if (hasClaimable) {
           banner.textContent = '🎁 משימה הושלמה! לחץ לאיסוף הפרס!';
-          banner.className = 'fixed top-16 right-2.5 z-20 glass-hud rounded-xl px-3 py-1.5 text-[11px] text-emerald-300 border border-emerald-400/60 font-black pointer-events-auto cursor-pointer animate-pulse max-w-[280px] truncate';
+          banner.className = `fixed top-16 right-2.5 z-20 glass-hud rounded-xl px-3 py-1.5 text-[11px] text-emerald-300 border border-emerald-400/60 font-black pointer-events-auto cursor-pointer animate-pulse max-w-[280px] truncate ${isBattle ? 'hidden' : ''}`;
         } else if (nextQuest) {
           banner.textContent = `🎯 ${nextQuest.title} (${nextQuest.progressText(state)})`;
-          banner.className = 'fixed top-16 right-2.5 z-20 glass-hud rounded-xl px-3 py-1.5 text-[11px] text-amber-200 font-bold pointer-events-auto cursor-pointer hover:border-amber-400/50 transition max-w-[280px] truncate';
+          banner.className = `fixed top-16 right-2.5 z-20 glass-hud rounded-xl px-3 py-1.5 text-[11px] text-amber-200 font-bold pointer-events-auto cursor-pointer hover:border-amber-400/50 transition max-w-[280px] truncate ${isBattle ? 'hidden' : ''}`;
         } else {
           banner.textContent = `🏆 כל המשימות הושלמו! פוקידע: ${caughtCount}/151`;
+          if (isBattle) banner.classList.add('hidden');
         }
       }
     }
 
     /********************************************************************
-     * 6. CONTINUOUS MOVEMENT & COLLISION ENGINE (64x56 MAP)
+     * 6. CONTINUOUS MOVEMENT & COLLISION ENGINE (160x144 KANTO MAP)
      ********************************************************************/
     const inputState = {
       vx: 0,
@@ -3267,6 +3608,26 @@
         !isPointSolid(wx - r, wy + r) &&
         !isPointSolid(wx + r, wy + r)
       );
+    }
+
+    function handleOverworldDoorAction(tx, ty, tile) {
+      const target = DOOR_TARGETS[`${tx},${ty}`];
+      if (target === 'GAME_CORNER') {
+        openGameCornerModal();
+        return true;
+      }
+      if (target === 'TRADE') {
+        openTradeModal();
+        return true;
+      }
+      if (target && INTERIOR_MAPS[target]) {
+        enterInteriorMap(target);
+        return true;
+      }
+      if (tile === 7) { enterInteriorMap('POKECENTER'); return true; }
+      if (tile === 12) { enterInteriorMap('POKEMART'); return true; }
+      if (tile === 14) { openTradeModal(); return true; }
+      return false;
     }
 
     function updateContinuousPlayerMovement() {
@@ -3329,15 +3690,9 @@
           exitInteriorToOverworld();
           return;
         }
-        // Step directly onto a building door in Overworld -> Enter the interior hall!
+        // Step directly onto a building door in Overworld -> Enter the mapped interior hall!
         if (!mData.isInterior && (tile === 7 || tile === 12 || tile === 14)) {
-          if (tile === 7) enterInteriorMap(ty >= 38 && tx <= 20 ? 'LAB' : 'POKECENTER');
-          else if (tile === 12) enterInteriorMap('POKEMART');
-          else if (tile === 14) {
-            if (ty <= 8 && tx <= 20) enterInteriorMap('INDIGO_HALL');
-            else if (ty <= 14 && tx >= 30) enterInteriorMap('GYM_MISTY');
-            else enterInteriorMap('GYM_SURGE');
-          }
+          handleOverworldDoorAction(tx, ty, tile);
           return;
         }
 
@@ -3548,16 +3903,8 @@
       const ty = Math.floor(lookY / TILE_SIZE);
       const tile = WORLD_MAP[ty]?.[tx];
 
-      if (tile === 7) {
-        healEntireParty();
-        return;
-      }
-      if (tile === 12) {
-        openShopModal();
-        return;
-      }
-      if (tile === 14) {
-        openTradeModal();
+      if (tile === 7 || tile === 12 || tile === 14) {
+        handleOverworldDoorAction(tx, ty, tile);
         return;
       }
       if (tile === 8) {
@@ -3671,6 +4018,8 @@
       state.mode = 'BATTLE';
       document.getElementById('overworldTouchControls').classList.add('hidden');
       document.getElementById('joystickBase').classList.add('hidden');
+      document.getElementById('topHudControls')?.classList.add('hidden');
+      document.getElementById('activeQuestBanner')?.classList.add('hidden');
       document.getElementById('battleOverlay').classList.remove('hidden');
       updateBattleButtonsForMode();
 
@@ -3716,6 +4065,8 @@
       state.mode = 'BATTLE';
       document.getElementById('overworldTouchControls').classList.add('hidden');
       document.getElementById('joystickBase').classList.add('hidden');
+      document.getElementById('topHudControls')?.classList.add('hidden');
+      document.getElementById('activeQuestBanner')?.classList.add('hidden');
       document.getElementById('battleOverlay').classList.remove('hidden');
 
       showBattleMessages([`${npc.name} מזמין אותך לקרב רשמי!`, `${npc.name} שלח את ${tParty[0].name} (רמה ${tParty[0].level})!`], 'MENU');
@@ -3774,6 +4125,8 @@
       document.getElementById('battleOverlay').classList.add('hidden');
       document.getElementById('overworldTouchControls').classList.remove('hidden');
       document.getElementById('joystickBase').classList.remove('hidden');
+      document.getElementById('topHudControls')?.classList.remove('hidden');
+      document.getElementById('activeQuestBanner')?.classList.remove('hidden');
 
       if (pendingEvo) {
         evolveMonsterInPlace(pendingEvo.mon, pendingEvo.targetId);
@@ -4734,21 +5087,25 @@
 
       renderBattleAttackVisual(ctx, b);
       const cardW = Math.min(240, w * 0.46);
-      drawBattleStatCard(14, 62, cardW, eMon, false);
+      const topHudEl = document.getElementById('topHud');
+      const hudBottom = topHudEl ? topHudEl.getBoundingClientRect().bottom : 58;
+      const enemyCardY = Math.max(66, Math.ceil(hudBottom) + 10);
+      drawBattleStatCard(14, enemyCardY, cardW, eMon, false);
       drawBattleStatCard(w - cardW - 14, h * 0.44, cardW, pMon, true);
 
       if (b.isSafari) {
+        const safariBannerY = enemyCardY + 70;
         ctx.fillStyle = 'rgba(20, 83, 45, 0.92)';
         ctx.strokeStyle = '#4ade80';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(w / 2 - 140, 62, 280, 32, 12);
+        ctx.roundRect(14, safariBannerY, Math.min(280, w - 28), 32, 12);
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = '#fef08a';
         ctx.font = '900 12px system-ui, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`🦓 ספארי • 🟢 כדורים: ${state.safariBalls ?? 30} • לכידה x${(b.safariCatchFactor || 1).toFixed(1)}`, w / 2, 82);
+        ctx.fillText(`🦓 ספארי • 🟢 כדורים: ${state.safariBalls ?? 30} • לכידה x${(b.safariCatchFactor || 1).toFixed(1)}`, 14 + Math.min(280, w - 28) / 2, safariBannerY + 20);
       }
       ctx.restore();
     }
@@ -5706,14 +6063,14 @@
     function openMapModal() {
       const mCanvas = document.getElementById('minimapCanvas');
       const mctx = mCanvas.getContext('2d');
-      const scale = 5; // 64*5 = 320, 56*5 = 280
+      const scale = 2; // 160*2 = 320, 144*2 = 288
       mctx.clearRect(0, 0, mCanvas.width, mCanvas.height);
 
       const tileColors = {
         0: '#22c55e', 1: '#064e3b', 2: '#15803d', 3: '#0284c7', 4: '#f43f5e',
         5: '#e2e8f0', 6: '#ef4444', 7: '#ef4444', 8: '#d97706', 9: '#fde047',
         10: '#facc15', 11: '#3b82f6', 12: '#3b82f6', 13: '#eab308', 14: '#eab308',
-        15: '#57534e', 16: '#292524', 17: '#fef08a'
+        15: '#57534e', 16: '#292524', 17: '#fef08a', 21: '#4ade80', 22: '#a8a29e'
       };
 
       for (let r = 0; r < MAP_ROWS; r++) {
@@ -5722,6 +6079,41 @@
           mctx.fillRect(c * scale, r * scale, scale, scale);
         }
       }
+
+      // Draw Kanto City Markers & Labels on Town Map
+      const mapLabels = [
+        { name: 'פאלט',     x: 34.5,  y: 108.5, color: '#f8fafc' },
+        { name: 'וירידיאן', x: 34.5,  y: 72.5,  color: '#4ade80' },
+        { name: 'פיוטר',    x: 34.5,  y: 27.5,  color: '#d6d3d1' },
+        { name: 'הר הירח',  x: 65.5,  y: 23.0,  color: '#fbbf24' },
+        { name: 'סרוליאן',  x: 95.5,  y: 26.5,  color: '#38bdf8' },
+        { name: 'ספרון',    x: 95.5,  y: 57.5,  color: '#f472b6' },
+        { name: 'סלדון',    x: 68.5,  y: 57.5,  color: '#a3e635' },
+        { name: 'לוונדר',   x: 133.5, y: 58.5,  color: '#c084fc' },
+        { name: 'ורמיליון', x: 95.5,  y: 84.5,  color: '#facc15' },
+        { name: 'פושיה/ספארי', x: 85.5, y: 106.5, color: '#fb7185' },
+        { name: 'סיניבר',   x: 35.5,  y: 129.5, color: '#f87171' },
+        { name: 'אינדיגו',  x: 13.5,  y: 14.5,  color: '#fde047' }
+      ];
+      mctx.font = 'bold 9px system-ui, sans-serif';
+      mctx.textAlign = 'center';
+      mapLabels.forEach(loc => {
+        const lx = loc.x * scale;
+        const ly = loc.y * scale;
+        mctx.fillStyle = '#0f172a';
+        mctx.beginPath();
+        mctx.arc(lx, ly, 3.5, 0, Math.PI * 2);
+        mctx.fill();
+        mctx.fillStyle = loc.color;
+        mctx.beginPath();
+        mctx.arc(lx, ly, 2.2, 0, Math.PI * 2);
+        mctx.fill();
+        mctx.strokeStyle = 'rgba(2, 6, 23, 0.9)';
+        mctx.lineWidth = 2.5;
+        mctx.strokeText(loc.name, lx, ly - 5);
+        mctx.fillStyle = '#ffffff';
+        mctx.fillText(loc.name, lx, ly - 5);
+      });
 
       // Draw Player Marker on Minimap
       const px = (state.player.x / TILE_SIZE) * scale;
@@ -5746,9 +6138,13 @@
           <div class="text-[10px] text-indigo-300 mt-0.5">${pt.desc}</div>
         `;
         btn.addEventListener('click', () => {
+          if (state.currentMap && state.currentMap !== 'OVERWORLD') {
+            exitInteriorToOverworld();
+          }
           state.player.x = pt.x * TILE_SIZE;
           state.player.y = pt.y * TILE_SIZE;
           state.player.dir = 'down';
+          state.partnerTrail = [];
           document.getElementById('mapModal').classList.add('hidden');
           document.getElementById('mapModal').classList.remove('flex');
           sfx.playConfirm();
@@ -6364,7 +6760,7 @@
     if (!NPCS.some(n => n.id === 'celadon_casino_host')) {
       NPCS.push({
         id: 'celadon_casino_host',
-        x: 34, y: 26,
+        x: 76, y: 52,
         name: 'מנהל קזינו סלדון 🎰',
         role: 'game_corner',
         color: '#f59e0b',
@@ -6378,7 +6774,7 @@
 
     // 1. Safari Zone Dynamic 4-Button UI & Encounter Logic
     function isTileInSafariZone(tx, ty) {
-      return (state.currentMap || 'OVERWORLD') === 'OVERWORLD' && tx > 43 && ty >= 20 && ty <= 39;
+      return (state.currentMap || 'OVERWORLD') === 'OVERWORLD' && tx >= 74 && tx <= 95 && ty >= 95 && ty <= 100;
     }
 
     function updateBattleButtonsForMode() {

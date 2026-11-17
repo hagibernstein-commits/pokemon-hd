@@ -322,6 +322,10 @@
           <span>🪪</span>
           <span class="hidden lg:inline">מאמן</span>
         </button>
+        <button id="btnGameCornerHud" class="glass-hud px-2.5 py-1.5 rounded-xl text-xs font-bold text-yellow-300 hover:bg-slate-800/80 active:scale-95 transition flex items-center gap-1" title="קזינו סלדון ודלפק פרסים (פוריגון, דרטיני, TM15)">
+          <span>🎰</span>
+          <span class="hidden lg:inline">קזינו</span>
+        </button>
         <button id="btnExitInteriorHud" class="glass-hud px-2.5 py-1.5 rounded-xl text-xs font-black text-rose-300 border border-rose-400/50 hover:bg-rose-900/50 active:scale-95 transition hidden" title="צא מהאולם אל מפת קאנטו">
           <span>🚪 צא החוצה</span>
         </button>
@@ -699,6 +703,71 @@
         <button id="btnCloseEvoModal" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black text-sm shadow-lg">
           🎉 איזה יופי! המשך
         </button>
+      </div>
+    </div>
+
+
+    <!-- Celadon Game Corner (Slot Machine & Prize Exchange) Modal -->
+    <div id="gameCornerModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+      <div class="glass-modal rounded-3xl max-w-lg w-full p-5 space-y-4 border-2 border-amber-400/60 scroll-y max-h-[92dvh]">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
+          <div>
+            <div class="text-[10px] font-black text-amber-300 uppercase tracking-widest">CELADON GAME CORNER 🎰</div>
+            <h2 class="text-base font-black text-white">🎰 אולם השעשועים ודלפק הפרסים של סלדון</h2>
+          </div>
+          <button id="btnCloseGameCorner" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">סגור ✕</button>
+        </div>
+
+        <!-- Wallet & Coins Bar -->
+        <div class="flex items-center justify-between bg-slate-900/95 border border-amber-400/40 rounded-2xl p-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-extrabold text-amber-300">🪙 מטבעות קזינו: <strong id="gcCoinsDisplay" class="text-white text-sm">100</strong></span>
+            <span class="text-slate-500">|</span>
+            <span class="text-xs font-extrabold text-emerald-300">ארנק: <strong id="gcMoneyDisplay">₽ 1,500</strong></span>
+          </div>
+          <button id="btnBuyCoins" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition">
+            קנה +100 🪙 (₽500)
+          </button>
+        </div>
+
+        <!-- 3-Reel Pokemon Slot Machine -->
+        <div class="bg-slate-950 border-2 border-purple-500/50 rounded-2xl p-4 text-center space-y-3">
+          <div class="text-xs font-extrabold text-purple-300">🎲 מכונת המזל של סלדון (עלות סיבוב: 10 🪙)</div>
+          <div class="flex items-center justify-center gap-3 py-2">
+            <div id="slotReel1" class="w-16 h-16 rounded-2xl bg-slate-900 border-2 border-amber-400 flex items-center justify-center text-2xl font-black shadow-lg">⚡</div>
+            <div id="slotReel2" class="w-16 h-16 rounded-2xl bg-slate-900 border-2 border-amber-400 flex items-center justify-center text-2xl font-black shadow-lg">7️⃣</div>
+            <div id="slotReel3" class="w-16 h-16 rounded-2xl bg-slate-900 border-2 border-amber-400 flex items-center justify-center text-2xl font-black shadow-lg">💎</div>
+          </div>
+          <div id="slotResultBanner" class="text-xs font-black text-emerald-300 min-h-[1.25rem]">סובב את הגלגלים וזכה בעד 300 מטבעות!</div>
+          <button id="btnSpinSlots" class="w-full py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-sm shadow-lg transition">
+            🎰 סובב גלגלים! (-10 🪙)
+          </button>
+        </div>
+
+        <!-- Prize Exchange Counter -->
+        <div class="space-y-2">
+          <h3 class="text-xs font-extrabold text-sky-300">🎁 דלפק החלפת פרסים ופוקימונים נדירים:</h3>
+          <div id="gcPrizesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 scroll-y pr-1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Move Replacement Choice Modal (4-Move Limit & Move Reminder) -->
+    <div id="moveReplaceModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+      <div class="glass-modal rounded-3xl max-w-md w-full p-5 space-y-3.5 border-2 border-emerald-400/60 scroll-y max-h-[92dvh]">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+          <div>
+            <div class="text-[10px] font-black text-emerald-300 uppercase tracking-widest">MOVE LEARN & REMINDER 🧠</div>
+            <h2 id="moveReplaceTitle" class="text-base font-black text-white">📚 בחירת מתקפה להחלפה</h2>
+          </div>
+          <button id="btnCancelMoveReplace" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">ותר על המהלך ✕</button>
+        </div>
+
+        <p id="moveReplaceDesc" class="text-xs text-slate-200 leading-relaxed"></p>
+        <div id="moveReplaceNewCard" class="p-3 rounded-2xl bg-emerald-950/60 border border-emerald-400/60"></div>
+
+        <div class="text-xs font-extrabold text-amber-300">בחר איזו מ-4 המתקפות הקיימות לשכוח ולהחליף:</div>
+        <div id="moveReplaceCurrentList" class="space-y-2"></div>
       </div>
     </div>
 
@@ -2192,6 +2261,7 @@
     // 7. Illustrated 2D-HD Artwork Renderer (vs. Procedural Shapes)
     function drawIllustratedFeatures(ctx, sp, r, tick, isBack) {
       if (state.graphicsMode === 'PROCEDURAL') return; // Skip illustrated anatomical layers in classic mode
+      drawIconicSpeciesTraits(ctx, sp, r, tick, isBack);
 
       // A) Anatomical Legs / Feet / Paws with Claws (for non-floating/non-serpent)
       if (sp.shape !== 'floating' && sp.shape !== 'serpent' && sp.shape !== 'aquatic') {
@@ -2973,7 +3043,9 @@
         championDefeated: !!state.championDefeated,
         defeatedTrainers: { ...(state.defeatedTrainers || {}) },
         eliteFourDefeated: { ...(state.eliteFourDefeated || {}) },
-        revivedFossils: { ...(state.revivedFossils || {}) }
+        revivedFossils: { ...(state.revivedFossils || {}) },
+        coins: state.coins ?? 250,
+        safariBalls: state.safariBalls ?? 30
       };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
@@ -3028,6 +3100,8 @@
       state.defeatedTrainers = data.defeatedTrainers || {};
       state.eliteFourDefeated = data.eliteFourDefeated || {};
       state.revivedFossils = data.revivedFossils || {};
+      state.coins = typeof data.coins === 'number' ? data.coins : 250;
+      state.safariBalls = typeof data.safariBalls === 'number' ? data.safariBalls : 30;
       syncPartyToDex();
 
       try { localStorage.setItem(ACTIVE_SLOT_KEY, state.saveName); } catch (_) {}
@@ -3358,6 +3432,10 @@
         const nx = (npc.x + 0.5) * TILE_SIZE;
         const ny = (npc.y + 0.5) * TILE_SIZE;
         if (Math.hypot(state.player.x - nx, state.player.y - ny) < TILE_SIZE * 1.55) {
+          if (npc.role === 'game_corner') {
+            openGameCornerModal();
+            return;
+          }
           if (npc.role === 'healer') {
             healEntireParty();
             return;
@@ -3565,8 +3643,16 @@
         activeIdx = 0;
       }
 
+      const curTx = tx ?? Math.floor(state.player.x / TILE_SIZE);
+      const curTy = ty ?? Math.floor(state.player.y / TILE_SIZE);
+      const inSafari = isTileInSafariZone(curTx, curTy);
+
       state.battle = {
         isTrainer: false,
+        isSafari: inSafari,
+        safariCatchFactor: 1.0,
+        safariFleeFactor: 1.0,
+        safariStatusText: '',
         trainerNpc: null,
         trainerName: null,
         trainerParty: [enemy],
@@ -3586,9 +3672,14 @@
       document.getElementById('overworldTouchControls').classList.add('hidden');
       document.getElementById('joystickBase').classList.add('hidden');
       document.getElementById('battleOverlay').classList.remove('hidden');
+      updateBattleButtonsForMode();
 
       sfx.playConfirm();
-      showBattleMessages([`פוקימון פרא ${enemy.name} (#${enemy.dex} • רמה ${enemy.level}) הופיע!`], 'MENU');
+      if (inSafari) {
+        showBattleMessages([`🦓 אזור הספארי: ${enemy.name} פראי (#${enemy.dex} • רמה ${enemy.level}) הופיע! בחר: כדור ספארי, פיתיון או אבן!`], 'MENU');
+      } else {
+        showBattleMessages([`פוקימון פרא ${enemy.name} (#${enemy.dex} • רמה ${enemy.level}) הופיע!`], 'MENU');
+      }
     }
 
     function triggerTrainerBattle(npc) {
@@ -3678,6 +3769,7 @@
     function endBattleToOverworld() {
       const pendingEvo = state.battle?.pendingEvolution;
       state.battle = null;
+      updateBattleButtonsForMode();
       state.mode = 'OVERWORLD';
       document.getElementById('battleOverlay').classList.add('hidden');
       document.getElementById('overworldTouchControls').classList.remove('hidden');
@@ -3728,6 +3820,7 @@
 
       sfx.playAttack(move.type);
       b.enemyShake = 16;
+      triggerBattleAttackVisual(move.type, true);
       spawnBattleParticles(canvas.width * 0.68, canvas.height * 0.28, SPECIES_DB[pMon.speciesId]?.primary || '#38bdf8');
 
       // Check sleep / freeze / paralysis on player Pokemon before attacking
@@ -3849,10 +3942,11 @@
           const newMoveObj = { ...learnedEntry.move, maxPp: learnedEntry.move.pp };
           if (pMon.moves.length < 4) {
             pMon.moves.push(newMoveObj);
+            msgs.push(`📚 ${pMon.name} למד מתקפה חדשה: ${newMoveObj.name}!`);
           } else {
-            pMon.moves[1] = newMoveObj;
+            setTimeout(() => promptLearnMove(pMon, newMoveObj), 400);
+            msgs.push(`📚 ${pMon.name} רוצה ללמוד את ${newMoveObj.name}! (בחר איזו מתקפה להחליף)`);
           }
-          msgs.push(`📚 ${pMon.name} למד מתקפה חדשה: ${newMoveObj.name}!`);
         }
 
         const evoTarget = checkLevelEvolution(pMon);
@@ -3901,6 +3995,19 @@
       const pMon = state.party[b.playerIndex];
       const eMon = b.enemy;
       const msgs = [];
+
+      // Safari Zone Turn: Wild Pokemon does not attack with moves; it watches or flees!
+      if (b.isSafari) {
+        const fleeChance = Math.min(0.45, 0.14 * (b.safariFleeFactor || 1.0));
+        if (Math.random() < fleeChance && !state.kidFriendlyMode) {
+          sfx.playCancel();
+          showBattleMessages([`💨 אוי! ${eMon.name} הפראי ברח אל תוך השיחים של הספארי!`], 'END_BATTLE');
+          return;
+        }
+        const watchMsg = b.safariStatusText || `🦓 ${eMon.name} מסתכל עליך בזהירות באזור הספארי...`;
+        showBattleMessages([watchMsg], 'MENU');
+        return;
+      }
       // End-of-turn Burn / Poison damage on Enemy
       if (eMon.status === 'BURN' || eMon.status === 'POISON') {
         const dot = Math.max(2, Math.floor(eMon.maxHp * 0.12));
@@ -3932,6 +4039,7 @@
 
       sfx.playAttack(move.type);
       b.playerShake = 16;
+      triggerBattleAttackVisual(move.type, false);
       spawnBattleParticles(canvas.width * 0.32, canvas.height * 0.52, SPECIES_DB[eMon.speciesId]?.primary || '#ef4444');
 
       const mult = getDualTypeMultiplier(move.type, pMon);
@@ -4492,6 +4600,12 @@
       const pMon = state.party[b.playerIndex];
       const eMon = b.enemy;
 
+      ctx.save();
+      if (b.screenShake && b.screenShake > 0) {
+        b.screenShake--;
+        ctx.translate((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 12);
+      }
+
       const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.65);
       skyGrad.addColorStop(0, '#0f172a');
       skyGrad.addColorStop(0.5, '#1e3a8a');
@@ -4551,7 +4665,7 @@
           }
         }
 
-        const ballColors = { pokeball: '#ef4444', greatball: '#2563eb', ultraball: '#eab308', masterball: '#9333ea' };
+        const ballColors = { pokeball: '#ef4444', greatball: '#2563eb', ultraball: '#eab308', masterball: '#9333ea', safariball: '#16a34a' };
         ctx.save();
         ctx.translate(bx, by);
         ctx.fillStyle = ballColors[b.ballAnim.ballKey] || '#ef4444';
@@ -4618,9 +4732,25 @@
         ctx.restore();
       }
 
+      renderBattleAttackVisual(ctx, b);
       const cardW = Math.min(240, w * 0.46);
       drawBattleStatCard(14, 62, cardW, eMon, false);
       drawBattleStatCard(w - cardW - 14, h * 0.44, cardW, pMon, true);
+
+      if (b.isSafari) {
+        ctx.fillStyle = 'rgba(20, 83, 45, 0.92)';
+        ctx.strokeStyle = '#4ade80';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(w / 2 - 140, 62, 280, 32, 12);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#fef08a';
+        ctx.font = '900 12px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`🦓 ספארי • 🟢 כדורים: ${state.safariBalls ?? 30} • לכידה x${(b.safariCatchFactor || 1).toFixed(1)}`, w / 2, 82);
+      }
+      ctx.restore();
     }
 
     function gameLoop() {
@@ -4929,6 +5059,7 @@
         const b = state.battle;
         if (!b) return;
         sfx.playConfirm();
+        if (b.isSafari && handleSafariAction(act)) return;
 
         if (act === 'fight') {
           const pMon = state.party[b.playerIndex];
@@ -5064,6 +5195,7 @@
             </div>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
+            ${!fromBattle ? `<button data-moves="${idx}" class="px-2 py-1.5 rounded-xl bg-purple-500/20 border border-purple-400/40 text-purple-200 text-[10px] font-bold" title="מזכיר המהלכים: שחזר או החלף מתקפות">🧠 מהלכים</button>` : ''}
             ${!fromBattle ? `<button data-hold="${idx}" class="px-2 py-1.5 rounded-xl bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 text-[10px] font-bold" title="צייד או החלף פריט מוחזק">🎒 חפץ</button>` : ''}
             <button data-lead="${idx}" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[11px] font-bold">
               ${fromBattle ? 'שלח לקרב' : (idx === 0 ? 'מוביל ★' : 'קבע כמוביל')}
@@ -5090,6 +5222,13 @@
             openPartyBagModal(false);
           }
         });
+        const movesBtn = row.querySelector('[data-moves]');
+        if (movesBtn) {
+          movesBtn.addEventListener('click', () => {
+            sfx.playConfirm();
+            openMoveReminderForMon(mon);
+          });
+        }
         const holdBtn = row.querySelector('[data-hold]');
         if (holdBtn) {
           holdBtn.addEventListener('click', () => {
@@ -5200,11 +5339,11 @@
         const tm = TM_DISCS_DB[itemKey];
         state.inventory[itemKey]--;
         const moveCopy = { ...tm.move, maxPp: tm.move.pp };
-        if (lead.moves.length < 4) lead.moves.push(moveCopy);
-        else lead.moves[2] = moveCopy;
-        sfx.playEvolveFanfare();
-        saveGameToSlot(state.saveName, true);
-        openPartyBagModal(false);
+        promptLearnMove(lead, moveCopy, () => {
+          sfx.playEvolveFanfare();
+          saveGameToSlot(state.saveName, true);
+          openPartyBagModal(false);
+        });
         return;
       }
 
@@ -5841,6 +5980,758 @@
         } catch (_) {}
       }
       document.getElementById('btnDownloadPortableHtml').click();
+    });
+
+
+    /********************************************************************
+     * V5 PILLAR 1 & 2:
+     * - ICONIC ANATOMICAL TRAITS FOR ALL 151 KANTO SPECIES
+     * - ELEMENTAL BATTLE PROJECTILE & BEAM ANIMATIONS PER MOVE TYPE
+     ********************************************************************/
+    function drawIconicSpeciesTraits(ctx, sp, r, tick, isBack) {
+      if (state.graphicsMode === 'PROCEDURAL') return;
+      const id = sp.id;
+      const dex = sp.dex;
+
+      // 1. Staryu (#120) & Starmie (#121): Geometric Starfish + Ruby Core
+      if (id === 'staryu' || id === 'starmie') {
+        const points = id === 'starmie' ? 10 : 5;
+        ctx.save();
+        ctx.rotate(Math.sin(tick * 0.05) * 0.15);
+        ctx.fillStyle = id === 'starmie' ? '#a855f7' : '#d97706';
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        for (let i = 0; i < points * 2; i++) {
+          const rad = (i % 2 === 0) ? r * 1.12 : r * 0.48;
+          const ang = (i * Math.PI) / points - Math.PI / 2;
+          const px = Math.cos(ang) * rad;
+          const py = Math.sin(ang) * rad;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Golden ring & Ruby jewel core
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.36, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        return;
+      }
+
+      // 2. Magnemite (#81) & Magneton (#82): Horseshoe Magnets, Screws & Cyclops Eye
+      if (id === 'magnemite' || id === 'magneton') {
+        [-1, 1].forEach(side => {
+          ctx.strokeStyle = '#94a3b8';
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.arc(side * r * 0.85, 0, r * 0.28, side === 1 ? -Math.PI/2 : Math.PI/2, side === 1 ? Math.PI/2 : -Math.PI/2);
+          ctx.stroke();
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(side * r * 0.85, -r * 0.32, side * r * 0.22, r * 0.14);
+          ctx.fillStyle = '#3b82f6';
+          ctx.fillRect(side * r * 0.85, r * 0.18, side * r * 0.22, r * 0.14);
+        });
+        if (id === 'magneton') {
+          [-0.65, 0.65].forEach(ox => {
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.arc(ox * r, r * 0.45, r * 0.48, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          });
+        }
+        // Central mechanical cyclops eye
+        if (!isBack) {
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(0, -r * 0.05, r * 0.28, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath();
+          ctx.arc(0, -r * 0.05, r * 0.10, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        return;
+      }
+
+      // 3. Voltorb (#100) & Electrode (#101): Classic Red/White Pokéball Split
+      if (id === 'voltorb' || id === 'electrode') {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.84, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.fillStyle = id === 'voltorb' ? '#ef4444' : '#ffffff';
+        ctx.fillRect(-r, -r, r * 2, r);
+        ctx.fillStyle = id === 'voltorb' ? '#ffffff' : '#ef4444';
+        ctx.fillRect(-r, 0, r * 2, r);
+        ctx.restore();
+      }
+
+      // 4. Multi-Headed Pokemon: Dugtrio (#51), Doduo (#84), Dodrio (#85), Exeggcute (#102), Exeggutor (#103), Weezing (#110)
+      if ( ['dugtrio', 'doduo', 'dodrio', 'exeggcute', 'exeggutor', 'weezing'].includes(id) ) {
+        const offsets = id === 'doduo' || id === 'weezing' ? [-0.55, 0.55] : [-0.62, 0, 0.62];
+        offsets.forEach((ox, idx) => {
+          if (ox === 0) return;
+          ctx.fillStyle = sp.primary;
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.arc(ox * r, -r * 0.28 + (idx % 2) * r * 0.12, r * 0.42, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          if (!isBack) {
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(ox * r - r * 0.1, -r * 0.32, r * 0.06, 0, Math.PI * 2);
+            ctx.arc(ox * r + r * 0.1, -r * 0.32, r * 0.06, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+      }
+
+      // 5. Cubone (#104) & Marowak (#105): Bone Skull Helmet & Bone Club
+      if (id === 'cubone' || id === 'marowak') {
+        ctx.fillStyle = '#f8fafc';
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, -r * 0.22, r * 0.66, Math.PI * 0.9, Math.PI * 0.1);
+        ctx.fill();
+        ctx.stroke();
+        // Bone club in hand
+        ctx.save();
+        ctx.translate(r * 0.85, 0);
+        ctx.rotate(-0.4 + Math.sin(tick * 0.15) * 0.2);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(-r * 0.1, -r * 0.55, r * 0.2, r * 0.9);
+        ctx.beginPath();
+        ctx.arc(0, -r * 0.55, r * 0.18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 6. Kadabra (#64) & Alakazam (#65): Psychic Silver Spoons & Mustache
+      if (id === 'kadabra' || id === 'alakazam') {
+        const sides = id === 'alakazam' ? [-1, 1] : [1];
+        sides.forEach(side => {
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(side * r * 0.88, r * 0.2);
+          ctx.lineTo(side * r * 0.95, -r * 0.35);
+          ctx.stroke();
+          ctx.fillStyle = '#cbd5e1';
+          ctx.beginPath();
+          ctx.ellipse(side * r * 0.95, -r * 0.45, r * 0.12, r * 0.18, 0, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        if (!isBack) {
+          ctx.strokeStyle = '#fde047';
+          ctx.lineWidth = 3;
+          [-1, 1].forEach(side => {
+            ctx.beginPath();
+            ctx.moveTo(side * r * 0.1, r * 0.05);
+            ctx.quadraticCurveTo(side * r * 0.65, r * 0.15, side * r * 0.85, r * 0.45);
+            ctx.stroke();
+          });
+        }
+      }
+
+      // 7. Gastly (#92), Haunter (#93), Gengar (#94): Ghostly Gas, Floating Claws & Wide Grin
+      if (id === 'gastly' || id === 'haunter' || id === 'gengar') {
+        for (let i = 0; i < 5; i++) {
+          const ang = tick * 0.06 + (i * Math.PI * 2) / 5;
+          ctx.fillStyle = 'rgba(168, 85, 247, 0.35)';
+          ctx.beginPath();
+          ctx.arc(Math.cos(ang) * r * 0.85, Math.sin(ang) * r * 0.65, r * 0.24, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        if (!isBack && (id === 'haunter' || id === 'gengar')) {
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(0, r * 0.16, r * 0.36, 0.1 * Math.PI, 0.9 * Math.PI);
+          ctx.fill();
+        }
+      }
+
+      // 8. Snorlax (#143): Sleeping Eyes & Huge Cream Belly
+      if (id === 'snorlax' && !isBack) {
+        ctx.fillStyle = '#fef3c7';
+        ctx.beginPath();
+        ctx.ellipse(0, r * 0.18, r * 0.62, r * 0.52, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 3;
+        [-1, 1].forEach(side => {
+          ctx.beginPath();
+          ctx.moveTo(side * r * 0.18, -r * 0.22);
+          ctx.lineTo(side * r * 0.44, -r * 0.22);
+          ctx.stroke();
+        });
+      }
+
+      // 9. Mewtwo (#150) & Mew (#151): Long Psychic Tail & Orbiting Energy Sphere
+      if (id === 'mewtwo' || id === 'mew') {
+        ctx.strokeStyle = id === 'mewtwo' ? '#a855f7' : '#f472b6';
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(0, r * 0.45);
+        ctx.bezierCurveTo(r * 1.2, r * 0.6, r * 1.35, -r * 0.5, r * 0.85, -r * 0.85);
+        ctx.stroke();
+        // Orbiting psychic orb
+        const ox = Math.cos(tick * 0.12) * r * 0.95;
+        const oy = Math.sin(tick * 0.12) * r * 0.45;
+        ctx.fillStyle = 'rgba(244, 114, 182, 0.85)';
+        ctx.beginPath();
+        ctx.arc(ox, oy, r * 0.16, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 10. Per-Dex Unique Crest / Antennae / Tail Plume so all 151 have distinct identity
+      if (sp.type === 'BUG' && !isBack) {
+        ctx.strokeStyle = sp.secondary;
+        ctx.lineWidth = 2;
+        [-1, 1].forEach(side => {
+          ctx.beginPath();
+          ctx.moveTo(side * r * 0.2, -r * 0.72);
+          ctx.quadraticCurveTo(side * r * 0.55, -r * 1.15, side * r * 0.72, -r * 0.95);
+          ctx.stroke();
+        });
+      }
+    }
+
+    // 2. Elemental Battle Attack Beam / Projectile Renderer
+    function triggerBattleAttackVisual(moveType, isPlayerAttacking) {
+      const b = state.battle;
+      if (!b) return;
+      const w = canvas.width;
+      const h = canvas.height;
+      const startX = isPlayerAttacking ? w * 0.32 : w * 0.68;
+      const startY = isPlayerAttacking ? h * 0.50 : h * 0.29;
+      const endX   = isPlayerAttacking ? w * 0.68 : w * 0.32;
+      const endY   = isPlayerAttacking ? h * 0.29 : h * 0.50;
+
+      b.attackAnim = {
+        type: moveType || 'NORMAL',
+        x1: startX, y1: startY,
+        x2: endX,   y2: endY,
+        timer: 0,
+        maxTimer: 20
+      };
+      if (moveType === 'ROCK' || moveType === 'GROUND' || moveType === 'DRAGON') {
+        b.screenShake = 14;
+      }
+    }
+
+    function renderBattleAttackVisual(ctx, b) {
+      if (!b || !b.attackAnim) return;
+      const anim = b.attackAnim;
+      anim.timer++;
+      const prog = Math.min(1, anim.timer / anim.maxTimer);
+      const cx = anim.x1 + (anim.x2 - anim.x1) * prog;
+      const cy = anim.y1 + (anim.y2 - anim.y1) * prog;
+      const t = anim.type;
+
+      ctx.save();
+      if (t === 'FIRE') {
+        // Blazing Flamethrower Stream
+        for (let i = 0; i < 6; i++) {
+          const p = Math.max(0, prog - i * 0.06);
+          const fx = anim.x1 + (anim.x2 - anim.x1) * p;
+          const fy = anim.y1 + (anim.y2 - anim.y1) * p + Math.sin(anim.timer + i) * 6;
+          const grad = ctx.createRadialGradient(fx, fy, 2, fx, fy, 22 - i * 2);
+          grad.addColorStop(0, '#fef08a');
+          grad.addColorStop(0.5, '#f97316');
+          grad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(fx, fy, 22 - i * 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (t === 'ELECTRIC') {
+        // Jagged Thunderbolt from Sky + Arc
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(anim.x2, 20);
+        ctx.lineTo(anim.x2 - 18, anim.y2 * 0.45);
+        ctx.lineTo(anim.x2 + 14, anim.y2 * 0.72);
+        ctx.lineTo(anim.x2, anim.y2);
+        ctx.stroke();
+        ctx.strokeStyle = '#eab308';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(anim.x1, anim.y1);
+        ctx.lineTo((anim.x1 + cx) / 2 + (Math.random() - 0.5) * 24, (anim.y1 + cy) / 2);
+        ctx.lineTo(cx, cy);
+        ctx.stroke();
+      } else if (t === 'WATER' || t === 'ICE') {
+        // Hydro Stream / Ice Beam with Crystals
+        ctx.strokeStyle = t === 'ICE' ? '#67e8f9' : '#38bdf8';
+        ctx.lineWidth = 10;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(anim.x1, anim.y1);
+        ctx.lineTo(cx, cy);
+        ctx.stroke();
+        ctx.fillStyle = '#e0f2fe';
+        for (let i = 0; i < 4; i++) {
+          ctx.beginPath();
+          ctx.arc(cx + (i - 1.5) * 10, cy + Math.sin(anim.timer + i) * 8, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (t === 'GRASS') {
+        // Spinning Razor Leaves
+        for (let i = 0; i < 3; i++) {
+          const p = Math.max(0, prog - i * 0.08);
+          const lx = anim.x1 + (anim.x2 - anim.x1) * p;
+          const ly = anim.y1 + (anim.y2 - anim.y1) * p - Math.sin(p * Math.PI) * 28;
+          ctx.save();
+          ctx.translate(lx, ly);
+          ctx.rotate(anim.timer * 0.35 + i);
+          ctx.fillStyle = '#4ade80';
+          ctx.strokeStyle = '#14532d';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 14, 6, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+      } else if (t === 'PSYCHIC' || t === 'GHOST') {
+        // Expanding Telekinetic Rings / Shadow Ball
+        for (let i = 0; i < 3; i++) {
+          ctx.strokeStyle = t === 'GHOST' ? '#a855f7' : '#f472b6';
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 12 + i * 8, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      } else if (t === 'ROCK' || t === 'GROUND') {
+        // Falling Boulders & Quake Shockwave
+        for (let i = -1; i <= 1; i++) {
+          ctx.fillStyle = '#78716c';
+          ctx.strokeStyle = '#292524';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(anim.x2 + i * 24, anim.y2 - (1 - prog) * 90, 12, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      } else {
+        // Energetic Impact Slash / Dragon Orb
+        ctx.fillStyle = TYPE_META[t]?.primary || '#f8fafc';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      if (anim.timer >= anim.maxTimer) {
+        b.attackAnim = null;
+      }
+    }
+
+
+    /********************************************************************
+     * V5 PILLAR 3, 4 & 5:
+     * - SAFARI ZONE AUTHENTIC 4-BUTTON MECHANIC (BALL / BAIT / ROCK / RUN)
+     * - CELADON GAME CORNER SLOT MACHINE & PRIZE EXCHANGE
+     * - 4-MOVE REPLACEMENT CHOICE MODAL & MOVE REMINDER
+     ********************************************************************/
+    state.coins = state.coins ?? 250;
+    state.safariBalls = state.safariBalls ?? 30;
+    state.safariSteps = state.safariSteps ?? 500;
+
+    // Add TM15 Hyper Beam to TM_DISCS_DB if not present
+    TM_DISCS_DB.tm15_hyperbeam = {
+      key: 'tm15_hyperbeam',
+      name: 'TM15 קרן-על (Hyper Beam)',
+      price: 5500,
+      icon: '💿',
+      move: { name: 'קרן-על היפר 💥', power: 120, type: 'NORMAL', pp: 5 }
+    };
+
+    // Add Celadon Game Corner Host NPC to Overworld NPCs
+    if (!NPCS.some(n => n.id === 'celadon_casino_host')) {
+      NPCS.push({
+        id: 'celadon_casino_host',
+        x: 34, y: 26,
+        name: 'מנהל קזינו סלדון 🎰',
+        role: 'game_corner',
+        color: '#f59e0b',
+        hat: '#7c3aed',
+        lines: [
+          'ברוך הבא לאולם משחקי המזל של סלדון (Celadon Game Corner)! 🎰',
+          'סובב את מכונת המזל או החלף מטבעות בפוריגון (#137), דרטיני (#147), סיית׳ר ו-TM15!'
+        ]
+      });
+    }
+
+    // 1. Safari Zone Dynamic 4-Button UI & Encounter Logic
+    function isTileInSafariZone(tx, ty) {
+      return (state.currentMap || 'OVERWORLD') === 'OVERWORLD' && tx > 43 && ty >= 20 && ty <= 39;
+    }
+
+    function updateBattleButtonsForMode() {
+      const b = state.battle;
+      const isSafari = !!(b && b.isSafari);
+      const btnFight = document.querySelector('[data-bact="fight"]');
+      const btnBag   = document.querySelector('[data-bact="bag"]');
+      const btnParty = document.querySelector('[data-bact="party"]');
+      const btnRun   = document.querySelector('[data-bact="run"]');
+      if (!btnFight || !btnBag || !btnParty || !btnRun) return;
+
+      if (isSafari) {
+        state.safariBalls = state.safariBalls ?? 30;
+        btnFight.innerHTML = `<span>🟢</span><span>כדור ספארי (${state.safariBalls})</span>`;
+        btnBag.innerHTML   = `<span>🍎</span><span>זרוק פיתיון (Bait)</span>`;
+        btnParty.innerHTML = `<span>🪨</span><span>זרוק אבן (Rock)</span>`;
+        btnRun.innerHTML   = `<span>🏃</span><span>ברח מהספארי</span>`;
+      } else {
+        btnFight.innerHTML = `<span>⚔️</span><span>תקיפה (קרב)</span>`;
+        btnBag.innerHTML   = `<span>🔴</span><span>זרוק פוקדור / תיק</span>`;
+        btnParty.innerHTML = `<span>🐾</span><span>החלף פוקימון</span>`;
+        btnRun.innerHTML   = `<span>🏃</span><span>בריחה</span>`;
+      }
+    }
+
+    function handleSafariAction(act) {
+      const b = state.battle;
+      if (!b || !b.isSafari) return false;
+      const eMon = b.enemy;
+
+      if (act === 'fight') {
+        // Throw Safari Ball!
+        if ((state.safariBalls || 0) <= 0) {
+          state.safariBalls = 30;
+          showBattleMessages(['חבילת כדורי הספארי חודשה ל-30 כדורים! 🟢'], 'MENU');
+          updateBattleButtonsForMode();
+          return true;
+        }
+        state.safariBalls--;
+        updateBattleButtonsForMode();
+        const baseChance = 0.34;
+        const kidBonus = state.kidFriendlyMode ? 0.16 : 0;
+        const catchProb = Math.min(0.95, Math.max(0.10, baseChance * (b.safariCatchFactor || 1.0) + kidBonus));
+        const caught = Math.random() < catchProb;
+        b.ballAnim = {
+          ballKey: 'safariball',
+          timer: 0,
+          caught
+        };
+        document.getElementById('battleMainActions').classList.add('hidden');
+        document.getElementById('battleMsgText').textContent = `זרקת כדור ספארי 🟢 לעבר ${eMon.name}! (סיכוי לכידה x${(b.safariCatchFactor || 1).toFixed(1)})`;
+        return true;
+      }
+
+      if (act === 'bag') {
+        // Throw Bait (פיתיון): lowers flee chance, slightly lowers catch factor
+        b.safariFleeFactor = Math.max(0.25, (b.safariFleeFactor || 1.0) * 0.55);
+        b.safariCatchFactor = Math.max(0.55, (b.safariCatchFactor || 1.0) * 0.85);
+        b.safariStatusText = '🍎 אוכל פיתיון בהנאה (פחות סיכוי שיברח)';
+        spawnBattleParticles(canvas.width * 0.68, canvas.height * 0.28, '#4ade80');
+        showBattleMessages([
+          `🍎 זרקת פיתיון ריחני לעבר ${eMon.name}!`,
+          `${eMon.name} אוכל בהנאה ורגוע יותר (הסיכוי שיברח קטן מאוד!)`
+        ], 'ENEMY_TURN');
+        return true;
+      }
+
+      if (act === 'party') {
+        // Throw Rock/Mud (אבן/בוץ): doubles catch factor, increases flee factor
+        b.safariCatchFactor = Math.min(3.2, (b.safariCatchFactor || 1.0) * 1.75);
+        b.safariFleeFactor = Math.min(2.5, (b.safariFleeFactor || 1.0) * 1.45);
+        b.safariStatusText = '🪨 כועס ומבולבל! (קל הרבה יותר לתפוס!)';
+        b.enemyShake = 16;
+        triggerBattleAttackVisual('ROCK', true);
+        spawnBattleParticles(canvas.width * 0.68, canvas.height * 0.28, '#f59e0b');
+        showBattleMessages([
+          `🪨 זרקת אבן ספארי ליד ${eMon.name}!`,
+          `${eMon.name} כועס! עכשיו קל פי ${b.safariCatchFactor.toFixed(1)} לתפוס אותו, אבל היזהר שלא יברח!`
+        ], 'ENEMY_TURN');
+        return true;
+      }
+
+      if (act === 'run') {
+        sfx.playCancel();
+        showBattleMessages(['עזבת את פוקימון הפרא באזור הספארי.'], 'END_BATTLE');
+        return true;
+      }
+      return false;
+    }
+
+    // 2. Move Replacement Choice Modal (4-Move Limit) & Move Reminder
+    let pendingMoveLearnState = null;
+
+    function promptLearnMove(mon, newMoveObj, onComplete = null) {
+      if (!mon || !newMoveObj) {
+        if (onComplete) onComplete();
+        return;
+      }
+      const moveCopy = { ...newMoveObj, maxPp: newMoveObj.maxPp || newMoveObj.pp };
+      if (mon.moves.some(m => m.name === moveCopy.name)) {
+        if (onComplete) onComplete();
+        return;
+      }
+      if (mon.moves.length < 4) {
+        mon.moves.push(moveCopy);
+        saveGameToSlot(state.saveName, false);
+        if (onComplete) onComplete();
+        return;
+      }
+
+      // Open 4-Move Replacement Modal so the player chooses which move to forget!
+      pendingMoveLearnState = { mon, moveCopy, onComplete };
+      const modal = document.getElementById('moveReplaceModal');
+      document.getElementById('moveReplaceTitle').textContent = `📚 ${mon.name} רוצה ללמוד מתקפה חדשה!`;
+      document.getElementById('moveReplaceDesc').textContent = `ל-${mon.name} יש כבר 4 מתקפות. בחר איזו מתקפה לשכוח כדי לפנות מקום ל-${moveCopy.name}:`;
+      document.getElementById('moveReplaceNewCard').innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-black text-emerald-300">✨ מתקפה חדשה: ${moveCopy.name}</span>
+          <span class="text-[11px] font-bold text-amber-300">עוצמה ${moveCopy.power} | PP ${moveCopy.pp} | ${TYPE_META[moveCopy.type]?.name || moveCopy.type}</span>
+        </div>
+      `;
+
+      const listEl = document.getElementById('moveReplaceCurrentList');
+      listEl.innerHTML = '';
+      mon.moves.forEach((oldMove, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-400 flex items-center justify-between text-right transition';
+        btn.innerHTML = `
+          <div>
+            <div class="text-xs font-black text-white">שכח את: ${oldMove.name}</div>
+            <div class="text-[10px] text-slate-400">סוג: ${TYPE_META[oldMove.type]?.name || oldMove.type} • עוצמה ${oldMove.power} • PP ${oldMove.pp}/${oldMove.maxPp}</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-xl bg-amber-500 text-slate-950 font-black text-[11px]">החלף בזו ↺</span>
+        `;
+        btn.addEventListener('click', () => {
+          mon.moves[idx] = moveCopy;
+          sfx.playEvolveFanfare();
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          saveGameToSlot(state.saveName, true);
+          const cb = pendingMoveLearnState?.onComplete;
+          pendingMoveLearnState = null;
+          if (cb) cb();
+        });
+        listEl.appendChild(btn);
+      });
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    document.getElementById('btnCancelMoveReplace')?.addEventListener('click', () => {
+      const modal = document.getElementById('moveReplaceModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      sfx.playCancel();
+      const cb = pendingMoveLearnState?.onComplete;
+      pendingMoveLearnState = null;
+      if (cb) cb();
+    });
+
+    function openMoveReminderForMon(mon) {
+      const sp = SPECIES_DB[mon.speciesId];
+      if (!sp) return;
+      const pool = [];
+      (sp.moves || []).forEach(m => {
+        if (!pool.some(x => x.name === m.name)) pool.push(m);
+      });
+      (sp.learnset || []).forEach(entry => {
+        if (entry.move && !pool.some(x => x.name === entry.move.name)) pool.push(entry.move);
+      });
+
+      const unlearned = pool.filter(m => !mon.moves.some(cur => cur.name === m.name));
+      if (unlearned.length === 0) {
+        showDialogue('מזכיר המהלכים 🧠', [`${mon.name} כבר מכיר את כל המהלכים האפשריים שלו כרגע!`]);
+        return;
+      }
+
+      // Let player pick which move from the species pool to learn/recall
+      const modal = document.getElementById('moveReplaceModal');
+      document.getElementById('moveReplaceTitle').textContent = `🧠 מזכיר המהלכים: ${mon.name}`;
+      document.getElementById('moveReplaceDesc').textContent = `בחר מהלך מתוך מאגר המתקפות של ${mon.name} שתרצה לשחזר או ללמוד:`;
+      document.getElementById('moveReplaceNewCard').innerHTML = `
+        <div class="text-xs font-bold text-emerald-300">מתקפות נוכחיות: ${mon.moves.map(m => m.name).join(' • ')}</div>
+      `;
+      const listEl = document.getElementById('moveReplaceCurrentList');
+      listEl.innerHTML = '';
+      unlearned.forEach(candidate => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-emerald-400 flex items-center justify-between text-right transition';
+        btn.innerHTML = `
+          <div>
+            <div class="text-xs font-black text-white">✨ למד: ${candidate.name}</div>
+            <div class="text-[10px] text-slate-400">סוג: ${TYPE_META[candidate.type]?.name || candidate.type} • עוצמה ${candidate.power} • PP ${candidate.pp}</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-xl bg-emerald-500 text-slate-950 font-black text-[11px]">בחר מהלך 🧠</span>
+        `;
+        btn.addEventListener('click', () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          promptLearnMove(mon, candidate, () => openPartyBagModal(false));
+        });
+        listEl.appendChild(btn);
+      });
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    // 3. Celadon Game Corner (Slot Machine & Prize Counter)
+    const GAME_CORNER_PRIZES = [
+      { type: 'pokemon', id: 'abra',    name: 'אברה (#63)',     cost: 120,  level: 15, icon: '🔮' },
+      { type: 'pokemon', id: 'eevee',   name: 'איווי (#133)',   cost: 300,  level: 20, icon: '🦊' },
+      { type: 'pokemon', id: 'scyther', name: 'סיית׳ר (#123)',  cost: 550,  level: 25, icon: '螳' },
+      { type: 'pokemon', id: 'pinsir',  name: 'פינסיר (#127)',  cost: 550,  level: 25, icon: '🪲' },
+      { type: 'pokemon', id: 'dratini', name: 'דרטיני (#147)',  cost: 800,  level: 24, icon: '🐉' },
+      { type: 'pokemon', id: 'porygon', name: 'פוריגון (#137)', cost: 999,  level: 26, icon: '👾' },
+      { type: 'item',    id: 'tm15_hyperbeam', name: 'TM15 קרן-על (Hyper Beam)', cost: 400, icon: '💿' },
+      { type: 'item',    id: 'masterball',     name: 'מאסטר-בול נדיר',            cost: 1200, icon: '🟣' }
+    ];
+
+    function openGameCornerModal() {
+      const modal = document.getElementById('gameCornerModal');
+      if (!modal) return;
+      state.coins = state.coins ?? 250;
+      document.getElementById('gcCoinsDisplay').textContent = state.coins.toLocaleString();
+      document.getElementById('gcMoneyDisplay').textContent = `₽ ${state.money.toLocaleString()}`;
+
+      const grid = document.getElementById('gcPrizesGrid');
+      grid.innerHTML = '';
+      GAME_CORNER_PRIZES.forEach(prize => {
+        const canAfford = state.coins >= prize.cost;
+        const card = document.createElement('div');
+        card.className = 'p-3 rounded-2xl bg-slate-900/95 border border-slate-700 flex items-center justify-between gap-2';
+        card.innerHTML = `
+          <div>
+            <div class="text-xs font-black text-white">${prize.icon} ${prize.name}</div>
+            <div class="text-[10px] text-amber-300 font-bold">מחיר: ${prize.cost} 🪙 מטבעות</div>
+          </div>
+          <button class="px-3 py-1.5 rounded-xl font-black text-xs ${canAfford ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}">
+            פדה פרס
+          </button>
+        `;
+        card.querySelector('button').addEventListener('click', () => {
+          if (state.coins < prize.cost) {
+            sfx.playCancel();
+            document.getElementById('slotResultBanner').textContent = 'אין לך מספיק מטבעות קזינו! סובב את הגלגלים או קנה מטבעות.';
+            return;
+          }
+          state.coins -= prize.cost;
+          sfx.playVictory();
+          if (prize.type === 'pokemon') {
+            markDexCaught(prize.id);
+            const newMon = createMonster(prize.id, prize.level);
+            if (state.party.length < 6) {
+              state.party.push(newMon);
+              document.getElementById('slotResultBanner').textContent = `🎉 פדית את ${newMon.name} (רמה ${newMon.level})! הוא נוסף לצוות שלך!`;
+            } else {
+              state.pcBox.push(newMon);
+              document.getElementById('slotResultBanner').textContent = `🎉 פדית את ${newMon.name}! הוא נשלח למחשב האחסון (PC)!`;
+            }
+          } else {
+            state.inventory[prize.id] = (state.inventory[prize.id] || 0) + 1;
+            document.getElementById('slotResultBanner').textContent = `🎉 פדית את ${prize.name}! הוא נוסף לתיק שלך!`;
+          }
+          saveGameToSlot(state.saveName, true);
+          openGameCornerModal();
+        });
+        grid.appendChild(card);
+      });
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    document.getElementById('btnCloseGameCorner')?.addEventListener('click', () => {
+      document.getElementById('gameCornerModal').classList.add('hidden');
+      document.getElementById('gameCornerModal').classList.remove('flex');
+    });
+
+    document.getElementById('btnBuyCoins')?.addEventListener('click', () => {
+      if (state.money < 500) {
+        sfx.playCancel();
+        document.getElementById('slotResultBanner').textContent = 'אין לך מספיק כסף בארנק (נדרש ₽500)!';
+        return;
+      }
+      state.money -= 500;
+      state.coins = (state.coins || 0) + 100;
+      sfx.playConfirm();
+      updateHud();
+      openGameCornerModal();
+    });
+
+    const SLOT_SYMBOLS = ['7️⃣', '⚡', '💎', '🍒', '🌟'];
+    let isSpinningSlots = false;
+    document.getElementById('btnSpinSlots')?.addEventListener('click', () => {
+      if (isSpinningSlots) return;
+      if ((state.coins || 0) < 10) {
+        sfx.playCancel();
+        document.getElementById('slotResultBanner').textContent = 'נגמרו המטבעות! קנה +100 מטבעות כדי להמשיך לשחק.';
+        return;
+      }
+      state.coins -= 10;
+      document.getElementById('gcCoinsDisplay').textContent = state.coins.toLocaleString();
+      isSpinningSlots = true;
+      sfx.playConfirm();
+
+      const r1 = document.getElementById('slotReel1');
+      const r2 = document.getElementById('slotReel2');
+      const r3 = document.getElementById('slotReel3');
+      let ticks = 0;
+      const spinInterval = setInterval(() => {
+        ticks++;
+        r1.textContent = SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)];
+        r2.textContent = SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)];
+        r3.textContent = SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)];
+        if (ticks >= 10) {
+          clearInterval(spinInterval);
+          isSpinningSlots = false;
+          // Kid-friendly & fun generous odds!
+          const roll = Math.random();
+          let s1 = r1.textContent, s2 = r2.textContent, s3 = r3.textContent;
+          if (roll < 0.14) {
+            s1 = s2 = s3 = '7️⃣';
+          } else if (roll < 0.32) {
+            s1 = s2 = s3 = SLOT_SYMBOLS[1 + Math.floor(Math.random() * 4)];
+          } else if (roll < 0.65) {
+            s1 = s2 = SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)];
+          }
+          r1.textContent = s1; r2.textContent = s2; r3.textContent = s3;
+
+          let winCoins = 0;
+          if (s1 === s2 && s2 === s3) {
+            winCoins = s1 === '7️⃣' ? 300 : 120;
+            sfx.playVictory();
+            document.getElementById('slotResultBanner').textContent = `🎰 ג׳קפוט משולש (${s1}${s2}${s3})!! זכית ב-+${winCoins} מטבעות!`;
+          } else if (s1 === s2 || s2 === s3 || s1 === s3) {
+            winCoins = 35;
+            sfx.playHealJingle();
+            document.getElementById('slotResultBanner').textContent = `✨ זוג תואם! זכית ב-+${winCoins} מטבעות!`;
+          } else {
+            document.getElementById('slotResultBanner').textContent = 'כמעט! נסה סיבוב נוסף במכונת המזל.';
+          }
+          state.coins += winCoins;
+          saveGameToSlot(state.saveName, false);
+          openGameCornerModal();
+        }
+      }, 65);
+    });
+
+
+    document.getElementById('btnGameCornerHud')?.addEventListener('click', () => {
+      sfx.playConfirm();
+      openGameCornerModal();
     });
 
     // Initialize Title Screen & Game Loop

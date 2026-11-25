@@ -8,9 +8,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="פוקימון HD 151" />
-  <title>פוקימון: מהדורת 151 מלאה | POKéMON 2D-HD KANTO</title>
-  <link id="appleTouchIcon" rel="apple-touch-icon" />
-  <link id="webManifestLink" rel="manifest" />
+  <title>פוקימון: מהדורת 151 מלאה | POKéMON 2D-HD KANTO v5.0.0</title>
+  <link id="appleTouchIcon" rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+  <link id="webManifestLink" rel="manifest" href="./manifest.json" />
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     * {
@@ -405,8 +406,14 @@
         <button id="btnWeatherHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-sky-200 hover:bg-slate-800/80 active:scale-95 transition" title="שעון אמת / החלף מזג אוויר (שעון אמת / יום / שקיעה / לילה / גשם)">
           <span id="weatherIcon">🕒</span>
         </button>
-        <button id="btnSaveMenu" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-emerald-300 hover:bg-slate-800/80 active:scale-95 transition" title="שמירות">
+        <button id="btnSaveMenu" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-emerald-300 hover:bg-slate-800/80 active:scale-95 transition" title="שמירות והגדרות">
           <span>💾</span>
+        </button>
+        <button id="btnGuideHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-sky-300 hover:bg-slate-800/80 active:scale-95 transition" title="מדריך למתחילים (סוגים, לכידה, פריטים ו-HM)">
+          <span>📘</span>
+        </button>
+        <button id="btnParentHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:bg-slate-800/80 active:scale-95 transition" title="בקרת הורים ומגבלת זמן משחק יומית">
+          <span>👨‍👩‍👧</span>
         </button>
         <button id="btnMusicHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-pink-300 hover:bg-slate-800/80 active:scale-95 transition" title="מוזיקת רקע (BGM)">
           <span id="musicIcon">🎵</span>
@@ -427,6 +434,9 @@
     <div id="activeQuestBanner" class="fixed top-16 right-2.5 z-20 glass-hud rounded-xl px-3 py-1.5 text-[11px] text-amber-200 font-bold pointer-events-auto cursor-pointer hover:border-amber-400/50 transition max-w-[270px] truncate">
       🎯 משימה: דבר עם פרופסור אוק במעבדה
     </div>
+
+    <!-- HM / Field Move Bump Toast -->
+    <div id="hmBumpToast" class="fixed bottom-28 left-1/2 -translate-x-1/2 z-40 glass-modal rounded-2xl px-4 py-2.5 border border-amber-400/60 text-xs sm:text-sm font-bold text-amber-200 text-center max-w-[90vw] hidden pointer-events-none shadow-2xl"></div>
 
     <!-- Area Transition Popup Banner -->
     <div id="zoneTransitionBanner" class="glass-modal rounded-2xl px-4 py-3 border-2 border-sky-400/50">
@@ -525,11 +535,12 @@
     <div id="titleModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
       <div class="glass-modal rounded-3xl max-w-md w-full p-5 sm:p-6 border border-slate-700/80 space-y-4 scroll-y max-h-[92dvh]">
         <div class="text-center space-y-1">
-          <div class="inline-block px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-extrabold mb-1">
-            מהדורת 151 יצורים • מפת קאנטו הענקית • התפתחויות וחנויות
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-extrabold mb-1">
+            <span>מהדורת 151 יצורים • מפת קאנטו הענקית</span>
+            <span id="titleVersionBadge" class="px-1.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-400/50 text-emerald-200 text-[10px] font-black">v5.0.0</span>
           </div>
           <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">פוקימון: מהדורת 151 HD</h1>
-          <p class="text-xs text-slate-300">151 פוקימונים • התפתחויות • מפת קאנטו מקורית 1:1 (348x368) • חנויות • משימות • החלפות</p>
+          <p class="text-xs text-slate-300">151 פוקימונים • התפתחויות • מפת קאנטו מקורית 1:1 (348x368) • חנויות • משימות • החלפות • אופליין מלא</p>
         </div>
 
         <div id="titleSavedSection" class="space-y-2 hidden">
@@ -554,6 +565,15 @@
             🚀 התחל הרפתקה חדשה במחוז קאנטו!
           </button>
 
+          <div class="flex gap-2">
+            <button id="btnOpenGuideTitle" type="button" class="flex-1 py-2 rounded-xl bg-indigo-500/20 border border-indigo-400/50 hover:bg-indigo-500/30 text-indigo-200 font-extrabold text-xs transition">
+              📘 מדריך למתחילים
+            </button>
+            <button id="btnOpenParentTitle" type="button" class="flex-1 py-2 rounded-xl bg-amber-500/20 border border-amber-400/50 hover:bg-amber-500/30 text-amber-200 font-extrabold text-xs transition">
+              👨‍👩‍👧 בקרת הורים
+            </button>
+          </div>
+
           <button id="btnCopyHtmlClipboard" type="button" class="w-full py-2.5 rounded-xl bg-sky-500/20 border border-sky-400/50 hover:bg-sky-500/30 text-sky-200 font-extrabold text-xs transition flex items-center justify-center gap-1.5">
             <span>📋</span>
             <span id="copyBtnLabel">העתק את כל קוד המשחק ללוח (ללא הורדת קובץ)</span>
@@ -562,11 +582,14 @@
       </div>
     </div>
 
-    <!-- Save Manager Modal -->
+    <!-- Save Manager & Settings Modal -->
     <div id="saveModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
       <div class="glass-modal rounded-3xl max-w-md w-full p-5 space-y-4 scroll-y max-h-[90dvh]">
         <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
-          <h2 class="text-base font-black text-white flex items-center gap-2">💾 ניהול שמירות ומשחקים</h2>
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-black text-white">💾 שמירות והגדרות</h2>
+            <span id="settingsVersionBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black">v5.0.0</span>
+          </div>
           <button id="btnCloseSaveModal" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">סגור ✕</button>
         </div>
 
@@ -588,26 +611,179 @@
 
         <div class="space-y-2">
           <h3 class="text-xs font-bold text-slate-300">כל השמירות במכשיר:</h3>
-          <div id="saveSlotsList" class="space-y-2 max-h-48 scroll-y pr-1"></div>
+          <div id="saveSlotsList" class="space-y-2 max-h-40 scroll-y pr-1"></div>
         </div>
 
         <div class="bg-slate-900/90 border border-sky-500/30 rounded-2xl p-3 space-y-2">
-          <div class="text-xs font-extrabold text-sky-300">☁️ גיבוי וסנכרון שמירות (אופליין ובין מכשירים):</div>
+          <div class="text-xs font-extrabold text-sky-300">☁️ גיבוי וסנכרון שמירות (שורד מחיקת דפדפן ובין מכשירים):</div>
           <div class="flex gap-2">
             <button id="btnExportSavesJson" class="flex-1 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs">
-              ⬇️ הורד גיבוי שמירות (.json)
+              ⬇️ הורד קובץ (.json)
             </button>
             <label class="flex-1 py-2 rounded-xl bg-purple-500 hover:bg-purple-400 text-slate-950 font-black text-xs text-center cursor-pointer">
-              ⬆️ שחזר מקובץ גיבוי
+              ⬆️ שחזר מקובץ
               <input id="inputImportSavesJson" type="file" accept=".json,application/json" class="hidden" />
             </label>
           </div>
+          <div class="pt-2 border-t border-slate-700/80 space-y-1.5">
+            <div class="text-[11px] font-bold text-slate-300">🔑 קוד שמירה נייד (העתק ושמור בפתק / וואטסאפ):</div>
+            <div class="flex gap-1.5">
+              <button id="btnExportSaveCode" type="button" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 hover:bg-emerald-500/30 font-black text-xs">
+                📋 צור והעתק קוד
+              </button>
+              <button id="btnImportSaveCode" type="button" class="px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-200 hover:bg-amber-500/30 font-black text-xs">
+                📥 טען מקוד
+              </button>
+            </div>
+            <textarea id="saveCodeTextarea" rows="2" placeholder="הדבק כאן קוד שמירה (PKHD5:...) ולחץ 'טען מקוד'..."
+              class="w-full px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-sky-200 text-[10px] font-mono select-text" style="user-select:text;-webkit-user-select:text;"></textarea>
+            <div id="saveCodeFeedback" class="text-[11px] font-bold text-emerald-300 hidden"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btnOpenParentFromSave" type="button" class="py-2 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-200 hover:bg-amber-500/30 font-extrabold text-xs transition">
+            👨‍👩‍👧 בקרת הורים (PIN)
+          </button>
+          <button id="btnOpenGuideFromSave" type="button" class="py-2 rounded-xl bg-indigo-500/20 border border-indigo-400/40 text-indigo-200 hover:bg-indigo-500/30 font-extrabold text-xs transition">
+            📘 מדריך למתחילים
+          </button>
         </div>
 
         <div class="pt-2 border-t border-slate-700/80 flex items-center justify-between gap-2">
           <button id="btnOpenNewGameScreen" class="w-full py-2.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 hover:bg-amber-500/30 font-extrabold text-xs transition">
             ✨ פתיחת משחק חדש משלב ההתחלה
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Beginner Guide Modal (Plain-language Hebrew help for new players) -->
+    <div id="beginnerGuideModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="glass-modal rounded-3xl max-w-lg w-full p-5 space-y-3.5 scroll-y max-h-[90dvh]">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
+          <h2 class="text-base font-black text-white">📘 מדריך קצר למאמן המתחיל</h2>
+          <button id="btnCloseGuideModal" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">סגור ✕</button>
+        </div>
+        <div class="space-y-2.5 text-xs text-slate-200 leading-relaxed">
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-1">
+            <div class="font-black text-emerald-300">⚡ 1. סוגים ואפקטיביות בקרב (Types)</div>
+            <p>לכל פוקימון ולכל מתקפה יש סוג (אש, מים, עשב, חשמל, אבן וכו׳). מתקפה <strong>סופר-אפקטיבית</strong> גורמת הרבה יותר נזק:</p>
+            <ul class="list-disc pr-4 text-[11px] text-slate-300 space-y-0.5">
+              <li>🔥 <strong>אש</strong> חזקה נגד 🌿 עשב, ❄️ קרח ו-🐛 חרק</li>
+              <li>💧 <strong>מים</strong> חזקים נגד 🔥 אש, 🏜️ אדמה ו-🪨 אבן</li>
+              <li>🌿 <strong>עשב</strong> חזק נגד 💧 מים, 🏜️ אדמה ו-🪨 אבן</li>
+              <li>⚡ <strong>חשמל</strong> חזק נגד 💧 מים ו-🦅 מעופף (אבל חלש נגד 🏜️ אדמה)</li>
+              <li>💡 כשמצב 🌟 <strong>מותאם לילדים</strong> דלוק, תראה על כל מתקפה אם היא סופר-אפקטיבית!</li>
+            </ul>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-sky-500/30 space-y-1">
+            <div class="font-black text-sky-300">🔴 2. איך לוכדים פוקימונים פראיים?</div>
+            <p>הולכים בדשא גבוה (ירוק כהה), במערות או בגלישה במים. בקרב: החלש קודם את הפוקימון (עד שפס החיים שלו אדום/צהוב), ואז לחץ <strong>🔴 זרוק פוקדור / תיק</strong> ובחר כדור! כדורי 🔵 <strong>Great</strong> ו-🟡 <strong>Ultra</strong> לוכדים טוב יותר, ו-🟣 <strong>Master Ball</strong> לוכד ב-100%.</p>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-amber-500/30 space-y-1">
+            <div class="font-black text-amber-300">🎒 3. פריטים, אבני התפתחות ודיסקים (TMs)</div>
+            <p>בחלון הצוות והתיק (🐾) אפשר: להשתמש בשיקויים מחוץ לקרב, לתת 🍬 <strong>סוכרייה נדירה</strong> (+1 רמה), להשתמש באבני התפתחות (🔥💧⚡🌿🌙) או 🔗 <strong>כבל החלפה</strong>, לצייד <strong>חפץ מוחזק</strong> (🍎 שאריות תפוח / 🥚 ביצת מזל), וללמד 💿 <strong>דיסקי TM</strong>!</p>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-purple-500/30 space-y-1">
+            <div class="font-black text-purple-300">🌊 4. יכולות שטח (HMs) והתקדמות בקאנטו</div>
+            <p>חלק מהשבילים חסומים עד שתשיג את התג והיכולת המתאימים:</p>
+            <ul class="list-disc pr-4 text-[11px] text-slate-300 space-y-0.5">
+              <li>🌳 <strong>HM01 חיתוך (Cut):</strong> מקפטן ה-S.S. Anne בוורמיליון + תג #2 (מיסטי) — חותך שיחים חוסמים.</li>
+              <li>✈️ <strong>HM02 תעופה (Fly):</strong> מהבית הסודי בדרך 16 + תג #3 (סרג׳) — טיסה לכל עיר מהמפה 🗺️.</li>
+              <li>🪨 <strong>HM04 כוח (Strength):</strong> ממנהל הספארי בפושיה + תג #4 (אריקה) — דוחף סלעי ענק (כולל דרך הניצחון!).</li>
+              <li>🌊 <strong>HM03 גלישה (Surf):</strong> מהבית הסודי בצפון הספארי + תג #5 (קוגה) — גלישה על הים אל סיניבר וליגת אינדיגו!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parent Controls Modal (4-Digit PIN + Daily Playtime Limit) -->
+    <div id="parentControlsModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="glass-modal rounded-3xl max-w-md w-full p-5 space-y-4 scroll-y max-h-[90dvh]">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
+          <h2 class="text-base font-black text-white">👨‍👩‍👧 בקרת הורים ומגבלת זמן</h2>
+          <button id="btnCloseParentModal" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">סגור ✕</button>
+        </div>
+
+        <!-- PIN Gate View -->
+        <div id="parentPinGateView" class="space-y-3">
+          <p id="parentPinPromptText" class="text-xs text-slate-300 leading-relaxed"></p>
+          <input id="parentPinInput" type="password" inputmode="numeric" maxlength="4" placeholder="הזן קוד PIN בן 4 ספרות"
+            class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-600 text-white text-center text-lg tracking-widest font-black focus:outline-none focus:border-amber-400" />
+          <div id="parentPinError" class="text-xs font-bold text-rose-400 hidden"></div>
+          <button id="btnSubmitParentPin" type="button" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm">
+            🔓 המשך
+          </button>
+        </div>
+
+        <!-- Unlocked Parent Settings View -->
+        <div id="parentSettingsView" class="space-y-3 hidden">
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-700 flex items-center justify-between text-xs">
+            <span class="text-slate-300 font-bold">⏱️ זמן משחק היום:</span>
+            <strong id="parentPlaytimeTodayDisplay" class="text-emerald-300 text-sm">00:00</strong>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-amber-500/30 space-y-2.5">
+            <label class="flex items-center justify-between text-xs font-bold text-white cursor-pointer">
+              <span>הפעל מגבלת זמן משחק יומית</span>
+              <input id="parentLimitEnabledCheck" type="checkbox" class="w-4 h-4 accent-amber-500" />
+            </label>
+            <div class="flex items-center justify-between gap-2">
+              <label for="parentLimitMinutesInput" class="text-xs text-slate-300 font-bold">מגבלה יומית (בדקות):</label>
+              <input id="parentLimitMinutesInput" type="number" min="1" max="300" value="30"
+                class="w-24 px-2.5 py-1.5 rounded-xl bg-slate-800 border border-slate-600 text-white text-center text-sm font-black" />
+            </div>
+            <div class="flex gap-1.5 flex-wrap">
+              <button type="button" data-parent-preset="1" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-amber-200">1 דק׳</button>
+              <button type="button" data-parent-preset="15" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-200">15 דק׳</button>
+              <button type="button" data-parent-preset="30" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-200">30 דק׳</button>
+              <button type="button" data-parent-preset="45" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-200">45 דק׳</button>
+              <button type="button" data-parent-preset="60" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-200">60 דק׳</button>
+            </div>
+            <button id="btnSaveParentSettings" type="button" class="w-full py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs">
+              💾 שמור הגדרות הורים
+            </button>
+            <div id="parentSaveFeedback" class="text-xs font-bold text-emerald-300 hidden"></div>
+          </div>
+
+          <div class="flex gap-2">
+            <button id="btnResetTodayPlaytime" type="button" class="flex-1 py-2 rounded-xl bg-sky-500/20 border border-sky-400/40 text-sky-200 font-bold text-xs">
+              🔄 אפס שעון היום
+            </button>
+            <button id="btnChangeParentPin" type="button" class="flex-1 py-2 rounded-xl bg-rose-500/20 border border-rose-400/40 text-rose-200 font-bold text-xs">
+              🔑 החלף קוד PIN
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Friendly Daily Playtime Limit Stop Screen (Unskippable without 4-digit Parent PIN!) -->
+    <div id="timeLimitLockModal" class="fixed inset-0 hidden items-center justify-center p-5 bg-slate-950/95 backdrop-blur-lg" style="z-index: 9999;">
+      <div class="glass-modal rounded-3xl max-w-md w-full p-6 border-2 border-amber-400/60 text-center space-y-4">
+        <div class="text-5xl">⏰🌟</div>
+        <h2 class="text-2xl font-black text-amber-300">זמן המשחק להיום הסתיים!</h2>
+        <p class="text-sm text-slate-200 leading-relaxed">
+          כל הכבוד על ההרפתקה הנהדרת במחוז קאנטו היום! המשחק נשמר אוטומטית — הפוקימונים שלך יחכו לך רעננים למשחק הבא.
+        </p>
+        <div class="text-xs font-bold text-sky-300 bg-slate-900/90 border border-slate-700 rounded-xl py-2 px-3">
+          זמן משחק היום: <span id="lockScreenUsedTime">--:--</span> / מגבלה: <span id="lockScreenLimitTime">--</span> דקות
+        </div>
+        <div class="pt-2 border-t border-slate-700 space-y-2.5 text-right">
+          <div class="text-xs font-extrabold text-amber-200">🔒 להורה בלבד — שחרור או תוספת זמן (קוד PIN בן 4 ספרות):</div>
+          <div class="flex gap-2">
+            <input id="lockScreenPinInput" type="password" inputmode="numeric" maxlength="4" placeholder="PIN"
+              class="w-28 px-3 py-2 rounded-xl bg-slate-900 border border-slate-600 text-white text-center text-base tracking-widest font-black" />
+            <button id="btnUnlockTimeLimit15" type="button" class="flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs">
+              +15 דקות
+            </button>
+            <button id="btnUnlockTimeLimitOff" type="button" class="px-3 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs">
+              בטל מגבלה
+            </button>
+          </div>
+          <div id="lockScreenPinError" class="text-xs font-bold text-rose-400 hidden"></div>
         </div>
       </div>
     </div>
@@ -907,78 +1083,24 @@
      ********************************************************************/
     let deferredInstallPrompt = null;
 
+    const GAME_VERSION = '5.0.0';
+    const CURRENT_MAP_VERSION = 5;
+
     function setupPWA() {
-      const iconCanvas = document.createElement('canvas');
-      iconCanvas.width = 192;
-      iconCanvas.height = 192;
-      const ic = iconCanvas.getContext('2d');
+      const titleVer = document.getElementById('titleVersionBadge');
+      if (titleVer) titleVer.textContent = `v${GAME_VERSION}`;
+      const setVer = document.getElementById('settingsVersionBadge');
+      if (setVer) setVer.textContent = `v${GAME_VERSION}`;
 
-      const bgGrad = ic.createLinearGradient(0, 0, 192, 192);
-      bgGrad.addColorStop(0, '#0f172a');
-      bgGrad.addColorStop(1, '#1e293b');
-      ic.fillStyle = bgGrad;
-      ic.fillRect(0, 0, 192, 192);
-
-      ic.save();
-      ic.translate(96, 96);
-      ic.beginPath();
-      ic.arc(0, 0, 72, 0, Math.PI * 2);
-      ic.clip();
-
-      const redGrad = ic.createRadialGradient(-20, -30, 10, 0, 0, 75);
-      redGrad.addColorStop(0, '#ff5f6d');
-      redGrad.addColorStop(1, '#dc2626');
-      ic.fillStyle = redGrad;
-      ic.fillRect(-75, -75, 150, 75);
-
-      const whiteGrad = ic.createRadialGradient(-10, 20, 10, 0, 0, 75);
-      whiteGrad.addColorStop(0, '#ffffff');
-      whiteGrad.addColorStop(1, '#cbd5e1');
-      ic.fillStyle = whiteGrad;
-      ic.fillRect(-75, 0, 150, 75);
-
-      ic.fillStyle = '#0f172a';
-      ic.fillRect(-75, -8, 150, 16);
-      ic.restore();
-
-      ic.strokeStyle = '#0f172a';
-      ic.lineWidth = 8;
-      ic.beginPath();
-      ic.arc(96, 96, 72, 0, Math.PI * 2);
-      ic.stroke();
-
-      ic.fillStyle = '#0f172a';
-      ic.beginPath();
-      ic.arc(96, 96, 22, 0, Math.PI * 2);
-      ic.fill();
-
-      ic.fillStyle = '#f8fafc';
-      ic.beginPath();
-      ic.arc(96, 96, 13, 0, Math.PI * 2);
-      ic.fill();
-
-      const iconDataUrl = iconCanvas.toDataURL('image/png');
-      document.getElementById('appleTouchIcon').href = iconDataUrl;
-
-      const manifestObj = {
-        name: 'פוקימון: מהדורת 151 HD',
-        short_name: 'פוקימון 151',
-        description: 'משחק פוקימון 2D-HD עם 151 יצורים, התפתחויות, מפת קאנטו גדולה, חנויות, משימות והחלפות',
-        lang: 'he',
-        dir: 'rtl',
-        start_url: '.',
-        display: 'fullscreen',
-        orientation: 'any',
-        background_color: '#090d16',
-        theme_color: '#0f172a',
-        icons: [
-          { src: iconDataUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-          { src: iconDataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
-        ]
-      };
-
-      const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
-      document.getElementById('webManifestLink').href = URL.createObjectURL(manifestBlob);
+      // Keep real static manifest.json and icons/icon-192.png from repo root (no blob override!)
+      const manifestLink = document.getElementById('webManifestLink');
+      if (manifestLink && !manifestLink.getAttribute('href')) {
+        manifestLink.setAttribute('href', './manifest.json');
+      }
+      const appleIcon = document.getElementById('appleTouchIcon');
+      if (appleIcon && !appleIcon.getAttribute('href')) {
+        appleIcon.setAttribute('href', './icons/icon-192.png');
+      }
 
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -1429,19 +1551,29 @@
       const oldSpecies = mon.speciesId;
       mon.speciesId = sp.id;
       mon.dex = sp.dex;
-      mon.name = sp.name;
+      mon.name = mon.shiny ? `✨ ${sp.name}` : sp.name;
       mon.type = sp.type;
       mon.secondaryType = sp.secondaryType || null;
       mon.typeName = sp.fullTypeName || sp.typeName;
-      mon.maxHp = Math.floor(sp.baseHp + (mon.level - 1) * 5.8);
+      const shinyBonus = mon.shiny ? 1.12 : 1.0;
+      mon.maxHp = Math.floor((sp.baseHp + (mon.level - 1) * 5.8) * shinyBonus);
       mon.hp = mon.maxHp;
       mon.atk = Math.floor(sp.baseAtk + (mon.level - 1) * 2.4);
       mon.def = Math.floor(sp.baseDef + (mon.level - 1) * 2.0);
       mon.spd = Math.floor(sp.baseSpd + (mon.level - 1) * 2.0);
-      mon.moves = sp.moves.map(m => ({ ...m, maxPp: m.pp }));
+      // Keep any learned TM / custom moves while upgrading basic species moves
+      const keptTms = (mon.moves || []).filter(m => m.name && m.name.startsWith('TM'));
+      const newMoves = sp.moves.map(m => ({ ...m, maxPp: m.pp }));
+      for (const tmMove of keptTms) {
+        if (!newMoves.some(m => m.name === tmMove.name)) {
+          if (newMoves.length < 4) newMoves.push({ ...tmMove });
+          else newMoves[newMoves.length - 1] = { ...tmMove };
+        }
+      }
+      mon.moves = newMoves;
       markDexCaught(sp.id);
       state.stats.evolutionsCount = (state.stats.evolutionsCount || 0) + 1;
-      showEvolutionCelebration(oldName, sp.name, oldSpecies, sp.id);
+      showEvolutionCelebration(oldName, mon.name, oldSpecies, sp.id);
       return true;
     }
 
@@ -1772,8 +1904,9 @@
       setRect(154, -112, 176, -104, "p");
       setRect(204, -112, 224, -104, "p");
 
-      // Celadon South Garden hedge opening to Celadon Gym & Cerulean back-yard passage
+      // Celadon South Garden hedge opening to Celadon Gym, Game Corner plaza passage & Cerulean back-yard passage
       setRect(120, -104, 126, -94, "p");
+      setRect(129, -105, 130, -105, "p"); // Open Celadon Game Corner front plaza (x=183..184, y=133)
       setRect(178, -189, 180, -186, "p");
 
       // Route 16 (Cycling Road Gate), Route 18 (East Cycling Gate), Route 15 (Fuchsia East Gate), Route 11, Route 12
@@ -1787,8 +1920,13 @@
       setRect(-38, -76, -32, -52, "p");
       setRect(-46, -206, -32, -156, "p");
 
-      // Seafoam Islands (Route 20) water/cave pass-through
+      // Mt. Moon / Route 4 Treasure Alcove opening so (168,50) is reachable from Route 4 (170,50)
+      setRect(115, -188, 115, -188, "."); // tx=169, ty=50
+
+      // Seafoam Islands (Route 20) water pass-through WITH sandy islands around the two Seafoam cave entrances
       setRect(64, 112, 86, 120, "w");
+      setRect(67, 112, 69, 114, "s"); // West Seafoam Island around door (122,351)
+      setRect(77, 116, 79, 118, "s"); // East Seafoam Island around door (132,355)
 
       // Safari Zone Reserve immediately North of Fuchsia Safari Gatehouse (gbX=114..146, gbY=12..35)
       setRect(114, 12, 146, 35, ".");
@@ -1811,26 +1949,37 @@
         }
       }
 
-      // 4. Colorize Roofs & Doors and register all 81 authentic Game Boy building doors in DOOR_TARGETS
+      // Place real wooden sign tiles (tile 8) for Mt. Moon (149,53) and Indigo Plateau (12,19) so all 17 guidance signs sit on real sign tiles
+      WORLD_MAP[53][149] = 8;
+      WORLD_MAP[19][12] = 8;
+      // Indigo Plateau Pokemon League facade above doors (13,17)-(14,17) + open courtyard tile (15,19) for Nurse Joy
+      for (let c = 11; c <= 16; c++) {
+        WORLD_MAP[14][c] = 13;
+        WORLD_MAP[15][c] = 13;
+        WORLD_MAP[16][c] = 5;
+      }
+      WORLD_MAP[19][15] = 9;
+
+      // 4. Colorize Roofs & Doors and register all authentic Game Boy building doors in DOOR_TARGETS
       const doorDefs = [
         // Pallet Town (0, 0)
-        [5, 5, 0, 0, 6, 7, "POKECENTER"],
-        [13, 5, 0, 0, 11, 7, "POKECENTER"],
+        [5, 5, 0, 0, 6, 7, "HOUSE"],
+        [13, 5, 0, 0, 11, 7, "HOUSE"],
         [12, 11, 0, 0, 13, 7, "LAB"],
         // Viridian City (-10, -72)
         [23, 25, -10, -72, 6, 7, "POKECENTER"],
         [29, 19, -10, -72, 11, 12, "POKEMART"],
         [32, 7, -10, -72, 13, 14, "GYM_GIOVANNI"],
-        [21, 15, -10, -72, 11, 7, "POKECENTER"],
-        [21, 9, -10, -72, 6, 7, "POKECENTER"],
+        [21, 15, -10, -72, 11, 7, "HOUSE"],
+        [21, 9, -10, -72, 6, 7, "HOUSE"],
         // Pewter City (-10, -180)
         [16, 17, -10, -180, 13, 14, "GYM_BROCK"],
         [14, 7, -10, -180, 11, 7, "LAB"],
         [19, 5, -10, -180, 11, 7, "LAB"],
         [13, 25, -10, -180, 6, 7, "POKECENTER"],
         [23, 17, -10, -180, 11, 12, "POKEMART"],
-        [29, 13, -10, -180, 6, 7, "POKECENTER"],
-        [7, 29, -10, -180, 6, 7, "POKECENTER"],
+        [29, 13, -10, -180, 6, 7, "HOUSE"],
+        [7, 29, -10, -180, 6, 7, "HOUSE"],
         // Route 4 / Mt. Moon (80, -190)
         [11, 5, 80, -190, 6, 7, "POKECENTER"],
         [18, 5, 80, -190, 13, 14, "CAVE_MT_MOON"],
@@ -1840,16 +1989,16 @@
         [30, 19, 170, -198, 13, 14, "GYM_MISTY"],
         [25, 25, 170, -198, 11, 12, "POKEMART"],
         [13, 25, 170, -198, 11, 12, "POKEMART"],
-        [9, 11, 170, -198, 6, 7, "POKECENTER"],
-        [13, 15, 170, -198, 6, 7, "POKECENTER"],
-        [27, 11, 170, -198, 6, 7, "POKECENTER"],
-        [9, 9, 170, -198, 13, 14, "CAVE_MT_MOON"],
+        [9, 11, 170, -198, 6, 7, "HOUSE"],
+        [13, 15, 170, -198, 6, 7, "HOUSE"],
+        [27, 11, 170, -198, 6, 7, "HOUSE"],
+        [9, 9, 170, -198, 6, 7, "HOUSE"],
         [4, 11, 170, -198, 13, 14, "CAVE_MT_MOON"],
         // Route 25 (Bill's Sea Cottage) (200, -234)
         [45, 3, 200, -234, 13, 7, "LAB"],
         // Route 5 (Daycare) (180, -162)
-        [10, 21, 180, -162, 6, 7, "POKECENTER"],
-        [17, 27, 180, -162, 11, 7, "POKECENTER"],
+        [10, 21, 180, -162, 6, 7, "HOUSE"],
+        [17, 27, 180, -162, 11, 7, "HOUSE"],
         // Route 10 (Rock Tunnel PokéCenter & Power Plant) (270, -190)
         [11, 19, 270, -190, 6, 7, "POKECENTER"],
         [8, 17, 270, -190, 13, 14, "CAVE_MT_MOON"],
@@ -1859,18 +2008,18 @@
         [3, 5, 270, -118, 6, 7, "POKECENTER"],
         [14, 5, 270, -118, 13, 14, "ROCKET_TOWER"],
         [15, 13, 270, -118, 11, 12, "POKEMART"],
-        [7, 9, 270, -118, 6, 7, "POKECENTER"],
-        [3, 13, 270, -118, 6, 7, "POKECENTER"],
-        [7, 13, 270, -118, 6, 7, "POKECENTER"],
+        [7, 9, 270, -118, 6, 7, "HOUSE"],
+        [3, 13, 270, -118, 6, 7, "HOUSE"],
+        [7, 13, 270, -118, 6, 7, "HOUSE"],
         // Saffron City (170, -126)
         [34, 3, 170, -126, 13, 14, "GYM_SABRINA"],
         [26, 3, 170, -126, 13, 14, "GYM_SABRINA"],
         [18, 21, 170, -126, 11, 14, "TRADE"],
         [9, 29, 170, -126, 6, 7, "POKECENTER"],
         [25, 11, 170, -126, 11, 12, "POKEMART"],
-        [7, 5, 170, -126, 6, 7, "POKECENTER"],
-        [13, 11, 170, -126, 6, 7, "POKECENTER"],
-        [29, 29, 170, -126, 6, 7, "POKECENTER"],
+        [7, 5, 170, -126, 6, 7, "HOUSE"],
+        [13, 11, 170, -126, 6, 7, "HOUSE"],
+        [29, 29, 170, -126, 6, 7, "HOUSE"],
         // Celadon City (100, -126)
         [8, 13, 100, -126, 11, 12, "POKEMART"],
         [10, 13, 100, -126, 11, 12, "POKEMART"],
@@ -1879,25 +2028,25 @@
         [33, 19, 100, -126, 13, 14, "GAME_CORNER"],
         [12, 27, 100, -126, 13, 14, "GYM_ERIKA"],
         [24, 9, 100, -126, 11, 7, "LAB"],
-        [31, 27, 100, -126, 6, 7, "POKECENTER"],
-        [35, 27, 100, -126, 6, 7, "POKECENTER"],
-        [43, 27, 100, -126, 6, 7, "POKECENTER"],
+        [31, 27, 100, -126, 6, 7, "HOUSE"],
+        [35, 27, 100, -126, 6, 7, "HOUSE"],
+        [43, 27, 100, -126, 6, 7, "HOUSE"],
         // Vermilion City (170, -54)
         [11, 3, 170, -54, 6, 7, "POKECENTER"],
         [23, 13, 170, -54, 11, 12, "POKEMART"],
         [12, 19, 170, -54, 13, 14, "GYM_SURGE"],
-        [7, 3, 170, -54, 6, 7, "POKECENTER"],
-        [9, 13, 170, -54, 6, 7, "POKECENTER"],
+        [7, 3, 170, -54, 6, 7, "HOUSE"],
+        [9, 13, 170, -54, 6, 7, "HOUSE"],
         [23, 19, 170, -54, 11, 14, "TRADE"],
-        [15, 13, 170, -54, 6, 7, "POKECENTER"],
+        [15, 13, 170, -54, 6, 7, "HOUSE"],
         // Fuchsia City (110, 36)
         [19, 27, 110, 36, 6, 7, "POKECENTER"],
         [5, 27, 110, 36, 13, 14, "GYM_KOGA"],
         [5, 13, 110, 36, 11, 12, "POKEMART"],
-        [18, 3, 110, 36, 13, 7, "POKECENTER"],
-        [11, 27, 110, 36, 6, 7, "POKECENTER"],
-        [27, 27, 110, 36, 6, 7, "POKECENTER"],
-        [31, 27, 110, 36, 6, 7, "POKECENTER"],
+        [18, 3, 110, 36, 13, 7, "HOUSE"],
+        [11, 27, 110, 36, 6, 7, "HOUSE"],
+        [27, 27, 110, 36, 6, 7, "HOUSE"],
+        [31, 27, 110, 36, 6, 7, "HOUSE"],
         // Cinnabar Island (0, 108)
         [18, 3, 0, 108, 13, 14, "GYM_BLAINE"],
         [6, 3, 0, 108, 13, 14, "ROCKET_TOWER"],
@@ -1909,7 +2058,18 @@
         [10, 5, -50, -226, 13, 14, "INDIGO_HALL"],
         // Seafoam Islands Caves (Route 20) (20, 108)
         [48, 5, 20, 108, 13, 14, "CAVE_MT_MOON"],
-        [58, 9, 20, 108, 13, 14, "CAVE_MT_MOON"]
+        [58, 9, 20, 108, 13, 14, "CAVE_MT_MOON"],
+        // Remaining Route Gatehouses, Diglett's Cave & Route Houses (explicitly mapped!)
+        [12, 9, 0, -144, 13, 14, "CAVE_MT_MOON"],     // (66,103) Route 2 East Diglett's Cave
+        [13, 3, 210, -118, 6, 7, "HOUSE"],            // (277,123) Route 8 Underground House
+        [7, 5, 60, -118, 6, 7, "HOUSE"],              // (121,125) Route 16 Secret House
+        [10, 21, 270, -100, 6, 7, "HOUSE"],           // (334,159) Route 12 Gatehouse
+        [17, 13, 180, -90, 6, 7, "HOUSE"],            // (251,161) Route 6 Underground House
+        [8, 5, -50, -64, 6, 7, "POKECENTER"],         // (12,179) Route 22 Indigo League Gate
+        [4, 5, 210, -46, 13, 14, "CAVE_MT_MOON"],     // (268,197) Route 11 Diglett's Cave
+        [11, 77, 270, -100, 6, 7, "HOUSE"],           // (335,215) Route 12 Fishing House
+        [22, 13, 110, 36, 6, 7, "HOUSE"],             // (186,287) Fuchsia Warden's House
+        [5, 9, 120, 72, 6, 7, "HOUSE"]                // (179,319) Route 19 Beach House
       ];
 
       for (const [lx, ly, mx, my, roofTile, doorTile, targetId] of doorDefs) {
@@ -1929,13 +2089,13 @@
         }
       }
 
-      // 5. Place Treasure Pokéball Items (Tile 10) across authentic Kanto routes & forests
+      // 5. Place Treasure Pokéball Items (Tile 10) across authentic Kanto routes & forests (all 14 reachable!)
       const itemCoords = [
         [64, 210], // Route 1
         [30, 116], // Viridian Forest NW
         [52, 138], // Viridian Forest SE
-        [128, 64], // Route 3
-        [168, 50], // Mt. Moon / Route 4
+        [128, 70], // Route 3 (moved from blocked trees at 128,64 to reachable Route 3 meadow)
+        [168, 50], // Mt. Moon / Route 4 (alcove opened via 169,50)
         [285, 12], // Route 25 Cape
         [324, 68], // Rock Tunnel
         [124, 195],// Cycling Road (Route 17)
@@ -1961,7 +2121,7 @@
       { id: 'cerulean',  zoneId: 'CERULEAN_CITY',   name: '💧 עיר סרוליאן (מכון #2 מיסטי)', x: 243.5, y: 58.5,  desc: 'רמות 10–15 (מכון 18–21) • מכון המים וחנות האופניים' },
       { id: 'vermilion', zoneId: 'VERMILION_CITY',  name: '⚓ עיר ורמיליון (מכון #3 סרג׳)', x: 235.5, y: 188.5, desc: 'רמות 14–18 (מכון 21–25) • נמל S.S. Anne ומכון החשמל' },
       { id: 'lavender',  zoneId: 'LAVENDER_TOWN',   name: '👻 עיירת לוונדר ומגדל הרוחות',   x: 327.5, y: 126.5, desc: 'רמות 18–24 • מגדל הרוחות וגשר הדממה' },
-      { id: 'celadon',   zoneId: 'CELADON_CITY',    name: '🏙️ עיר סלדון (מכון #4 אריקה)',   x: 182.5, y: 132.5, desc: 'רמות 20–26 (מכון 27–31) • כלבו, קזינו ושביל האופניים' },
+      { id: 'celadon',   zoneId: 'CELADON_CITY',    name: '🏙️ עיר סלדון (מכון #4 אריקה)',   x: 184.5, y: 134.5, desc: 'רמות 20–26 (מכון 27–31) • כלבו, קזינו ושביל האופניים' },
       { id: 'fuchsia',   zoneId: 'FUCHSIA_CITY',    name: '🦓 עיר פושיה והספארי (#5 קוגה)', x: 183.5, y: 302.5, desc: 'רמות 24–33 (מכון 34–39) • מכון הרעל ושמורת הספארי' },
       { id: 'saffron',   zoneId: 'SAFFRON_CITY',    name: '🔮 עיר ספרון (מכון #6 סברינה)',  x: 233.5, y: 142.5, desc: 'רמות 28–36 (מכון 37–41) • מרכז קאנטו ומכון העל-חושי' },
       { id: 'cinnabar',  zoneId: 'CINNABAR_ISLAND', name: '🌋 אי סיניבר (מכון #7 בליין)',   x: 65.5,  y: 358.5, desc: 'רמות 32–40 (מכון 40–45) • מכון הלבה ומעבדת מאובנים' },
@@ -2086,24 +2246,25 @@
       return KANTO_ZONE_CATALOG.ROUTE_1;
     }
 
+    // All 17 Guidance Signs mapped 1:1 to real, reachable tile===8 sign coordinates!
     const SIGNS = {
-      '61,251':  '🏠 עיירת פאלט: צא צפונה בדרך 1 אל עיר וירידיאן, או דרומה בדרך ימית 21 לאי סיניבר (דורש HM03 גלישה)!',
+      '61,247':  '🏠 עיירת פאלט: צא צפונה בדרך 1 אל עיר וירידיאן, או דרומה בדרך ימית 21 לאי סיניבר (דורש HM03 גלישה)!',
       '57,243':  '🏠 בית השחקן בעיירת פאלט',
       '65,243':  '🏠 בית היריב גארי בעיירת פאלט',
       '67,251':  '🔬 מעבדת המחקר לפוקימונים של פרופסור אוק',
-      '71,183':  '🌿 עיר וירידיאן: צפונה ליער וירידיאן ופיוטר, מערבה לדרך 22 וליגת אינדיגו. מכון #8 של ג׳ובאני נמצא בצפון העיר!',
-      '81,167':  '🏜️ מכון הפוקימונים של עיר וירידיאן (#8 — מנהיג המכון ג׳ובאני)',
-      '40,148':  '🌲 יער וירידיאן: מבוך טבעי המוביל צפונה לעיר פיוטר. היזהר מלוכדי החרקים וחפש פיקאצ׳ו!',
-      '69,65':   '🪨 עיר פיוטר: מכון האבן (#1) של ברוק ומוזיאון המדע. המשך מזרחה בדרך 3 אל הר הירח!',
-      '171,46':  '⛰️ הר הירח (Mt. Moon): היכנס למערה או המשך מזרחה בדרך 4 לעיר סרוליאן!',
-      '241,57':  '💧 עיר סרוליאן: מכון המים (#2) של מיסטי וחנות האופניים! צפונה לגשר הזהב וכף סרוליאן, מזרחה למנהרת הסלע, דרומה לספרון.',
-      '325,129': '👻 עיירת לוונדר: ביתו של מגדל הרוחות. מערבה לספרון, דרומה על גשר הדממה (דרך 12) לפושיה.',
-      '241,151': '🔮 עיר ספרון: לב מחוז קאנטו! מכון העל-חושי (#6) של סברינה ובניין סילף קו.',
-      '183,131': '🏙️ עיר סלדון: כלבו הענק, קזינו סלדון ומכון העשב (#4) של אריקה! מערבה לדרך 16 (HM02 תעופה) ושביל האופניים.',
-      '237,199': '⚓ עיר ורמיליון: עיר הנמל (HM01 חיתוך ב-S.S. Anne וגורו הדיג) ומכון החשמל (#3) של לוטננט סרג׳!',
-      '179,299': '🦓 עיר פושיה: מכון הרעל (#5) של קוגה, מנהל הספארי (HM04 כוח), ובצפון — שמורת הספארי (HM03 גלישה)!',
-      '69,351':  '🌋 אי סיניבר: מכון הלבה (#7) של בליין, מעבדת החייאת המאובנים ואחוזת הפוקימונים!',
-      '14,19':   '👑 רמת אינדיגו: היכל ליגת הפוקימונים, רביעיית העילית (Elite Four) והאלוף גארי!'
+      '65,195':  '🌿 עיר וירידיאן: צפונה ליער וירידיאן ופיוטר, מערבה לדרך 22 וליגת אינדיגו. מכון #8 של ג׳ובאני נמצא בצפון העיר!',
+      '71,173':  '🏜️ מכון הפוקימונים של עיר וירידיאן (#8 — מנהיג המכון ג׳ובאני)',
+      '42,147':  '🌲 יער וירידיאן: מבוך טבעי המוביל צפונה לעיר פיוטר. היזהר מלוכדי החרקים וחפש פיקאצ׳ו!',
+      '63,87':   '🪨 עיר פיוטר: מכון האבן (#1) של ברוק ומוזיאון המדע. המשך מזרחה בדרך 3 אל הר הירח!',
+      '149,53':  '⛰️ הר הירח (Mt. Moon): היכנס למערה או המשך מזרחה בדרך 4 לעיר סרוליאן!',
+      '247,59':  '💧 עיר סרוליאן: מכון המים (#2) של מיסטי וחנות האופניים! צפונה לגשר הזהב וכף סרוליאן, מזרחה למנהרת הסלע, דרומה לספרון.',
+      '335,129': '👻 עיירת לוונדר: ביתו של מגדל הרוחות. מערבה לספרון, דרומה על גשר הדממה (דרך 12) לפושיה.',
+      '239,133': '🔮 עיר ספרון: לב מחוז קאנטו! מכון העל-חושי (#6) של סברינה ובניין סילף קו.',
+      '181,133': '🏙️ עיר סלדון: כלבו הענק, קזינו סלדון ומכון העשב (#4) של אריקה! מערבה לדרך 16 (HM02 תעופה) ושביל האופניים.',
+      '236,187': '⚓ עיר ורמיליון: עיר הנמל (HM01 חיתוך ב-S.S. Anne וגורו הדיג) ומכון החשמל (#3) של לוטננט סרג׳!',
+      '169,303': '🦓 עיר פושיה: מכון הרעל (#5) של קוגה, מנהל הספארי (HM04 כוח), ובצפון — שמורת הספארי (HM03 גלישה)!',
+      '67,349':  '🌋 אי סיניבר: מכון הלבה (#7) של בליין, מעבדת החייאת המאובנים ואחוזת הפוקימונים!',
+      '12,19':   '👑 רמת אינדיגו: היכנס בדלתות הזהב אל היכל ליגת הפוקימונים, רביעיית העילית (Elite Four), האלוף גארי ומיוטו!'
     };
 
     const NPCS = [
@@ -2115,10 +2276,9 @@
       { id: 'nurse2',     name: 'האחות ג׳וי (סרוליאן)',  x: 242, y: 58,  dir: 'down', shirt: '#ec4899', hat: '#fbcfe8', role: 'healer' },
       { id: 'surge',      name: 'סרג׳ (מכון החשמל #3)',  x: 235, y: 204, dir: 'down', shirt: '#eab308', hat: '#15803d', role: 'gym', badgeId: 'thunder', badgeName: 'תג הרעם ⚡', rewardMoney: 2500, team: [ ['voltorb', 21], ['pikachu', 22], ['raichu', 25] ] },
       { id: 'clerk2',     name: 'מנהל כלבו סלדון',       x: 163, y: 126, dir: 'down', shirt: '#10b981', hat: '#fef08a', role: 'shop' },
-      { id: 'trader1',    name: 'מומחה ההחלפות והקזינו', x: 181, y: 132, dir: 'down', shirt: '#06b6d4', hat: '#cffafe', role: 'trader' },
+      { id: 'trader1',    name: 'מומחה ההחלפות והקזינו', x: 180, y: 134, dir: 'down', shirt: '#06b6d4', hat: '#cffafe', role: 'trader' },
       { id: 'blaine',     name: 'בליין (מכון האש #7)',    x: 71,  y: 350, dir: 'down', shirt: '#ef4444', hat: '#f8fafc', role: 'gym', badgeId: 'volcano', badgeName: 'תג הלבה 🔥', rewardMoney: 3800, team: [ ['growlithe', 40], ['ponyta', 41], ['rapidash', 42], ['arcanine', 45] ] },
-      { id: 'champion',   name: 'האלוף גארי',            x: 14,  y: 18,  dir: 'down', shirt: '#7e22ce', hat: '#facc15', role: 'champion', rewardMoney: 7000, team: [ ['pidgeot', 55], ['alakazam', 56], ['rhydon', 57], ['gyarados', 58], ['arcanine', 59], ['charizard', 60] ] },
-      { id: 'mewtwo_npc', name: 'מיוטו האגדי 🔮',        x: 13,  y: 18,  dir: 'down', shirt: '#c084fc', hat: '#f472b6', role: 'legendary', speciesId: 'mewtwo', level: 65 }
+      { id: 'indigo_nurse', name: 'האחות ג׳וי (אינדיגו)', x: 15,  y: 19,  dir: 'left', shirt: '#ec4899', hat: '#fbcfe8', role: 'healer' }
     ];
 
     /********************************************************************
@@ -2264,30 +2424,11 @@
      * - REAL-TIME CLOCK, KID-FRIENDLY BALANCE MODE, 20 QUESTS & OFFLINE SYNC
      ********************************************************************/
 
-    // 1. Offline Service Worker + IndexedDB Dual Backup
+    // 1. Real Offline Service Worker (sw.js) + IndexedDB Dual Backup
     function setupTrueOfflineAndIDB() {
-      if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-        const swCode = `
-          const CACHE_NAME = 'pokemon-hd-151-v3-offline';
-          self.addEventListener('install', (e) => {
-            self.skipWaiting();
-            e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./', './index.html']).catch(() => {})));
-          });
-          self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
-          self.addEventListener('fetch', (e) => {
-            e.respondWith(
-              caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
-                const clone = res.clone();
-                caches.open(CACHE_NAME).then(c => c.put(e.request, clone)).catch(() => {});
-                return res;
-              }).catch(() => cached))
-            );
-          });
-        `;
-        try {
-          const blob = new Blob([swCode], { type: 'application/javascript' });
-          navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-        } catch (_) {}
+      const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      if ('serviceWorker' in navigator && isSecure) {
+        navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
       }
     }
     setupTrueOfflineAndIDB();
@@ -2320,7 +2461,7 @@
     const HELD_ITEMS_DB = {
       leftovers:      { key: 'leftovers',      name: 'שאריות תפוח 🍎', icon: '🍎', desc: 'מרפא 10% מהחיים של הפוקימון בסוף כל תור בקרב!' },
       mystic_gem:     { key: 'mystic_gem',     name: 'יהלום עוצמה 💎', icon: '💎', desc: 'מחזק את כל מתקפות הפוקימון המחזיק ב-+22%!' },
-      sitrus_berry:   { key: 'sitrus_berry',   name: 'פרי סיטרוס 🍊',  icon: '🍊', desc: 'מרפא אוטומטית 35% חיים כשהחיים יורדים מתחת לחצי!' },
+      sitrus_berry:   { key: 'sitrus_berry',   name: 'פרי סיטרוס 🍊',  icon: '🍊', desc: 'מרפא אוטומטית 35% חיים פעם אחת בקרב כשהחיים יורדים מתחת לחצי!' },
       quick_claw:     { key: 'quick_claw',     name: 'טופר מהיר ⚡',   icon: '⚡', desc: 'מעלה סיכוי למכה קריטית ב-+20% ומגביר מהירות!' },
       lucky_egg:      { key: 'lucky_egg',      name: 'ביצת מזל 🥚',    icon: '🥚', desc: 'מעניקה +45% תוספת XP וכסף מכל ניצחון בקרב!' },
       safety_goggles: { key: 'safety_goggles', name: 'משקפי מגן 🛡️',   icon: '🛡️', desc: 'מגן מפני פגיעות סטטוס (רעל/כוויה/שיתוק) ומפחית נזק ב-15%!' }
@@ -2331,7 +2472,7 @@
       { key: 'full_heal',      name: 'ריפוי-כל (סטטוסים)', icon: '💊', price: 250,  desc: 'מרפא מיד כוויה, רעל, שיתוק, שינה וקיפאון!' },
       { key: 'leftovers',      name: 'חפץ מוחזק: שאריות תפוח', icon: '🍎', price: 1400, desc: 'תן לפוקימון להחזיק: מרפא 10% חיים בכל תור!' },
       { key: 'mystic_gem',     name: 'חפץ מוחזק: יהלום עוצמה', icon: '💎', price: 1600, desc: 'תן לפוקימון להחזיק: +22% עוצמת התקפה!' },
-      { key: 'sitrus_berry',   name: 'חפץ מוחזק: פרי סיטרוס', icon: '🍊', price: 900,  desc: 'תן לפוקימון להחזיק: ריפוי אוטומטי של 35% בחצי חיים!' },
+      { key: 'sitrus_berry',   name: 'חפץ מוחזק: פרי סיטרוס', icon: '🍊', price: 900,  desc: 'תן לפוקימון להחזיק: ריפוי אוטומטי של 35% בחצי חיים (פעם בקרב)!' },
       { key: 'quick_claw',     name: 'חפץ מוחזק: טופר מהיר',  icon: '⚡', price: 1400, desc: 'תן לפוקימון להחזיק: +20% סיכוי למכה קריטית!' },
       { key: 'lucky_egg',      name: 'חפץ מוחזק: ביצת מזל',   icon: '🥚', price: 1800, desc: 'תן לפוקימון להחזיק: +45% נקודות ניסיון (XP) וכסף!' },
       { key: 'safety_goggles', name: 'חפץ מוחזק: משקפי מגן',  icon: '🛡️', price: 1500, desc: 'תן לפוקימון להחזיק: חסינות מסטטוסים והפחתת נזק!' }
@@ -2352,13 +2493,13 @@
       { id: 'earth',    name: 'תג האדמה', icon: '🏜️', leader: 'ג׳ובאני (Giovanni)',city: 'מכון וירידיאן העליון', tip: 'השתמש במים 💧, עשב 🌿 או קרח ❄️!' }
     ];
 
-    // Add the 4 missing Gym Leaders + Legendary Birds & Mew to Overworld NPCS
+    // Add the 4 missing Gym Leaders + Cave Guide to Overworld NPCS
     const EXTRA_NPCS = [
       { id: 'erika',      name: 'אריקה (מכון העשב #4)',    x: 165, y: 140, dir: 'down', shirt: '#22c55e', hat: '#f43f5e', role: 'gym', gymInteriorId: 'GYM_ERIKA',    badgeId: 'rainbow', badgeName: 'תג הקשת 🌿',  rewardMoney: 2800, team: [ ['tangela', 27], ['weepinbell', 29], ['vileplume', 31] ] },
       { id: 'koga',       name: 'קוגה (מכון הרעל #5)',     x: 168, y: 302, dir: 'down', shirt: '#9333ea', hat: '#1e1b4b', role: 'gym', gymInteriorId: 'GYM_KOGA',     badgeId: 'soul',    badgeName: 'תג הנשמה ☠️', rewardMoney: 3200, team: [ ['koffing', 34], ['muk', 36], ['venomoth', 37], ['weezing', 39] ] },
       { id: 'sabrina',    name: 'סברינה (מכון על-חושי #6)', x: 257, y: 116, dir: 'down', shirt: '#ec4899', hat: '#500724', role: 'gym', gymInteriorId: 'GYM_SABRINA',  badgeId: 'marsh',   badgeName: 'תג הביצה 🔮', rewardMoney: 3500, team: [ ['kadabra', 37], ['mr_mime', 38], ['venomoth', 39], ['alakazam', 41] ] },
       { id: 'giovanni',   name: 'ג׳ובאני (מכון האדמה #8)', x: 75,  y: 174, dir: 'down', shirt: '#1c1917', hat: '#dc2626', role: 'gym', gymInteriorId: 'GYM_GIOVANNI', badgeId: 'earth',   badgeName: 'תג האדמה 🏜️', rewardMoney: 4800, team: [ ['rhyhorn', 42], ['dugtrio', 43], ['nidoqueen', 45], ['nidoking', 46], ['rhydon', 48] ] },
-      { id: 'cave_guide', name: 'כניסה למערת הר הירח 🕳️', x: 151, y: 54,  dir: 'down', shirt: '#78716c', hat: '#facc15', role: 'enter_interior', targetInterior: 'CAVE_MT_MOON' }
+      { id: 'cave_guide', name: 'כניסה למערת הר הירח 🕳️', x: 150, y: 54,  dir: 'down', shirt: '#78716c', hat: '#facc15', role: 'enter_interior', targetInterior: 'CAVE_MT_MOON' }
     ];
     EXTRA_NPCS.forEach(n => {
       if (!NPCS.some(existing => existing.id === n.id)) NPCS.push(n);
@@ -2398,6 +2539,18 @@
     }
 
     const INTERIOR_MAPS = {
+      HOUSE: {
+        id: 'HOUSE',
+        name: '🏠 בית תושבים בקאנטו',
+        cols: 12, rows: 10,
+        grid: buildInteriorGrid(12, 10, 0, 4),
+        spawnX: 5.5, spawnY: 7.8,
+        floorColor1: '#3b2f2f', floorColor2: '#4b3b36',
+        npcs: [
+          { id: 'in_resident', name: 'תושב קאנטו (מנוחה וטיפים) 🏠', x: 5.5, y: 2.5, dir: 'down', shirt: '#f59e0b', hat: '#fef08a', role: 'healer' },
+          { id: 'in_house_guide', name: 'מדריך מאמנים 📘', x: 8.5, y: 4.5, dir: 'left', shirt: '#38bdf8', hat: '#e0f2fe', role: 'gym_guide', tip: 'טיפ מקומי: בדוק את השלטים בערים, אסוף את 8 התגים, ושמור את המשחק בכל רגע (גם בתוך בתים)!' }
+        ]
+      },
       POKECENTER: {
         id: 'POKECENTER',
         name: '🏥 אולם מרכז הפוקימונים והריפוי',
@@ -2441,7 +2594,7 @@
         cols: 20, rows: 16,
         grid: (() => {
           const g = buildInteriorGrid(20, 16, 15, 16);
-          g[3][4] = 10; g[3][15] = 10; g[8][10] = 10;
+          g[5][4] = 10; g[5][15] = 10; g[8][10] = 10;
           return g;
         })(),
         spawnX: 9.5, spawnY: 13.8,
@@ -2781,13 +2934,20 @@
       const room = INTERIOR_MAPS[interiorId];
       if (!room) return;
       if (!state.currentMap || state.currentMap === 'OVERWORLD') {
-        state.savedOverworldPos = {
-          x: state.player.x,
-          y: state.player.y + TILE_SIZE * 0.55,
-          dir: 'down'
-        };
+        const dtx = Math.floor(state.player.x / TILE_SIZE);
+        const dty = Math.floor(state.player.y / TILE_SIZE);
+        const curTile = WORLD_MAP[dty]?.[dtx];
+        let exitX = state.player.x;
+        let exitY = state.player.y + TILE_SIZE * 0.55;
+        // If entering via a door tile (7/12/14), place exit cleanly one tile below the door
+        if (curTile === 7 || curTile === 12 || curTile === 14) {
+          exitX = (dtx + 0.5) * TILE_SIZE;
+          exitY = (dty + 1.45) * TILE_SIZE;
+        }
+        state.savedOverworldPos = { x: exitX, y: exitY, dir: 'down' };
       }
       state.currentMap = interiorId;
+      state.isSurfing = false;
       state.player.x = room.spawnX * TILE_SIZE;
       state.player.y = room.spawnY * TILE_SIZE;
       state.player.dir = 'up';
@@ -2807,7 +2967,7 @@
     function exitInteriorToOverworld() {
       if (!state.currentMap || state.currentMap === 'OVERWORLD') return;
       state.currentMap = 'OVERWORLD';
-      if (state.savedOverworldPos) {
+      if (state.savedOverworldPos && typeof state.savedOverworldPos.x === 'number' && typeof state.savedOverworldPos.y === 'number') {
         state.player.x = state.savedOverworldPos.x;
         state.player.y = state.savedOverworldPos.y;
         state.player.dir = state.savedOverworldPos.dir || 'down';
@@ -2815,9 +2975,15 @@
         state.player.x = 62.5 * TILE_SIZE;
         state.player.y = 245.5 * TILE_SIZE;
       }
+      // Safety fallback if exit tile is somehow blocked
+      if (typeof canStandAt === 'function' && !canStandAt(state.player.x, state.player.y)) {
+        state.player.x = 62.5 * TILE_SIZE;
+        state.player.y = 245.5 * TILE_SIZE;
+      }
       state.partnerTrail = [];
       const tx = Math.floor(state.player.x / TILE_SIZE);
       const ty = Math.floor(state.player.y / TILE_SIZE);
+      state.isSurfing = (WORLD_MAP[ty]?.[tx] === 3 && canUseSurf());
       state.lastZoneId = getZoneInfoAt(tx, ty).id;
       sfx.playConfirm();
       const exitBtn = document.getElementById('btnExitInteriorHud');
@@ -3073,9 +3239,13 @@
     });
 
     // 2. Overworld HM Obstacles: Cuttable Bushes (Tile 21) & Strength Boulders (Tile 22)
+    // Placed in REAL choke points so BFS without the HM cannot pass, while BFS with the HM opens real routes & areas!
     function placeHMObstaclesOnWorldMap() {
-      const cutBushes = [ [72, 134], [164, 137], [244, 211], [279, 53] ];
-      const strengthBoulders = [ [174, 48], [326, 56], [205, 345] ];
+      // Cut Bush (66,152) gates ALL 536 tiles of Route 2 East + Diglett's Cave door (66,103)!
+      // Cut Bushes (279,53) & (244,211) remain as optional route/harbor shortcuts.
+      const cutBushes = [ [66, 152], [244, 211], [279, 53] ];
+      // Strength Boulders (16,83) & (17,83) gate the 2-tile Victory Road choke on Route 23 leading to Indigo Plateau!
+      const strengthBoulders = [ [16, 83], [17, 83], [326, 56] ];
       cutBushes.forEach(([c, r]) => { if (WORLD_MAP[r]) WORLD_MAP[r][c] = 21; });
       strengthBoulders.forEach(([c, r]) => { if (WORLD_MAP[r]) WORLD_MAP[r][c] = 22; });
     }
@@ -3087,7 +3257,7 @@
       { id: 'rt_bug1',     name: 'לוכד החרקים סמי 👀',       x: 40,  y: 140, dir: 'left',  shirt: '#84cc16', hat: '#fef08a', role: 'route_trainer', sightRange: 3.6, rewardMoney: 350,  team: [ ['caterpie', 5], ['weedle', 5], ['metapod', 6] ], intro: 'היי! המבטים שלנו נפגשו! חרקי יער וירידיאן שלי בלתי מנוצחים!' },
       { id: 'rt_lass1',    name: 'המאמנת ליסה 👀',           x: 59,  y: 100, dir: 'down',  shirt: '#f43f5e', hat: '#fbcfe8', role: 'route_trainer', sightRange: 3.6, rewardMoney: 450,  team: [ ['pidgey', 7], ['jigglypuff', 8] ], intro: 'ראיתי אותך יוצא מיער וירידיאן בדרך 2! בוא נראה כמה הפוקימונים שלך חזקים!' },
       { id: 'rt_hiker1',   name: 'המטייל דניאל 👀',          x: 112, y: 74,  dir: 'left',  shirt: '#d97706', hat: '#78350f', role: 'route_trainer', sightRange: 3.6, rewardMoney: 700,  team: [ ['geodude', 10], ['machop', 11], ['onix', 12] ], intro: 'אף מאמן לא חוצה את דרך 3 להר הירח בלי קרב סלעים אמיתי!' },
-      { id: 'rt_rocket1',  name: 'חייל צוות רוקט R 👀',       x: 151, y: 55,  dir: 'left',  shirt: '#1e293b', hat: '#ef4444', role: 'route_trainer', sightRange: 3.8, rewardMoney: 850,  team: [ ['ekans', 11], ['zubat', 11], ['koffing', 13] ], intro: 'צוות רוקט ישתלט על כל המאובנים והפוקימונים הנדירים בהר הירח!' },
+      { id: 'rt_rocket1',  name: 'חייל צוות רוקט R 👀',       x: 152, y: 55,  dir: 'left',  shirt: '#1e293b', hat: '#ef4444', role: 'route_trainer', sightRange: 3.8, rewardMoney: 850,  team: [ ['ekans', 11], ['zubat', 11], ['koffing', 13] ], intro: 'צוות רוקט ישתלט על כל המאובנים והפוקימונים הנדירים בהר הירח!' },
       { id: 'rt_swimmer1', name: 'השחיין רון 👀',            x: 150, y: 350, dir: 'left',  shirt: '#0ea5e9', hat: '#fde047', role: 'route_trainer', sightRange: 3.6, rewardMoney: 1200, team: [ ['horsea', 31], ['shellder', 32], ['starmie', 34] ], intro: 'אתה גולש בדרך ימית 20 ליד איי קצף הים? בוא לקרב מים!' },
       // Rival Gary on Nugget Bridge (Route 24)
       { id: 'rival_mid',   name: 'היריב גארי (גשר הזהב) 👀',  x: 245, y: 20,  dir: 'down',  shirt: '#7e22ce', hat: '#facc15', role: 'route_trainer', sightRange: 3.8, rewardMoney: 1400, team: [ ['pidgeotto', 16], ['kadabra', 16], ['gyarados', 18] ], intro: 'יו! הגעת לגשר הזהב בסרוליאן! אני כבר תפסתי מעל 20 מינים, בוא נבדוק אם השתפרת!' },
@@ -3187,7 +3357,8 @@
       ], () => triggerWildBattle(tx, ty, chosenFish, fishLv));
     }
 
-    // 6. Cinnabar Fossil Revival Lab ('🧬')
+    // 6. Cinnabar Fossil Revival Lab ('🧬') — One per fossil type + ₽2,500 DNA extraction fee (non-farmable!)
+    const FOSSIL_REVIVAL_FEE = 2500;
     function handleFossilRevival() {
       const fossils = [
         { key: 'helix_fossil', name: 'מאובן הסליל (Helix)', speciesId: 'omanyte', lv: 25 },
@@ -3199,12 +3370,22 @@
 
       if (!nextFossil) {
         showDialogue('מדען המאובנים באי סיניבר 🧬', [
-          'כבר החייאנו את כל 3 המאובנים העתיקים של קאנטו (אומנייט, קבוטו ואירודקטייל)!',
+          'כבר החייאנו את כל 3 המאובנים העתיקים של קאנטו (אומנייט, קבוטו ואירודקטייל) — אחד מכל סוג לכל מאמן!',
           'המשך לאמן אותם — אומנייט וקבוטו מתפתחים ברמה 40 לאומסטאר ולקבוטופס!'
         ]);
         return;
       }
 
+      if (state.money < FOSSIL_REVIVAL_FEE) {
+        sfx.playCancel();
+        showDialogue('מעבדת החייאת המאובנים 🧬', [
+          `עלות הפקת ה-DNA עבור ${nextFossil.name} היא ₽${FOSSIL_REVIVAL_FEE.toLocaleString()}.`,
+          `יש ברשותך כרגע ₽${state.money.toLocaleString()} בלבד — חזור לאחר שתאסוף מספיק כסף מקרבות או משימות!`
+        ]);
+        return;
+      }
+
+      state.money -= FOSSIL_REVIVAL_FEE;
       state.revivedFossils[nextFossil.key] = true;
       const revivedMon = createMonster(nextFossil.speciesId, nextFossil.lv);
       markDexCaught(nextFossil.speciesId);
@@ -3218,16 +3399,39 @@
       sfx.playEvolveFanfare();
       saveGameToSlot(state.saveName, true);
       showDialogue('מעבדת החייאת המאובנים 🧬', [
-        `מכונת ה-DNA העתיקה הפיקה חיים מתוך ${nextFossil.name}!`,
-        `🎉 מזל טוב! קיבלת את הפוקימון הפרהיסטורי ${revivedMon.name} (#${revivedMon.dex} • רמה ${revivedMon.level}) והוא ${whereMsg}`,
-        'דבר איתי שוב כדי להחיות גם את המאובנים הבאים שמצאת בהר הירח!'
+        `שילמת ₽${FOSSIL_REVIVAL_FEE.toLocaleString()} ומכונת ה-DNA הפיקה חיים מתוך ${nextFossil.name}!`,
+        `🎉 מזל טוב! קיבלת את הפוקימון הפרהיסטורי ${revivedMon.name} (#${revivedMon.dex} • רמה ${revivedMon.level}) והוא ${whereMsg}`
       ]);
     }
 
-    // 7. Kanto Daycare Center ('🏡')
+    // 7. Kanto Daycare Center ('🏡') — Requires step cooldown (60 steps walked) + training fee (₽150 * level)
+    const DAYCARE_STEP_COOLDOWN = 60;
     function handleDaycareInteraction() {
       const lead = state.party[0];
       if (!lead) return;
+      const stepsWalked = state.stepsWalked || 0;
+      const lastStep = typeof state.daycareLastStep === 'number' ? state.daycareLastStep : -DAYCARE_STEP_COOLDOWN;
+      const stepsSince = stepsWalked - lastStep;
+      if (stepsSince < DAYCARE_STEP_COOLDOWN) {
+        const remaining = DAYCARE_STEP_COOLDOWN - stepsSince;
+        sfx.playCancel();
+        showDialogue('בית הגידול של קאנטו (Daycare) 🏡', [
+          `בעלת בית הגידול: ${lead.name} עדיין נח מהאימון האחרון!`,
+          `צא לטייל ולחקור את קאנטו עוד ${remaining} צעדים וחזור אליי לאימון נוסף.`
+        ]);
+        return;
+      }
+      const fee = Math.max(300, lead.level * 150);
+      if (state.money < fee) {
+        sfx.playCancel();
+        showDialogue('בית הגידול של קאנטו (Daycare) 🏡', [
+          `בעלת בית הגידול: אימון מיוחד ל-${lead.name} (רמה ${lead.level} ← ${lead.level + 1}) עולה ₽${fee.toLocaleString()}.`,
+          `חסר לך כסף בארנק (יש לך ₽${state.money.toLocaleString()}). חזור אחרי כמה קרבות!`
+        ]);
+        return;
+      }
+      state.money -= fee;
+      state.daycareLastStep = stepsWalked;
       lead.level++;
       lead.nextXp = lead.level * 22;
       lead.maxHp += 6;
@@ -3239,19 +3443,21 @@
       saveGameToSlot(state.saveName, true);
       const evoTarget = checkLevelEvolution(lead);
       showDialogue('בית הגידול של קאנטו (Daycare) 🏡', [
-        `בעלת בית הגידול: בנוסף ל-XP שהפוקימונים שלך צוברים אוטומטית על כל צעד שאתה הולך במפה, הענקתי ל-${lead.name} אימון מיוחד והוא עלה לרמה ${lead.level}!`
+        `בעלת בית הגידול: שילמת ₽${fee.toLocaleString()} והענקתי ל-${lead.name} אימון מקצועי — הוא עלה לרמה ${lead.level}!`,
+        `צא לטייל עוד ${DAYCARE_STEP_COOLDOWN} צעדים לפני אימון בית הגידול הבא.`
       ], () => {
         if (evoTarget) evolveMonsterInPlace(lead, evoTarget);
       });
     }
 
-    // 8. Line-of-Sight ('!') Route Trainer Detection
+    // 8. Line-of-Sight ('!') Route Trainer Detection (with solid wall ray-cast!)
     function checkRouteTrainerLineOfSight() {
       if (state.mode !== 'OVERWORLD') return;
       state.defeatedTrainers = state.defeatedTrainers || {};
       const mData = getActiveMapData();
       const px = state.player.x / TILE_SIZE;
       const py = state.player.y / TILE_SIZE;
+      const solidWallSet = new Set([1, 5, 6, 8, 11, 13, 16]);
 
       for (const npc of mData.npcs) {
         if (npc.role !== 'route_trainer') continue;
@@ -3264,12 +3470,23 @@
         const range = npc.sightRange || 3.5;
 
         let inSight = false;
-        if (npc.dir === 'right' && Math.abs(dy) < 0.75 && dx > 0.4 && dx <= range) inSight = true;
-        else if (npc.dir === 'left' && Math.abs(dy) < 0.75 && dx < -0.4 && dx >= -range) inSight = true;
-        else if (npc.dir === 'down' && Math.abs(dx) < 0.75 && dy > 0.4 && dy <= range) inSight = true;
-        else if (npc.dir === 'up' && Math.abs(dx) < 0.75 && dy < -0.4 && dy >= -range) inSight = true;
+        let stepX = 0, stepY = 0, distSteps = 0;
+        if (npc.dir === 'right' && Math.abs(dy) < 0.75 && dx > 0.4 && dx <= range) { inSight = true; stepX = 1; distSteps = Math.floor(dx); }
+        else if (npc.dir === 'left' && Math.abs(dy) < 0.75 && dx < -0.4 && dx >= -range) { inSight = true; stepX = -1; distSteps = Math.floor(-dx); }
+        else if (npc.dir === 'down' && Math.abs(dx) < 0.75 && dy > 0.4 && dy <= range) { inSight = true; stepY = 1; distSteps = Math.floor(dy); }
+        else if (npc.dir === 'up' && Math.abs(dx) < 0.75 && dy < -0.4 && dy >= -range) { inSight = true; stepY = -1; distSteps = Math.floor(-dy); }
 
         if (inSight) {
+          // Ray-cast intermediate tiles so trainers cannot see through walls/trees/buildings!
+          let blocked = false;
+          const baseTx = Math.floor(npc.x);
+          const baseTy = Math.floor(npc.y);
+          for (let s = 1; s < distSteps; s++) {
+            const checkTile = mData.grid[baseTy + stepY * s]?.[baseTx + stepX * s];
+            if (solidWallSet.has(checkTile)) { blocked = true; break; }
+          }
+          if (blocked) continue;
+
           inputState.vx = 0;
           inputState.vy = 0;
           inputState.activePointerId = null;
@@ -3314,6 +3531,11 @@
       defeatedTrainers: {},
       eliteFourDefeated: {},
       revivedFossils: {},
+      wonderTradeDaily: { date: '', count: 0 },
+      stepsWalked: 0,
+      daycareLastStep: -60,
+      coins: 250,
+      safariBalls: 30,
       money: 1500,
       badges: {},
       claimedQuests: {},
@@ -3606,7 +3828,10 @@
       all[cleanName] = {
         saveName: cleanName,
         updatedAt: Date.now(),
-        mapVersion: 4,
+        gameVersion: GAME_VERSION,
+        mapVersion: CURRENT_MAP_VERSION,
+        currentMap: state.currentMap || 'OVERWORLD',
+        savedOverworldPos: state.savedOverworldPos ? { ...state.savedOverworldPos } : null,
         playerX: state.player.x,
         playerY: state.player.y,
         playerDir: state.player.dir,
@@ -3626,6 +3851,9 @@
         defeatedTrainers: { ...(state.defeatedTrainers || {}) },
         eliteFourDefeated: { ...(state.eliteFourDefeated || {}) },
         revivedFossils: { ...(state.revivedFossils || {}) },
+        wonderTradeDaily: { ...(state.wonderTradeDaily || { date: '', count: 0 }) },
+        stepsWalked: state.stepsWalked || 0,
+        daycareLastStep: typeof state.daycareLastStep === 'number' ? state.daycareLastStep : -DAYCARE_STEP_COOLDOWN,
         coins: state.coins ?? 250,
         safariBalls: state.safariBalls ?? 30
       };
@@ -3651,17 +3879,10 @@
       const data = all[slotName];
       if (!data) return false;
       state.saveName = data.saveName || slotName;
-      if (data.mapVersion === 4 && data.playerX && data.playerY) {
-        state.player.x = data.playerX;
-        state.player.y = data.playerY;
-      } else {
-        state.player.x = 62.5 * TILE_SIZE;
-        state.player.y = 245.5 * TILE_SIZE;
-      }
-      state.player.dir = data.playerDir || 'down';
+
+      // Restore progress, badges & HMs FIRST so canUseSurf()/canStandAt() checks are accurate!
       state.money = typeof data.money === 'number' ? data.money : 1500;
       state.badges = data.badges || {};
-      // Restore HMs (gracefully migrate older saves based on earned badges!)
       if (data.hms) {
         state.hms = { cut: false, fly: false, surf: false, strength: false, bike: false, rod: false, ...data.hms };
       } else {
@@ -3696,18 +3917,87 @@
         ...(data.inventory || {})
       };
       state.party = Array.isArray(data.party) && data.party.length > 0
-        ? data.party.map(m => ({ ...createMonster(m.speciesId, m.level || 5), ...m, speciesId: normalizeSpeciesId(m.speciesId) }))
+        ? data.party.map(m => ({ ...createMonster(m.speciesId, m.level || 5), ...m, atkStage: 0, defStage: 0, speciesId: normalizeSpeciesId(m.speciesId) }))
         : [createMonster('pikachu', 5)];
       state.pcBox = Array.isArray(data.pcBox)
-        ? data.pcBox.map(m => ({ ...createMonster(m.speciesId, m.level || 5), ...m, speciesId: normalizeSpeciesId(m.speciesId) }))
+        ? data.pcBox.map(m => ({ ...createMonster(m.speciesId, m.level || 5), ...m, atkStage: 0, defStage: 0, speciesId: normalizeSpeciesId(m.speciesId) }))
         : [];
       state.collectedItems = data.collectedItems || {};
       state.championDefeated = !!data.championDefeated;
       state.defeatedTrainers = data.defeatedTrainers || {};
       state.eliteFourDefeated = data.eliteFourDefeated || {};
       state.revivedFossils = data.revivedFossils || {};
+      state.wonderTradeDaily = data.wonderTradeDaily ? { ...data.wonderTradeDaily } : { date: '', count: 0 };
+      state.stepsWalked = typeof data.stepsWalked === 'number' ? data.stepsWalked : 0;
+      state.daycareLastStep = typeof data.daycareLastStep === 'number' ? data.daycareLastStep : -DAYCARE_STEP_COOLDOWN;
       state.coins = typeof data.coins === 'number' ? data.coins : 250;
       state.safariBalls = typeof data.safariBalls === 'number' ? data.safariBalls : 30;
+      state.partnerTrail = [];
+      state.battle = null;
+
+      // Map Version Migration (v4 -> v5) & Safe Map/Interior Restoration!
+      const savedMapVer = typeof data.mapVersion === 'number' ? data.mapVersion : 0;
+      const wasMigrated = savedMapVer < CURRENT_MAP_VERSION;
+      state.savedOverworldPos = (data.savedOverworldPos && typeof data.savedOverworldPos.x === 'number' && typeof data.savedOverworldPos.y === 'number')
+        ? { ...data.savedOverworldPos }
+        : null;
+
+      if (wasMigrated) {
+        // Older map version: relocate safely to Pallet Town (keeping all party, items, badges, Pokedex & money!)
+        state.currentMap = 'OVERWORLD';
+        state.savedOverworldPos = null;
+        state.player.x = 62.5 * TILE_SIZE;
+        state.player.y = 245.5 * TILE_SIZE;
+        state.player.dir = 'down';
+      } else {
+        // Restore map ID FIRST, then coordinates!
+        const rawMapId = data.currentMap || data.interiorId || null;
+        if (rawMapId === 'OVERWORLD') {
+          state.currentMap = 'OVERWORLD';
+          state.player.x = typeof data.playerX === 'number' ? data.playerX : 62.5 * TILE_SIZE;
+          state.player.y = typeof data.playerY === 'number' ? data.playerY : 245.5 * TILE_SIZE;
+          state.player.dir = data.playerDir || 'down';
+        } else if (rawMapId && INTERIOR_MAPS[rawMapId]) {
+          state.currentMap = rawMapId;
+          const rm = INTERIOR_MAPS[rawMapId];
+          state.player.x = typeof data.playerX === 'number' ? data.playerX : rm.spawnX * TILE_SIZE;
+          state.player.y = typeof data.playerY === 'number' ? data.playerY : rm.spawnY * TILE_SIZE;
+          state.player.dir = data.playerDir || 'up';
+        } else {
+          // Missing or invalid map id: place safely at last outdoor entrance or Pallet Town
+          state.currentMap = 'OVERWORLD';
+          if (state.savedOverworldPos) {
+            state.player.x = state.savedOverworldPos.x;
+            state.player.y = state.savedOverworldPos.y;
+            state.player.dir = state.savedOverworldPos.dir || 'down';
+          } else {
+            state.player.x = 62.5 * TILE_SIZE;
+            state.player.y = 245.5 * TILE_SIZE;
+            state.player.dir = 'down';
+          }
+        }
+
+        // Extra safety check: never leave the player stuck in a solid tile or out of bounds!
+        if (typeof canStandAt === 'function' && !canStandAt(state.player.x, state.player.y)) {
+          if (state.currentMap !== 'OVERWORLD' && INTERIOR_MAPS[state.currentMap]) {
+            const rm = INTERIOR_MAPS[state.currentMap];
+            state.player.x = rm.spawnX * TILE_SIZE;
+            state.player.y = rm.spawnY * TILE_SIZE;
+          } else if (state.savedOverworldPos && canStandAt(state.savedOverworldPos.x, state.savedOverworldPos.y)) {
+            state.player.x = state.savedOverworldPos.x;
+            state.player.y = state.savedOverworldPos.y;
+          } else {
+            state.currentMap = 'OVERWORLD';
+            state.player.x = 62.5 * TILE_SIZE;
+            state.player.y = 245.5 * TILE_SIZE;
+            state.player.dir = 'down';
+          }
+        }
+      }
+
+      const tx = Math.floor(state.player.x / TILE_SIZE);
+      const ty = Math.floor(state.player.y / TILE_SIZE);
+      state.isSurfing = (state.currentMap === 'OVERWORLD' && WORLD_MAP[ty]?.[tx] === 3 && canUseSurf());
       state.lastZoneId = null;
       syncPartyToDex();
 
@@ -3716,11 +4006,25 @@
       document.getElementById('titleModal').classList.add('hidden');
       document.getElementById('saveModal').classList.add('hidden');
       document.getElementById('saveModal').classList.remove('flex');
+      document.getElementById('battleOverlay')?.classList.add('hidden');
+      document.getElementById('overworldTouchControls')?.classList.remove('hidden');
+      document.getElementById('topHudControls')?.classList.remove('hidden');
+      const exitBtn = document.getElementById('btnExitInteriorHud');
+      if (exitBtn) exitBtn.classList.toggle('hidden', state.currentMap === 'OVERWORLD');
+
       syncRunBikeButtonUI();
       syncControlModeUI();
       updateHud();
       checkZoneTransition(true);
       sfx.playConfirm();
+
+      if (wasMigrated) {
+        saveGameToSlot(state.saveName, false);
+        showDialogue('עדכון עולם קאנטו 🗺️', [
+          `ברוך שובך, ${state.saveName}! מפת העולם עודכנה לגרסה v${GAME_VERSION}.`,
+          'כדי שתתחיל בבטחה ולא תיתקע בקירות, העברנו אותך לעיירת פאלט — כל הפוקימונים, החפצים, התגים, הכסף והפוקידע שלך נשמרו במלואם!'
+        ]);
+      }
       return true;
     }
 
@@ -3739,12 +4043,19 @@
       const normStarter = normalizeSpeciesId(starterId || 'pikachu');
       state.saveName = cleanName;
       state.currentMap = 'OVERWORLD';
+      state.savedOverworldPos = null;
+      state.partnerTrail = [];
       state.player.x = 62.5 * TILE_SIZE;
       state.player.y = 245.5 * TILE_SIZE;
       state.player.dir = 'down';
       state.bikeMode = 1;
       state.isSurfing = false;
       state.money = 1800;
+      state.coins = 250;
+      state.safariBalls = 30;
+      state.wonderTradeDaily = { date: '', count: 0 };
+      state.stepsWalked = 0;
+      state.daycareLastStep = -DAYCARE_STEP_COOLDOWN;
       state.badges = {};
       state.hms = { cut: false, fly: false, surf: false, strength: false, bike: false, rod: false };
       state.visitedZones = { PALLET_TOWN: true };
@@ -3781,6 +4092,8 @@
       document.getElementById('titleModal').classList.add('hidden');
       document.getElementById('saveModal').classList.add('hidden');
       document.getElementById('saveModal').classList.remove('flex');
+      const exitBtn = document.getElementById('btnExitInteriorHud');
+      if (exitBtn) exitBtn.classList.add('hidden');
       syncRunBikeButtonUI();
       syncControlModeUI();
 
@@ -3794,7 +4107,7 @@
         [
           `ברוך הבא למחוז קאנטו המקורי, ${cleanName}! בחרת את ${SPECIES_DB[normStarter].name} בתור השותף שלך!`,
           'צא מעיירת פאלט צפונה בדרך 1 אל עיר וירידיאן, יער וירידיאן ועיר פיוטר (מכון #1 של ברוק)!',
-          'בהמשך המסע תפתח יכולות מיוחדות ממש כמו במשחק המקורי: אופניים בסרוליאן, חכת דיג ו-HM01 חיתוך בורמיליון, HM02 תעופה בדרך 16, ו-HM03 גלישה בשמורת הספארי!'
+          'בהמשך המסע תפתח יכולות מיוחדות ממש כמו במשחק המקורי: אופניים בסרוליאן, חכת דיג ו-HM01 חיתוך בורמיליון, HM02 תעופה בדרך 16, HM04 כוח בפושיה, ו-HM03 גלישה בשמורת הספארי!'
         ]
       );
     }
@@ -3826,7 +4139,7 @@
       document.getElementById('hudPartyCount').textContent = `${state.party.length}/6`;
       document.getElementById('currentSaveSlotTitle').textContent = state.saveName;
 
-      // Update active quest banner & alert dot
+      // Update active quest banner & alert dot (positioned dynamically below #topHud so it never overlaps on mobile!)
       let hasClaimable = false;
       let nextQuest = null;
       for (const q of QUESTS_CATALOG) {
@@ -3843,15 +4156,32 @@
         const isBattle = state.mode === 'BATTLE';
         if (hasClaimable) {
           banner.textContent = '🎁 משימה הושלמה! לחץ לאיסוף הפרס!';
-          banner.className = `fixed top-16 right-2.5 z-20 glass-hud rounded-xl px-3 py-1.5 text-[11px] text-emerald-300 border border-emerald-400/60 font-black pointer-events-auto cursor-pointer animate-pulse max-w-[280px] truncate ${isBattle ? 'hidden' : ''}`;
+          banner.className = `fixed right-2.5 z-20 glass-hud rounded-xl px-3 py-1.5 text-[11px] text-emerald-300 border border-emerald-400/60 font-black pointer-events-auto cursor-pointer animate-pulse max-w-[280px] truncate ${isBattle ? 'hidden' : ''}`;
         } else if (nextQuest) {
           banner.textContent = `🎯 ${nextQuest.title} (${nextQuest.progressText(state)})`;
-          banner.className = `fixed top-16 right-2.5 z-20 glass-hud rounded-xl px-3 py-1.5 text-[11px] text-amber-200 font-bold pointer-events-auto cursor-pointer hover:border-amber-400/50 transition max-w-[280px] truncate ${isBattle ? 'hidden' : ''}`;
+          banner.className = `fixed right-2.5 z-20 glass-hud rounded-xl px-3 py-1.5 text-[11px] text-amber-200 font-bold pointer-events-auto cursor-pointer hover:border-amber-400/50 transition max-w-[280px] truncate ${isBattle ? 'hidden' : ''}`;
         } else {
           banner.textContent = `🏆 כל המשימות הושלמו! פוקידע: ${caughtCount}/151`;
           if (isBattle) banner.classList.add('hidden');
         }
+        syncQuestBannerPosition();
+        requestAnimationFrame(syncQuestBannerPosition);
       }
+    }
+
+    function syncQuestBannerPosition() {
+      const banner = document.getElementById('activeQuestBanner');
+      const topHud = document.getElementById('topHud');
+      if (!banner || !topHud) return;
+      const rect = topHud.getBoundingClientRect();
+      if (rect.height > 0) {
+        banner.style.top = `${Math.max(64, Math.ceil(rect.bottom + 6))}px`;
+      }
+    }
+    window.addEventListener('resize', syncQuestBannerPosition);
+    if (typeof ResizeObserver !== 'undefined') {
+      const _hudEl = document.getElementById('topHud');
+      if (_hudEl) new ResizeObserver(syncQuestBannerPosition).observe(_hudEl);
     }
 
     /********************************************************************
@@ -3921,8 +4251,38 @@
       return false;
     }
 
+    let _hmBumpCooldownUntil = 0;
+    let _hmBumpTimer = null;
+    function showHmBumpHint(tile) {
+      const now = Date.now();
+      if (now < _hmBumpCooldownUntil) return;
+      _hmBumpCooldownUntil = now + 2600;
+      let msg = '';
+      if (tile === 21) {
+        msg = canUseCut()
+          ? '🌳 לחץ פעולה (A) כדי לחתוך את השיח בעזרת HM01 חיתוך (Cut)!'
+          : '🔒 שיח חוסם! נדרשים HM01 חיתוך (קפטן S.S. Anne בורמיליון) + תג המפל (#2 מיסטי בסרוליאן).';
+      } else if (tile === 22) {
+        msg = canUseStrength()
+          ? '🪨 לחץ פעולה (A) כדי להדוף את סלע הענק בעזרת HM04 כוח (Strength)!'
+          : '🔒 סלע ענק חוסם את הדרך! נדרשים HM04 כוח (מנהל הספארי בפושיה) + תג הקשת (#4 אריקה בסלדון).';
+      } else if (tile === 3 && !canUseSurf()) {
+        msg = '🔒 מים עמוקים! נדרשים HM03 גלישה (צפון שמורת הספארי) + תג הנשמה (#5 קוגה בפושיה).';
+      }
+      if (!msg) return;
+      const el = document.getElementById('hmBumpToast');
+      if (el) {
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        clearTimeout(_hmBumpTimer);
+        _hmBumpTimer = setTimeout(() => el.classList.add('hidden'), 3200);
+      }
+      sfx.playCancel();
+    }
+
+    let _stepDistAccum = 0;
     function updateContinuousPlayerMovement() {
-      if (state.mode !== 'OVERWORLD') {
+      if (state.parentLocked || state.mode !== 'OVERWORLD') {
         state.player.moving = false;
         return;
       }
@@ -3968,7 +4328,28 @@
         moved = true;
       }
 
+      if (!moved) {
+        // Check if player bumped into a Field-Move (HM) obstacle and show clear requirement message!
+        const mData = getActiveMapData();
+        const probeX = state.player.x + vx * (TILE_SIZE * 0.48);
+        const probeY = state.player.y + vy * (TILE_SIZE * 0.48);
+        const btx = Math.floor(probeX / TILE_SIZE);
+        const bty = Math.floor(probeY / TILE_SIZE);
+        const bumpedTile = mData.grid[bty]?.[btx];
+        const isUncut = !state.collectedItems[`${state.currentMap || 'OW'}_${btx},${bty}`] && !state.collectedItems[`${btx},${bty}`];
+        if ((bumpedTile === 21 || bumpedTile === 22) && isUncut) {
+          showHmBumpHint(bumpedTile);
+        } else if (bumpedTile === 3 && !canUseSurf()) {
+          showHmBumpHint(3);
+        }
+      }
+
       if (moved) {
+        _stepDistAccum += speed;
+        if (_stepDistAccum >= TILE_SIZE) {
+          _stepDistAccum -= TILE_SIZE;
+          state.stepsWalked = (state.stepsWalked || 0) + 1;
+        }
         state.partnerTrail.push({ x: state.player.x, y: state.player.y });
         if (state.partnerTrail.length > 14) state.partnerTrail.shift();
         const mData = getActiveMapData();
@@ -4080,123 +4461,152 @@
       const lookY = state.player.y + oy;
 
       const mData = getActiveMapData();
-      // 1. Check nearby NPCs in active map (Overworld or Interior Hall)
+      const frontTx = Math.floor(lookX / TILE_SIZE);
+      const frontTy = Math.floor(lookY / TILE_SIZE);
+      const frontTile = mData.grid[frontTy]?.[frontTx];
+      // 1. Pick the CLOSEST NPC the player is actually facing (prevents side-adjacent NPCs hijacking signs/doors!)
+      let closestNpc = null;
+      let bestScore = Infinity;
       for (const npc of mData.npcs) {
         const nx = (npc.x + 0.5) * TILE_SIZE;
         const ny = (npc.y + 0.5) * TILE_SIZE;
-        if (Math.hypot(state.player.x - nx, state.player.y - ny) < TILE_SIZE * 1.55) {
-          if (npc.role === 'hm_giver') {
-            handleHMGiverNPC(npc);
-            return;
+        const playerDist = Math.hypot(state.player.x - nx, state.player.y - ny);
+        const lookDist = Math.hypot(lookX - nx, lookY - ny);
+        if (playerDist < TILE_SIZE * 1.55 && lookDist < TILE_SIZE * 1.05) {
+          const score = lookDist * 0.75 + playerDist * 0.25;
+          if (score < bestScore) {
+            bestScore = score;
+            closestNpc = npc;
           }
-          if (npc.role === 'game_corner') {
-            openGameCornerModal();
-            return;
-          }
-          if (npc.role === 'healer') {
-            healEntireParty();
-            return;
-          }
-          if (npc.role === 'pc_terminal') {
-            openPartyBagModal(false);
-            document.getElementById('tabBtnPcBox').click();
-            return;
-          }
-          if (npc.role === 'aide_gift') {
-            if (!state.collectedItems.aide_gift) {
-              state.collectedItems.aide_gift = true;
-              state.inventory.leftovers = (state.inventory.leftovers || 0) + 1;
-              state.inventory.sitrus_berry = (state.inventory.sitrus_berry || 0) + 2;
-              saveGameToSlot(state.saveName, true);
-              sfx.playVictory();
-              showDialogue(npc.name, [
-                'שלום! אני עוזר המחקר של פרופסור אוק! הנה מתנה מיוחדת למסע שלך:',
-                'קיבלת חפץ מוחזק: שאריות תפוח 🍎 ו-2 פירות סיטרוס 🍊! פתח את תפריט הצוות (🐾) כדי לתת לפוקימון שלך להחזיק אותם בקרב!'
-              ]);
-            } else {
-              showDialogue(npc.name, ['אל תשכח לצייד את הפוקימונים שלך בפריטים מוחזקים בחלון הצוות (🐾)!']);
-            }
-            return;
-          }
-          if (npc.role === 'gym_guide') {
-            showDialogue(npc.name, [npc.tip || 'בהצלחה בקרב המכון!']);
-            return;
-          }
-          if (npc.role === 'enter_interior' && npc.targetInterior) {
-            enterInteriorMap(npc.targetInterior);
-            return;
-          }
-          if (npc.role === 'shop') {
-            openShopModal();
-            return;
-          }
-          if (npc.role === 'trader') {
-            openTradeModal();
-            return;
-          }
-          if (npc.role === 'prof') {
-            const caughtCount = Object.keys(state.pokedexCaught).length;
+        }
+      }
+      // If player is directly facing a wooden sign with no NPC on it, read the sign instead of a nearby NPC
+      if (!mData.isInterior && frontTile === 8 && closestNpc && (closestNpc.x !== frontTx || closestNpc.y !== frontTy)) {
+        closestNpc = null;
+      }
+
+      if (closestNpc) {
+        const npc = closestNpc;
+        if (npc.role === 'hm_giver') {
+          handleHMGiverNPC(npc);
+          return;
+        }
+        if (npc.role === 'game_corner') {
+          openGameCornerModal();
+          return;
+        }
+        if (npc.role === 'healer') {
+          healEntireParty();
+          return;
+        }
+        if (npc.role === 'pc_terminal') {
+          openPartyBagModal(false);
+          document.getElementById('tabBtnPcBox').click();
+          return;
+        }
+        if (npc.role === 'aide_gift') {
+          if (!state.collectedItems.aide_gift) {
+            state.collectedItems.aide_gift = true;
+            state.inventory.leftovers = (state.inventory.leftovers || 0) + 1;
+            state.inventory.sitrus_berry = (state.inventory.sitrus_berry || 0) + 2;
+            saveGameToSlot(state.saveName, true);
+            sfx.playVictory();
             showDialogue(npc.name, [
-              `שלום ${state.saveName}! תפסת עד כה ${caughtCount} מתוך 151 מיני פוקימונים במחוז קאנטו!`,
-              'בדוק את תפריט ה-📜 משימות ואת כרטיס המאמן (🪪) כדי לעקוב אחרי תגי המכונים ויכולות ה-HM המיוחדות שלך!'
+              'שלום! אני עוזר המחקר של פרופסור אוק! הנה מתנה מיוחדת למסע שלך:',
+              'קיבלת חפץ מוחזק: שאריות תפוח 🍎 ו-2 פירות סיטרוס 🍊! פתח את תפריט הצוות (🐾) כדי לתת לפוקימון שלך להחזיק אותם בקרב!'
+            ]);
+          } else {
+            showDialogue(npc.name, ['אל תשכח לצייד את הפוקימונים שלך בפריטים מוחזקים בחלון הצוות (🐾)!']);
+          }
+          return;
+        }
+        if (npc.role === 'gym_guide') {
+          showDialogue(npc.name, [npc.tip || 'בהצלחה בקרב המכון!']);
+          return;
+        }
+        if (npc.role === 'enter_interior' && npc.targetInterior) {
+          enterInteriorMap(npc.targetInterior);
+          return;
+        }
+        if (npc.role === 'shop') {
+          openShopModal();
+          return;
+        }
+        if (npc.role === 'trader') {
+          openTradeModal();
+          return;
+        }
+        if (npc.role === 'prof') {
+          const caughtCount = Object.keys(state.pokedexCaught).length;
+          showDialogue(npc.name, [
+            `שלום ${state.saveName}! תפסת עד כה ${caughtCount} מתוך 151 מיני פוקימונים במחוז קאנטו!`,
+            'בדוק את תפריט ה-📜 משימות ואת כרטיס המאמן (🪪) כדי לעקוב אחרי תגי המכונים ויכולות ה-HM המיוחדות שלך!'
+          ]);
+          return;
+        }
+        if (npc.role === 'gym') {
+          if (!mData.isInterior && npc.gymInteriorId && INTERIOR_MAPS[npc.gymInteriorId]) {
+            showDialogue(npc.name, [
+              `ברוך הבא אל ${INTERIOR_MAPS[npc.gymInteriorId].name}! היכנס פנימה אל זירת המכון הרשמית!`
+            ], () => enterInteriorMap(npc.gymInteriorId));
+            return;
+          }
+          const already = !!state.badges[npc.badgeId];
+          showDialogue(npc.name, [
+            already
+              ? `כבר זכית ב-${npc.badgeName} שלי! מוכן לקרב אימון חוזר מול מכון הפוקימונים?`
+              : `ברוך הבא לזירת המכון! אם תנצח אותי תעניק לעצמך את ${npc.badgeName} ופרס של ₽${npc.rewardMoney}!`
+          ], () => triggerTrainerBattle(npc));
+          return;
+        }
+        if (npc.role === 'champion') {
+          const e4Ids = ['e4_lorelei', 'e4_bruno', 'e4_agatha', 'e4_lance'];
+          const e4DoneCount = e4Ids.filter(id => !!(state.eliteFourDefeated && state.eliteFourDefeated[id])).length;
+          if (state.currentMap === 'INDIGO_HALL' && e4DoneCount < 4 && !state.championDefeated) {
+            showDialogue(npc.name, [
+              `רגע אחד, ${state.saveName}! לפני שתילחם באלוף ליגת אינדיגו, עליך לנצח את כל 4 חברי רביעיית העילית שבאולם!`,
+              `התקדמות ברביעיית העילית: ${e4DoneCount} / 4 (לורליי ❄️, ברונו 🥊, אגאתה 👻, לאנס 🐉).`
             ]);
             return;
           }
-          if (npc.role === 'gym') {
-            if (!mData.isInterior && npc.gymInteriorId && INTERIOR_MAPS[npc.gymInteriorId]) {
-              showDialogue(npc.name, [
-                `ברוך הבא אל ${INTERIOR_MAPS[npc.gymInteriorId].name}! היכנס פנימה אל זירת המכון הרשמית!`
-              ], () => enterInteriorMap(npc.gymInteriorId));
-              return;
-            }
-            const already = !!state.badges[npc.badgeId];
-            showDialogue(npc.name, [
-              already
-                ? `כבר זכית ב-${npc.badgeName} שלי! מוכן לקרב אימון חוזר מול מכון הפוקימונים?`
-                : `ברוך הבא לזירת המכון! אם תנצח אותי תעניק לעצמך את ${npc.badgeName} ופרס של ₽${npc.rewardMoney}!`
-            ], () => triggerTrainerBattle(npc));
-            return;
+          showDialogue(npc.name, [
+            state.championDefeated
+              ? 'הקרב הקודם שלנו בליגת אינדיגו היה אגדי! מוכן להגן על תואר האלוף שלך?'
+              : 'הבסת את כל רביעיית העילית והגעת עד פסגת רמת אינדיגו! בוא נראה אם הצוות שלך מסוגל לנצח את האלוף של קאנטו!'
+          ], () => triggerTrainerBattle(npc));
+          return;
+        }
+        if (npc.role === 'fossil_lab') {
+          handleFossilRevival();
+          return;
+        }
+        if (npc.role === 'daycare') {
+          handleDaycareInteraction();
+          return;
+        }
+        if (npc.role === 'route_trainer') {
+          state.defeatedTrainers = state.defeatedTrainers || {};
+          if (state.defeatedTrainers[npc.id]) {
+            showDialogue(npc.name, ['ניצחת אותי בצורה מרשימה! המשך להתקדם בדרכי קאנטו!']);
+          } else {
+            showDialogue(npc.name, [npc.intro || 'קדימה לקרב מאמנים!'], () => triggerTrainerBattle(npc));
           }
-          if (npc.role === 'champion') {
-            showDialogue(npc.name, [
-              state.championDefeated
-                ? 'הקרב הקודם שלנו בליגת אינדיגו היה אגדי! מוכן להגן על תואר האלוף שלך?'
-                : 'הגעת עד לפסגת רמת אינדיגו! בוא נראה אם הצוות שלך מסוגל לנצח את האלוף של קאנטו!'
-            ], () => triggerTrainerBattle(npc));
-            return;
-          }
-          if (npc.role === 'fossil_lab') {
-            handleFossilRevival();
-            return;
-          }
-          if (npc.role === 'daycare') {
-            handleDaycareInteraction();
-            return;
-          }
-          if (npc.role === 'route_trainer') {
-            state.defeatedTrainers = state.defeatedTrainers || {};
-            if (state.defeatedTrainers[npc.id]) {
-              showDialogue(npc.name, ['ניצחת אותי בצורה מרשימה! המשך להתקדם בדרכי קאנטו!']);
-            } else {
-              showDialogue(npc.name, [npc.intro || 'קדימה לקרב מאמנים!'], () => triggerTrainerBattle(npc));
-            }
-            return;
-          }
-          if (npc.role === 'elite4') {
-            state.eliteFourDefeated = state.eliteFourDefeated || {};
-            showDialogue(npc.name, [
-              state.eliteFourDefeated[npc.id]
-                ? 'כבר הוכחת את כוחך מולי ברביעיית העילית! מוכן לקרב אימון חוזר?'
-                : `אני חבר ברביעיית העילית של ליגת אינדיגו! נראה אם תצליח לעבור אותי בדרך אל האלוף גארי!`
-            ], () => triggerTrainerBattle(npc));
-            return;
-          }
-          if (npc.role === 'legendary') {
-            showDialogue(npc.name, [
-              `נוכחות עוצמתית בוקעת מ-${SPECIES_DB[npc.speciesId]?.name || npc.name}! הוא מתכונן לקרב!`
-            ], () => triggerWildBattle(npc.x, npc.y, npc.speciesId, npc.level));
-            return;
-          }
+          return;
+        }
+        if (npc.role === 'elite4') {
+          state.eliteFourDefeated = state.eliteFourDefeated || {};
+          showDialogue(npc.name, [
+            state.eliteFourDefeated[npc.id]
+              ? 'כבר הוכחת את כוחך מולי ברביעיית העילית! מוכן לקרב אימון חוזר?'
+              : `אני חבר ברביעיית העילית של ליגת אינדיגו! נראה אם תצליח לעבור אותי בדרך אל האלוף גארי!`
+          ], () => triggerTrainerBattle(npc));
+          return;
+        }
+        if (npc.role === 'legendary') {
+          showDialogue(npc.name, [
+            `נוכחות עוצמתית בוקעת מ-${SPECIES_DB[npc.speciesId]?.name || npc.name}! הוא מתכונן לקרב!`
+          ], () => triggerWildBattle(npc.x, npc.y, npc.speciesId, npc.level));
+          return;
         }
       }
 
@@ -4277,10 +4687,13 @@
     }
 
     function healEntireParty() {
+      if (state.mode === 'BATTLE' || state.battle) return;
       state.party.forEach(mon => {
         mon.hp = mon.maxHp;
         mon.status = null;
         mon.sleepTurns = 0;
+        mon.atkStage = 0;
+        mon.defStage = 0;
         mon.moves.forEach(m => { m.pp = m.maxPp; });
       });
       if (state.inventory.pokeball < 5) state.inventory.pokeball = 6;
@@ -4460,6 +4873,8 @@
     function endBattleToOverworld() {
       const pendingEvo = state.battle?.pendingEvolution;
       state.battle = null;
+      // Reset temporary in-battle stat stages so Swords Dance / Growl do not persist permanently
+      state.party.forEach(m => { m.atkStage = 0; m.defStage = 0; });
       updateBattleButtonsForMode();
       state.mode = 'OVERWORLD';
       clearDpadInput();
@@ -4502,22 +4917,8 @@
         showBattleMessages(['אין יותר נקודות כוח (PP) למהלך זה!'], 'MENU');
         return;
       }
-      move.pp--;
 
-      if (move.type === 'HEAL') {
-        sfx.playHealJingle();
-        const healAmt = Math.min(pMon.maxHp - pMon.hp, Math.floor(pMon.maxHp * 0.45));
-        pMon.hp += healAmt;
-        showBattleMessages([`${pMon.name} השתמש ב-${move.name} וחידש ${healAmt} נק׳ חיים!`], 'ENEMY_TURN');
-        return;
-      }
-
-      sfx.playAttack(move.type);
-      b.enemyShake = 16;
-      triggerBattleAttackVisual(move.type, true);
-      spawnBattleParticles(canvas.width * 0.68, canvas.height * 0.28, SPECIES_DB[pMon.speciesId]?.primary || '#38bdf8');
-
-      // Check sleep / freeze / paralysis on player Pokemon before attacking
+      // Check sleep / freeze / paralysis BEFORE spending PP or playing attack animation!
       if (pMon.status === 'SLEEP') {
         if ((pMon.sleepTurns || 0) > 0) {
           pMon.sleepTurns--;
@@ -4539,6 +4940,21 @@
         showBattleMessages([`⚡ ${pMon.name} משותק מזרם חשמלי ואיבד את התור!`], 'ENEMY_TURN');
         return;
       }
+
+      move.pp--;
+
+      if (move.type === 'HEAL') {
+        sfx.playHealJingle();
+        const healAmt = Math.min(pMon.maxHp - pMon.hp, Math.floor(pMon.maxHp * 0.45));
+        pMon.hp += healAmt;
+        showBattleMessages([`${pMon.name} השתמש ב-${move.name} וחידש ${healAmt} נק׳ חיים!`], 'ENEMY_TURN');
+        return;
+      }
+
+      sfx.playAttack(move.type);
+      b.enemyShake = 16;
+      triggerBattleAttackVisual(move.type, true);
+      spawnBattleParticles(canvas.width * 0.68, canvas.height * 0.28, SPECIES_DB[pMon.speciesId]?.primary || '#38bdf8');
 
       // Apply move statEffect (+ATK / -ATK / +DEF / -DEF) if present
       if (move.statEffect) {
@@ -4586,15 +5002,17 @@
         }
       }
 
-      // Check Player Sitrus Berry / Leftovers
+      // Check Player Sitrus Berry (once per battle!) / Leftovers
+      b.sitrusUsed = b.sitrusUsed || {};
       if (pMon.hp > 0 && pMon.heldItem === 'leftovers' && pMon.hp < pMon.maxHp) {
         const hAmt = Math.max(2, Math.floor(pMon.maxHp * 0.10));
         pMon.hp = Math.min(pMon.maxHp, pMon.hp + hAmt);
         msgs.push(`🍎 שאריות התפוח חידשו ל-${pMon.name} ${hAmt} נק׳ חיים!`);
-      } else if (pMon.hp > 0 && pMon.heldItem === 'sitrus_berry' && pMon.hp <= pMon.maxHp * 0.5) {
+      } else if (pMon.hp > 0 && pMon.heldItem === 'sitrus_berry' && !b.sitrusUsed[pMon.uid] && pMon.hp <= pMon.maxHp * 0.5) {
+        b.sitrusUsed[pMon.uid] = true;
         const hAmt = Math.max(8, Math.floor(pMon.maxHp * 0.35));
         pMon.hp = Math.min(pMon.maxHp, pMon.hp + hAmt);
-        msgs.push(`🍊 פרי הסיטרוס הופעל אוטומטית וחידש ל-${pMon.name} ${hAmt} נק׳ חיים!`);
+        msgs.push(`🍊 פרי הסיטרוס הופעל אוטומטית (פעם בקרב) וחידש ל-${pMon.name} ${hAmt} נק׳ חיים!`);
       }
 
       if (eMon.hp <= 0) {
@@ -4739,6 +5157,16 @@
           eMon.status = null;
         }
       }
+      if (eMon.status === 'FREEZE') {
+        if (Math.random() < 0.65) {
+          msgs.push(`❄️ ${eMon.name} היריב קפוא בקרח ולא הצליח לתקוף!`);
+          showBattleMessages(msgs, 'MENU');
+          return;
+        } else {
+          eMon.status = null;
+          msgs.push(`🔥 ${eMon.name} היריב הפשיר מהקרח!`);
+        }
+      }
       if (eMon.status === 'PARALYZE' && Math.random() < 0.3) {
         msgs.push(`⚡ ${eMon.name} היריב משותק ולא הצליח לזוז!`);
         showBattleMessages(msgs, 'MENU');
@@ -4776,6 +5204,13 @@
         }
       }
 
+      // Apply end-of-turn Burn / Poison damage on Player Pokemon
+      if (pMon.hp > 0 && (pMon.status === 'BURN' || pMon.status === 'POISON')) {
+        const pDot = Math.max(2, Math.floor(pMon.maxHp * 0.08));
+        pMon.hp = Math.max(0, pMon.hp - pDot);
+        msgs.push(`${pMon.name} שלך נפגע מ-${STATUS_META[pMon.status].name} (-${pDot} HP)!`);
+      }
+
       if (pMon.hp <= 0) {
         msgs.push(`${pMon.name} שלך התעייף!`);
         const nextAlive = state.party.findIndex(p => p.hp > 0);
@@ -4784,7 +5219,7 @@
           msgs.push(`צא לקרב, ${state.party[nextAlive].name}!`);
           showBattleMessages(msgs, 'MENU');
         } else {
-          state.party.forEach(p => { p.hp = p.maxHp; });
+          state.party.forEach(p => { p.hp = p.maxHp; p.status = null; p.atkStage = 0; p.defStage = 0; });
           msgs.push('כל הצוות התעייף! האחות ג׳וי חילצה וריפאה את הצוות שלך.');
           showBattleMessages(msgs, 'END_BATTLE');
         }
@@ -5008,26 +5443,34 @@
         ctx.font = 'bold 10px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('💪', sx + 22, sy + 26);
-      } else if (tile === 10 && !state.collectedItems[`${c},${r}`]) {
-        const pulse = Math.sin(state.tick * 0.1) * 2;
-        ctx.fillStyle = 'rgba(250, 204, 21, 0.38)';
-        ctx.beginPath();
-        ctx.arc(sx + 22, sy + 22, 13 + pulse, 0, Math.PI * 2);
-        ctx.fill();
+      } else if (tile === 10) {
+        const mData = getActiveMapData();
+        if (mData.isInterior && mData.room) {
+          ctx.fillStyle = ((c + r) % 2 === 0) ? mData.room.floorColor1 : mData.room.floorColor2;
+          ctx.fillRect(sx, sy, TILE_SIZE + 0.6, TILE_SIZE + 0.6);
+        }
+        const isCollected = state.collectedItems[`${state.currentMap || 'OW'}_${c},${r}`] || state.collectedItems[`${c},${r}`];
+        if (!isCollected) {
+          const pulse = Math.sin(state.tick * 0.1) * 2;
+          ctx.fillStyle = 'rgba(250, 204, 21, 0.38)';
+          ctx.beginPath();
+          ctx.arc(sx + 22, sy + 22, 13 + pulse, 0, Math.PI * 2);
+          ctx.fill();
 
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.arc(sx + 22, sy + 22, 9, Math.PI, 0);
-        ctx.fill();
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(sx + 22, sy + 22, 9, 0, Math.PI);
-        ctx.fill();
-        ctx.strokeStyle = '#0f172a';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(sx + 22, sy + 22, 9, 0, Math.PI * 2);
-        ctx.stroke();
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(sx + 22, sy + 22, 9, Math.PI, 0);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(sx + 22, sy + 22, 9, 0, Math.PI);
+          ctx.fill();
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(sx + 22, sy + 22, 9, 0, Math.PI * 2);
+          ctx.stroke();
+        }
       }
     }
 
@@ -5255,57 +5698,72 @@
 
     function drawBattleStatCard(x, y, cardW, mon, isPlayer) {
       ctx.save();
+      const caughtIcon = (!isPlayer && state.pokedexCaught[mon.speciesId]) ? '🔴 ' : '';
+      const nameStr = `${caughtIcon}${mon.name}  רמ׳ ${mon.level}`;
+      ctx.font = 'bold 13px system-ui, sans-serif';
+      const nameW = ctx.measureText(nameStr).width;
+      ctx.font = 'bold 10px system-ui, sans-serif';
+      const typeW = ctx.measureText(mon.typeName).width;
+      const stackType = (nameW + typeW + 36) > cardW;
+      const cardH = (isPlayer ? 76 : 66) + (stackType ? 14 : 0);
+
       ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.roundRect(x, y, cardW, isPlayer ? 74 : 64, 16);
+      ctx.roundRect(x, y, cardW, cardH, 16);
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = '#f8fafc';
       ctx.font = 'bold 13px system-ui, sans-serif';
       ctx.textAlign = 'right';
-      const caughtIcon = (!isPlayer && state.pokedexCaught[mon.speciesId]) ? '🔴 ' : '';
-      ctx.fillText(`${caughtIcon}${mon.name}  רמ׳ ${mon.level}`, x + cardW - 14, y + 22);
+      ctx.fillText(nameStr, x + cardW - 14, y + 21);
 
       ctx.fillStyle = SPECIES_DB[mon.speciesId]?.badgeColor || '#3b82f6';
-      ctx.font = 'bold 11px system-ui, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(mon.typeName, x + 14, y + 22);
+      ctx.font = 'bold 10px system-ui, sans-serif';
+      if (stackType) {
+        ctx.textAlign = 'right';
+        ctx.fillText(mon.typeName, x + cardW - 14, y + 35);
+      } else {
+        ctx.textAlign = 'left';
+        ctx.fillText(mon.typeName, x + 14, y + 21);
+      }
 
+      const barY = y + (stackType ? 44 : 32);
       const ratio = Math.max(0, Math.min(1, mon.hp / mon.maxHp));
       const barW = cardW - 28;
       ctx.fillStyle = '#334155';
       ctx.beginPath();
-      ctx.roundRect(x + 14, y + 32, barW, 10, 5);
+      ctx.roundRect(x + 14, barY, barW, 10, 5);
       ctx.fill();
 
       ctx.fillStyle = ratio > 0.5 ? '#22c55e' : ratio > 0.22 ? '#eab308' : '#ef4444';
       ctx.beginPath();
-      ctx.roundRect(x + 14, y + 32, Math.max(4, barW * ratio), 10, 5);
+      ctx.roundRect(x + 14, barY, Math.max(4, barW * ratio), 10, 5);
       ctx.fill();
 
+      const hpTextY = barY + 24;
       ctx.fillStyle = '#cbd5e1';
       ctx.font = 'bold 11px system-ui, sans-serif';
       ctx.textAlign = 'right';
       const heldIcon = (mon.heldItem && HELD_ITEMS_DB[mon.heldItem]) ? ` ${HELD_ITEMS_DB[mon.heldItem].icon}` : '';
-      ctx.fillText(`חיים: ${mon.hp} / ${mon.maxHp}${heldIcon}`, x + cardW - 14, y + 56);
+      ctx.fillText(`חיים: ${mon.hp} / ${mon.maxHp}${heldIcon}`, x + cardW - 14, hpTextY);
 
       if (mon.status && STATUS_META[mon.status]) {
         const st = STATUS_META[mon.status];
         ctx.fillStyle = st.color;
         ctx.font = 'bold 10px system-ui, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(st.short, x + 14, y + 56);
+        ctx.fillText(st.short, x + 14, hpTextY);
       }
 
       if (isPlayer) {
         const xpRatio = Math.min(1, mon.xp / mon.nextXp);
         ctx.fillStyle = '#1e293b';
-        ctx.fillRect(x + 14, y + 63, barW, 4);
+        ctx.fillRect(x + 14, hpTextY + 7, barW, 4);
         ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(x + 14, y + 63, barW * xpRatio, 4);
+        ctx.fillRect(x + 14, hpTextY + 7, barW * xpRatio, 4);
       }
 
       ctx.restore();
@@ -5634,6 +6092,12 @@
     });
 
     window.addEventListener('keydown', (e) => {
+      if (state.parentLocked) {
+        if (e.code === 'Escape') { e.preventDefault(); e.stopPropagation(); }
+        return;
+      }
+      const activeTag = document.activeElement?.tagName;
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') return;
       const map = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right' };
       if (map[e.code]) {
         inputState.keys.add(map[e.code]);
@@ -5983,6 +6447,8 @@
       const modal = document.getElementById('partyBagModal');
       const pList = document.getElementById('modalPartyList');
       document.getElementById('pcBoxCountLabel').textContent = state.pcBox.length;
+      const instantHealBtn = document.getElementById('btnInstantHealModal');
+      if (instantHealBtn) instantHealBtn.classList.toggle('hidden', !!fromBattle);
       pList.innerHTML = '';
 
       state.party.forEach((mon, idx) => {
@@ -6073,14 +6539,23 @@
         pList.appendChild(row);
       });
 
-      // Render Bag Items (including usable Rare Candy & Evolution Stones!)
+      // Render Bag Items (including Potions, Rare Candy, Evolution Stones & ALL TMs including TM15 Hyper Beam!)
       const bList = document.getElementById('modalBagList');
       bList.innerHTML = '';
-      SHOP_CATALOG.forEach(item => {
+      const catalogKeys = new Set(SHOP_CATALOG.map(i => i.key));
+      const bagCatalog = [...SHOP_CATALOG];
+      Object.values(TM_DISCS_DB).forEach(tm => {
+        if (!catalogKeys.has(tm.key)) {
+          bagCatalog.push({ key: tm.key, name: tm.name, icon: tm.icon || '💿', price: tm.price || 5000 });
+          catalogKeys.add(tm.key);
+        }
+      });
+      bagCatalog.forEach(item => {
         const count = state.inventory[item.key] || 0;
-        const isUsableOnLead = ['rare_candy', 'fire_stone', 'water_stone', 'thunder_stone', 'leaf_stone', 'moon_stone', 'link_cable'].includes(item.key) || !!TM_DISCS_DB[item.key];
+        const isUsableOnLead = ['potion', 'super_potion', 'full_heal', 'rare_candy', 'fire_stone', 'water_stone', 'thunder_stone', 'leaf_stone', 'moon_stone', 'link_cable'].includes(item.key) || !!TM_DISCS_DB[item.key];
         const card = document.createElement('button');
         card.type = 'button';
+        card.dataset.bagKey = item.key;
         card.className = `p-2 rounded-xl border text-center transition ${
           count > 0 ? 'bg-slate-900 border-slate-700 hover:border-sky-400' : 'bg-slate-950/50 border-slate-800/60 opacity-50'
         }`;
@@ -6088,7 +6563,7 @@
           <div class="text-base">${item.icon}</div>
           <div class="text-[11px] font-bold text-white truncate">${item.name}</div>
           <div class="text-[10px] text-sky-300 font-bold">x${count}</div>
-          ${(isUsableOnLead && count > 0) ? '<div class="text-[9px] text-amber-300 mt-0.5 font-extrabold">השתמש על המוביל</div>' : ''}
+          ${(isUsableOnLead && count > 0 && !fromBattle) ? '<div class="text-[9px] text-amber-300 mt-0.5 font-extrabold">השתמש על המוביל</div>' : ''}
         `;
         if (isUsableOnLead && count > 0 && !fromBattle) {
           card.addEventListener('click', () => useSpecialItemOnLead(item.key));
@@ -6138,13 +6613,47 @@
       const lead = state.party[0];
       if (!lead || (state.inventory[itemKey] || 0) <= 0) return;
 
+      if (itemKey === 'potion' || itemKey === 'super_potion') {
+        if (lead.hp >= lead.maxHp) {
+          sfx.playCancel();
+          return;
+        }
+        const healAmt = itemKey === 'super_potion' ? 100 : 40;
+        lead.hp = Math.min(lead.maxHp, lead.hp + healAmt);
+        state.inventory[itemKey]--;
+        sfx.playHealJingle();
+        saveGameToSlot(state.saveName, false);
+        openPartyBagModal(false);
+        return;
+      }
+
+      if (itemKey === 'full_heal') {
+        if (!lead.status) {
+          sfx.playCancel();
+          return;
+        }
+        lead.status = null;
+        state.inventory.full_heal--;
+        sfx.playHealJingle();
+        saveGameToSlot(state.saveName, false);
+        openPartyBagModal(false);
+        return;
+      }
+
       if (TM_DISCS_DB[itemKey]) {
         const tm = TM_DISCS_DB[itemKey];
-        state.inventory[itemKey]--;
+        if (lead.moves.some(m => m.name === tm.move.name)) {
+          sfx.playCancel();
+          showDialogue('דיסק טכני (TM)', [`${lead.name} כבר מכיר את המתקפה ${tm.move.name}! הדיסק נשאר בתיק שלך.`]);
+          return;
+        }
         const moveCopy = { ...tm.move, maxPp: tm.move.pp };
-        promptLearnMove(lead, moveCopy, () => {
-          sfx.playEvolveFanfare();
-          saveGameToSlot(state.saveName, true);
+        promptLearnMove(lead, moveCopy, (learned) => {
+          if (learned) {
+            state.inventory[itemKey] = Math.max(0, (state.inventory[itemKey] || 0) - 1);
+            sfx.playEvolveFanfare();
+            saveGameToSlot(state.saveName, true);
+          }
           openPartyBagModal(false);
         });
         return;
@@ -6402,7 +6911,73 @@
       document.getElementById('questsModal').classList.remove('flex');
     });
 
-    // Trade Center Modal (NPC Trades + Wonder Trade)
+    // Trade Center Modal (NPC Trades + Balanced Wonder Trade)
+    const WONDER_TRADE_EXCLUDED = new Set(['articuno', 'zapdos', 'moltres', 'mewtwo', 'mew']);
+    const MAX_DAILY_WONDER_TRADES = 3;
+
+    function getLocalDateKey() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    function getWonderTradeUsageToday() {
+      const today = getLocalDateKey();
+      if (!state.wonderTradeDaily || state.wonderTradeDaily.date !== today) {
+        state.wonderTradeDaily = { date: today, count: 0 };
+      }
+      return state.wonderTradeDaily;
+    }
+
+    function rollWonderTradeSpecies(mon) {
+      const sp = mon ? SPECIES_DB[mon.speciesId] : null;
+      // If this Pokemon evolves by TRADE, evolve it immediately!
+      if (sp && sp.evoMethod === 'TRADE' && sp.evoTo && !WONDER_TRADE_EXCLUDED.has(sp.evoTo)) {
+        return sp.evoTo;
+      }
+      const eligiblePool = DEX_ORDER.filter(id => !WONDER_TRADE_EXCLUDED.has(id));
+      const unowned = eligiblePool.filter(id => !state.pokedexCaught[id]);
+      if (unowned.length > 0 && Math.random() < 0.75) {
+        return unowned[Math.floor(Math.random() * unowned.length)];
+      }
+      return eligiblePool[Math.floor(Math.random() * eligiblePool.length)];
+    }
+
+    function performWonderTrade(partyIdx) {
+      const mon = state.party[partyIdx];
+      if (!mon) return { ok: false, message: 'לא נמצא פוקימון להחלפה.' };
+      const usage = getWonderTradeUsageToday();
+      if (usage.count >= MAX_DAILY_WONDER_TRADES) {
+        sfx.playCancel();
+        return {
+          ok: false,
+          message: `⏳ הגעת למגבלה היומית של החלפות פלא (${MAX_DAILY_WONDER_TRADES} החלפות ביום)! חזור מחר להחלפות נוספות.`
+        };
+      }
+      const newSpeciesId = rollWonderTradeSpecies(mon);
+      const oldName = mon.name;
+      // Return equipped held item to inventory so it is never lost on trade
+      if (mon.heldItem) {
+        state.inventory[mon.heldItem] = (state.inventory[mon.heldItem] || 0) + 1;
+        mon.heldItem = null;
+      }
+      // Keep received level close to the given Pokemon's level (+/- 2, min 2, max 100)
+      const levelDelta = Math.floor(Math.random() * 5) - 2;
+      const newLevel = Math.max(2, Math.min(100, (mon.level || 5) + levelDelta));
+      const newMon = createMonster(newSpeciesId, newLevel);
+      state.party[partyIdx] = newMon;
+      markDexCaught(newSpeciesId);
+      usage.count++;
+      state.stats.tradesCount = (state.stats.tradesCount || 0) + 1;
+      sfx.playEvolveFanfare();
+      saveGameToSlot(state.saveName, true);
+      const left = Math.max(0, MAX_DAILY_WONDER_TRADES - usage.count);
+      return {
+        ok: true,
+        mon: newMon,
+        message: `✨ החלפת פלא! שלחת את ${oldName} וקיבלת את ${newMon.name} (#${newMon.dex} • רמה ${newMon.level})! (נותרו ${left}/${MAX_DAILY_WONDER_TRADES} החלפות פלא היום)`
+      };
+    }
+
     function openTradeModal(feedbackMsg = null) {
       const fb = document.getElementById('tradeFeedbackBanner');
       if (feedbackMsg) {
@@ -6443,10 +7018,20 @@
           }
           let tradedLevel = 15;
           if (partyIdx !== -1) {
-            tradedLevel = state.party[partyIdx].level;
+            const oldMon = state.party[partyIdx];
+            if (oldMon.heldItem) {
+              state.inventory[oldMon.heldItem] = (state.inventory[oldMon.heldItem] || 0) + 1;
+              oldMon.heldItem = null;
+            }
+            tradedLevel = oldMon.level;
             state.party[partyIdx] = createMonster(tr.getId, tradedLevel);
           } else {
-            tradedLevel = state.pcBox[boxIdx].level;
+            const oldMon = state.pcBox[boxIdx];
+            if (oldMon.heldItem) {
+              state.inventory[oldMon.heldItem] = (state.inventory[oldMon.heldItem] || 0) + 1;
+              oldMon.heldItem = null;
+            }
+            tradedLevel = oldMon.level;
             state.pcBox[boxIdx] = createMonster(tr.getId, tradedLevel);
           }
           markDexCaught(tr.getId);
@@ -6458,39 +7043,37 @@
         npcCont.appendChild(row);
       });
 
-      // Wonder Trade List
+      // Wonder Trade List (daily limit: 3/day, no legendaries/mythicals)
       const wtCont = document.getElementById('wonderTradePartyList');
       wtCont.innerHTML = '';
+      const usage = getWonderTradeUsageToday();
+      const remaining = Math.max(0, MAX_DAILY_WONDER_TRADES - usage.count);
+      const quotaBanner = document.createElement('div');
+      quotaBanner.className = `col-span-full text-[11px] font-bold px-3 py-1.5 rounded-xl border ${
+        remaining > 0 ? 'bg-purple-500/15 border-purple-400/40 text-purple-200' : 'bg-rose-500/15 border-rose-400/40 text-rose-200'
+      }`;
+      quotaBanner.textContent = remaining > 0
+        ? `🎲 החלפות פלא שנותרו היום: ${remaining} / ${MAX_DAILY_WONDER_TRADES} (ללא אגדיים, רמה תואמת לפוקימון שנשלח)`
+        : `⏳ ניצלת את כל ${MAX_DAILY_WONDER_TRADES} החלפות הפלא להיום! חזור מחר.`;
+      wtCont.appendChild(quotaBanner);
+
       state.party.forEach((mon, idx) => {
         const btn = document.createElement('button');
-        btn.className = 'p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-purple-500/40 text-right flex items-center justify-between';
+        btn.className = `p-2.5 rounded-xl border text-right flex items-center justify-between ${
+          remaining > 0
+            ? 'bg-slate-900 hover:bg-slate-800 border-purple-500/40'
+            : 'bg-slate-950/60 border-slate-800 opacity-60'
+        }`;
         btn.innerHTML = `
           <div>
             <div class="text-xs font-black text-white">${mon.name} <span class="text-amber-300">רמ׳${mon.level}</span></div>
-            <div class="text-[10px] text-purple-300">שלח להחלפת פלא 🎲</div>
+            <div class="text-[10px] text-purple-300">${remaining > 0 ? 'שלח להחלפת פלא 🎲' : 'המכסה היומית הסתיימה'}</div>
           </div>
           <span>🔄</span>
         `;
         btn.addEventListener('click', () => {
-          const sp = SPECIES_DB[mon.speciesId];
-          let newSpeciesId = null;
-          // If this Pokemon evolves by TRADE, evolve it immediately!
-          if (sp && sp.evoMethod === 'TRADE' && sp.evoTo) {
-            newSpeciesId = sp.evoTo;
-          } else {
-            const unowned = DEX_ORDER.filter(id => !state.pokedexCaught[id]);
-            newSpeciesId = (unowned.length > 0 && Math.random() < 0.75)
-              ? unowned[Math.floor(Math.random() * unowned.length)]
-              : DEX_ORDER[Math.floor(Math.random() * DEX_ORDER.length)];
-          }
-          const oldName = mon.name;
-          const newMon = createMonster(newSpeciesId, mon.level);
-          state.party[idx] = newMon;
-          markDexCaught(newSpeciesId);
-          state.stats.tradesCount = (state.stats.tradesCount || 0) + 1;
-          sfx.playEvolveFanfare();
-          saveGameToSlot(state.saveName, true);
-          openTradeModal(`✨ החלפת פלא! שלחת את ${oldName} וקיבלת את ${newMon.name} (#${newMon.dex} • רמה ${newMon.level})!`);
+          const res = performWonderTrade(idx);
+          openTradeModal(res.message);
         });
         wtCont.appendChild(btn);
       });
@@ -7239,7 +7822,7 @@
     if (!NPCS.some(n => n.id === 'celadon_casino_host')) {
       NPCS.push({
         id: 'celadon_casino_host',
-        x: 186, y: 132,
+        x: 186, y: 134,
         name: 'מנהל קזינו סלדון 🎰',
         role: 'game_corner',
         color: '#f59e0b',
@@ -7349,18 +7932,18 @@
 
     function promptLearnMove(mon, newMoveObj, onComplete = null) {
       if (!mon || !newMoveObj) {
-        if (onComplete) onComplete();
+        if (onComplete) onComplete(false);
         return;
       }
       const moveCopy = { ...newMoveObj, maxPp: newMoveObj.maxPp || newMoveObj.pp };
       if (mon.moves.some(m => m.name === moveCopy.name)) {
-        if (onComplete) onComplete();
+        if (onComplete) onComplete(false);
         return;
       }
       if (mon.moves.length < 4) {
         mon.moves.push(moveCopy);
         saveGameToSlot(state.saveName, false);
-        if (onComplete) onComplete();
+        if (onComplete) onComplete(true);
         return;
       }
 
@@ -7396,7 +7979,7 @@
           saveGameToSlot(state.saveName, true);
           const cb = pendingMoveLearnState?.onComplete;
           pendingMoveLearnState = null;
-          if (cb) cb();
+          if (cb) cb(true);
         });
         listEl.appendChild(btn);
       });
@@ -7412,7 +7995,7 @@
       sfx.playCancel();
       const cb = pendingMoveLearnState?.onComplete;
       pendingMoveLearnState = null;
-      if (cb) cb();
+      if (cb) cb(false);
     });
 
     function openMoveReminderForMon(mon) {
@@ -7608,6 +8191,382 @@
       sfx.playConfirm();
       openGameCornerModal();
     });
+
+    /********************************************************************
+     * 16. BEGINNER GUIDE, PORTABLE SAVE CODE & PARENT CONTROLS (v5.0.0)
+     ********************************************************************/
+    // Sync visible version badges with GAME_VERSION
+    const titleVerEl = document.getElementById('titleVersionBadge');
+    const settingsVerEl = document.getElementById('settingsVersionBadge');
+    if (titleVerEl) titleVerEl.textContent = `v${GAME_VERSION}`;
+    if (settingsVerEl) settingsVerEl.textContent = `v${GAME_VERSION}`;
+
+    // 16A. Beginner Guide Modal
+    function openBeginnerGuideModal() {
+      const m = document.getElementById('beginnerGuideModal');
+      if (!m) return;
+      sfx.playConfirm();
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+    function closeBeginnerGuideModal() {
+      const m = document.getElementById('beginnerGuideModal');
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+    ['btnOpenGuideTitle', 'btnGuideHud', 'btnOpenGuideFromSave'].forEach(id => {
+      document.getElementById(id)?.addEventListener('click', openBeginnerGuideModal);
+    });
+    document.getElementById('btnCloseGuideModal')?.addEventListener('click', closeBeginnerGuideModal);
+
+    // 16B. Portable Save Code (Survives clearing browser storage / cross-device copy-paste)
+    function encodeUtf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let bin = '';
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin);
+    }
+
+    function decodeBase64ToUtf8(b64) {
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new TextDecoder().decode(bytes);
+    }
+
+    function exportPortableSaveCode(slotName = state.saveName) {
+      saveGameToSlot(slotName, false);
+      const all = getAllSaves();
+      const slotData = all[slotName];
+      if (!slotData) return null;
+      const payload = JSON.stringify({ v: GAME_VERSION, slot: slotName, data: slotData });
+      return 'PKHD5:' + encodeUtf8ToBase64(payload);
+    }
+
+    function importPortableSaveCode(rawCode) {
+      const cleaned = String(rawCode || '').trim().replace(/\s+/g, '');
+      if (!cleaned.startsWith('PKHD5:')) {
+        return { ok: false, message: '❌ קוד השמירה אינו תקין (חייב להתחיל ב-PKHD5:).' };
+      }
+      try {
+        const jsonStr = decodeBase64ToUtf8(cleaned.slice(6));
+        const parsed = JSON.parse(jsonStr);
+        if (!parsed || !parsed.slot || !parsed.data || !Array.isArray(parsed.data.party)) {
+          return { ok: false, message: '❌ תוכן קוד השמירה פגום או חסר.' };
+        }
+        const all = getAllSaves();
+        all[parsed.slot] = parsed.data;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+        syncSavesToIndexedDB(all);
+        loadGameFromSlot(parsed.slot);
+        renderSaveSlotsList();
+        renderTitleScreenModal();
+        const saveModal = document.getElementById('saveModal');
+        if (saveModal) { saveModal.classList.add('hidden'); saveModal.classList.remove('flex'); }
+        const titleModal = document.getElementById('titleScreenModal');
+        if (titleModal) { titleModal.classList.add('hidden'); titleModal.classList.remove('flex'); }
+        sfx.playVictory();
+        return { ok: true, slot: parsed.slot, message: `✅ השמירה "${parsed.slot}" שוחזרה בהצלחה מקוד השמירה!` };
+      } catch (_) {
+        sfx.playCancel();
+        return { ok: false, message: '❌ לא ניתן לפענח את קוד השמירה. ודא שהעתקת את כל הקוד במלואו.' };
+      }
+    }
+
+    document.getElementById('btnExportSaveCode')?.addEventListener('click', async () => {
+      const code = exportPortableSaveCode(state.saveName);
+      const ta = document.getElementById('saveCodeTextarea');
+      const fb = document.getElementById('saveCodeFeedback');
+      if (!code || !ta || !fb) return;
+      ta.value = code;
+      ta.focus();
+      ta.select();
+      let copied = false;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(code);
+          copied = true;
+        }
+      } catch (_) {}
+      fb.className = 'text-[11px] font-bold text-emerald-300';
+      fb.textContent = copied
+        ? '✅ קוד השמירה נוצר והועתק ללוח! שמור אותו בפתק או בוואטסאפ.'
+        : '✅ קוד השמירה נוצר בתיבה למעלה! סמן והעתק אותו לשמירה בטוחה.';
+      fb.classList.remove('hidden');
+      sfx.playVictory();
+    });
+
+    document.getElementById('btnImportSaveCode')?.addEventListener('click', () => {
+      const ta = document.getElementById('saveCodeTextarea');
+      const fb = document.getElementById('saveCodeFeedback');
+      if (!ta || !fb) return;
+      const res = importPortableSaveCode(ta.value);
+      fb.className = `text-[11px] font-bold ${res.ok ? 'text-emerald-300' : 'text-rose-400'}`;
+      fb.textContent = res.message;
+      fb.classList.remove('hidden');
+    });
+
+    // 16C. Parent Controls (4-Digit PIN + Daily Playtime Limit + Friendly Unskippable Stop Screen)
+    const PARENT_CTRL_KEY = 'POKEMON_HD_PARENT_CTRL_V1';
+    let _parentPinMode = 'verify'; // 'setup' | 'verify' | 'change'
+
+    function getParentCtrl() {
+      const today = getLocalDateKey();
+      const defaults = { pin: null, limitEnabled: false, limitMinutes: 30, date: today, usedSeconds: 0 };
+      try {
+        const raw = localStorage.getItem(PARENT_CTRL_KEY);
+        if (!raw) return defaults;
+        const parsed = { ...defaults, ...JSON.parse(raw) };
+        if (parsed.date !== today) {
+          parsed.date = today;
+          parsed.usedSeconds = 0;
+        }
+        return parsed;
+      } catch (_) {
+        return defaults;
+      }
+    }
+
+    function saveParentCtrl(cfg) {
+      try {
+        localStorage.setItem(PARENT_CTRL_KEY, JSON.stringify(cfg));
+      } catch (_) {}
+    }
+
+    function formatPlaytimeMMSS(totalSec) {
+      const s = Math.max(0, Math.floor(totalSec || 0));
+      const mins = Math.floor(s / 60);
+      const secs = s % 60;
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function refreshParentSettingsUI(cfg) {
+      const timeEl = document.getElementById('parentPlaytimeTodayDisplay');
+      const enabledEl = document.getElementById('parentLimitEnabledCheck');
+      const minsEl = document.getElementById('parentLimitMinutesInput');
+      if (timeEl) timeEl.textContent = formatPlaytimeMMSS(cfg.usedSeconds);
+      if (enabledEl) enabledEl.checked = !!cfg.limitEnabled;
+      if (minsEl) minsEl.value = String(cfg.limitMinutes || 30);
+    }
+
+    function openParentControlsModal() {
+      const modal = document.getElementById('parentControlsModal');
+      if (!modal) return;
+      const cfg = getParentCtrl();
+      const gateView = document.getElementById('parentPinGateView');
+      const settingsView = document.getElementById('parentSettingsView');
+      const promptEl = document.getElementById('parentPinPromptText');
+      const pinInput = document.getElementById('parentPinInput');
+      const errEl = document.getElementById('parentPinError');
+      const fbEl = document.getElementById('parentSaveFeedback');
+
+      _parentPinMode = cfg.pin ? 'verify' : 'setup';
+      promptEl.textContent = cfg.pin
+        ? 'הזן את קוד ההורים (4 ספרות) כדי לפתוח את הגדרות בקרת ההורים:'
+        : 'הגדר קוד הורים בן 4 ספרות בפעם הראשונה (ישמש לשמירת הגדרות ולשחרור מגבלת זמן):';
+      pinInput.value = '';
+      errEl.classList.add('hidden');
+      if (fbEl) fbEl.classList.add('hidden');
+      gateView.classList.remove('hidden');
+      settingsView.classList.add('hidden');
+
+      sfx.playConfirm();
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => pinInput.focus(), 50);
+    }
+
+    function closeParentControlsModal() {
+      const modal = document.getElementById('parentControlsModal');
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function submitParentPinGate() {
+      const pinInput = document.getElementById('parentPinInput');
+      const errEl = document.getElementById('parentPinError');
+      const val = (pinInput?.value || '').trim();
+      if (!/^\d{4}$/.test(val)) {
+        errEl.textContent = '❌ יש להזין בדיוק 4 ספרות (לדוגמה: 1234).';
+        errEl.classList.remove('hidden');
+        sfx.playCancel();
+        return;
+      }
+      const cfg = getParentCtrl();
+      if (_parentPinMode === 'setup' || _parentPinMode === 'change') {
+        cfg.pin = val;
+        saveParentCtrl(cfg);
+        errEl.classList.add('hidden');
+        document.getElementById('parentPinGateView').classList.add('hidden');
+        document.getElementById('parentSettingsView').classList.remove('hidden');
+        refreshParentSettingsUI(cfg);
+        const fbEl = document.getElementById('parentSaveFeedback');
+        if (fbEl) {
+          fbEl.textContent = _parentPinMode === 'setup' ? '✅ קוד ההורים הוגדר בהצלחה!' : '✅ קוד ההורים עודכן בהצלחה!';
+          fbEl.classList.remove('hidden');
+        }
+        sfx.playVictory();
+        return;
+      }
+      if (val !== cfg.pin) {
+        errEl.textContent = '❌ קוד PIN שגוי! נסה שוב.';
+        errEl.classList.remove('hidden');
+        sfx.playCancel();
+        return;
+      }
+      errEl.classList.add('hidden');
+      document.getElementById('parentPinGateView').classList.add('hidden');
+      document.getElementById('parentSettingsView').classList.remove('hidden');
+      refreshParentSettingsUI(cfg);
+      sfx.playConfirm();
+    }
+
+    function showTimeLimitLockScreen(cfg) {
+      if (!state.parentLocked && state.mode !== 'TITLE' && state.party.length > 0) {
+        saveGameToSlot(state.saveName, false);
+      }
+      state.parentLocked = true;
+      inputState.keys.clear();
+      inputState.dpadDirs.clear();
+      inputState.vx = 0;
+      inputState.vy = 0;
+      closeParentControlsModal();
+
+      const lockModal = document.getElementById('timeLimitLockModal');
+      if (!lockModal) return;
+      document.getElementById('lockScreenUsedTime').textContent = formatPlaytimeMMSS(cfg.usedSeconds);
+      document.getElementById('lockScreenLimitTime').textContent = String(cfg.limitMinutes);
+      document.getElementById('lockScreenPinError').classList.add('hidden');
+      lockModal.classList.remove('hidden');
+      lockModal.classList.add('flex');
+    }
+
+    function hideTimeLimitLockScreen() {
+      state.parentLocked = false;
+      const lockModal = document.getElementById('timeLimitLockModal');
+      if (!lockModal) return;
+      document.getElementById('lockScreenPinInput').value = '';
+      document.getElementById('lockScreenPinError').classList.add('hidden');
+      lockModal.classList.add('hidden');
+      lockModal.classList.remove('flex');
+    }
+
+    function checkParentTimeLimit() {
+      const cfg = getParentCtrl();
+      if (cfg.limitEnabled && cfg.pin && cfg.usedSeconds >= cfg.limitMinutes * 60) {
+        showTimeLimitLockScreen(cfg);
+        return true;
+      }
+      return false;
+    }
+
+    function tickParentPlaytime(deltaSeconds = 1) {
+      const cfg = getParentCtrl();
+      if (state.mode !== 'TITLE' && !state.parentLocked) {
+        cfg.usedSeconds = (cfg.usedSeconds || 0) + deltaSeconds;
+        saveParentCtrl(cfg);
+      }
+      const timeEl = document.getElementById('parentPlaytimeTodayDisplay');
+      if (timeEl) timeEl.textContent = formatPlaytimeMMSS(cfg.usedSeconds);
+      if (cfg.limitEnabled && cfg.pin && cfg.usedSeconds >= cfg.limitMinutes * 60) {
+        showTimeLimitLockScreen(cfg);
+      }
+    }
+
+    ['btnParentHud', 'btnOpenParentTitle', 'btnOpenParentFromSave'].forEach(id => {
+      document.getElementById(id)?.addEventListener('click', openParentControlsModal);
+    });
+    document.getElementById('btnCloseParentModal')?.addEventListener('click', closeParentControlsModal);
+    document.getElementById('btnSubmitParentPin')?.addEventListener('click', submitParentPinGate);
+    document.getElementById('parentPinInput')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitParentPinGate();
+    });
+
+    document.querySelectorAll('[data-parent-preset]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mins = parseInt(btn.dataset.parentPreset, 10) || 30;
+        const minsInput = document.getElementById('parentLimitMinutesInput');
+        const checkEl = document.getElementById('parentLimitEnabledCheck');
+        if (minsInput) minsInput.value = String(mins);
+        if (checkEl) checkEl.checked = true;
+        sfx.playConfirm();
+      });
+    });
+
+    document.getElementById('btnSaveParentSettings')?.addEventListener('click', () => {
+      const cfg = getParentCtrl();
+      const enabled = !!document.getElementById('parentLimitEnabledCheck')?.checked;
+      const mins = Math.max(1, Math.min(300, parseInt(document.getElementById('parentLimitMinutesInput')?.value, 10) || 30));
+      cfg.limitEnabled = enabled;
+      cfg.limitMinutes = mins;
+      saveParentCtrl(cfg);
+      const fb = document.getElementById('parentSaveFeedback');
+      if (fb) {
+        fb.textContent = enabled
+          ? `✅ נשמר! מגבלת זמן יומית פעילה: ${mins} דקות.`
+          : '✅ נשמר! מגבלת הזמן היומית כבויה.';
+        fb.classList.remove('hidden');
+      }
+      sfx.playVictory();
+      checkParentTimeLimit();
+    });
+
+    document.getElementById('btnResetTodayPlaytime')?.addEventListener('click', () => {
+      const cfg = getParentCtrl();
+      cfg.usedSeconds = 0;
+      cfg.date = getLocalDateKey();
+      saveParentCtrl(cfg);
+      refreshParentSettingsUI(cfg);
+      const fb = document.getElementById('parentSaveFeedback');
+      if (fb) {
+        fb.textContent = '🔄 שעון זמן המשחק של היום אופס ל-00:00.';
+        fb.classList.remove('hidden');
+      }
+      sfx.playConfirm();
+    });
+
+    document.getElementById('btnChangeParentPin')?.addEventListener('click', () => {
+      _parentPinMode = 'change';
+      document.getElementById('parentPinPromptText').textContent = 'הזן קוד הורים חדש בן 4 ספרות:';
+      document.getElementById('parentPinInput').value = '';
+      document.getElementById('parentPinError').classList.add('hidden');
+      document.getElementById('parentSettingsView').classList.add('hidden');
+      document.getElementById('parentPinGateView').classList.remove('hidden');
+      document.getElementById('parentPinInput').focus();
+    });
+
+    function handleLockScreenUnlock(mode) {
+      const cfg = getParentCtrl();
+      const val = (document.getElementById('lockScreenPinInput')?.value || '').trim();
+      const errEl = document.getElementById('lockScreenPinError');
+      if (!cfg.pin || val !== cfg.pin) {
+        errEl.textContent = '❌ קוד PIN שגוי! רק הורה עם הקוד הנכון יכול לשחרר את הנעילה.';
+        errEl.classList.remove('hidden');
+        sfx.playCancel();
+        return;
+      }
+      if (mode === 'add15') {
+        cfg.limitMinutes = Math.max(cfg.limitMinutes, Math.ceil(cfg.usedSeconds / 60)) + 15;
+        cfg.limitEnabled = true;
+      } else {
+        cfg.limitEnabled = false;
+      }
+      saveParentCtrl(cfg);
+      hideTimeLimitLockScreen();
+      sfx.playVictory();
+    }
+
+    document.getElementById('btnUnlockTimeLimit15')?.addEventListener('click', () => handleLockScreenUnlock('add15'));
+    document.getElementById('btnUnlockTimeLimitOff')?.addEventListener('click', () => handleLockScreenUnlock('off'));
+    document.getElementById('lockScreenPinInput')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleLockScreenUnlock('add15');
+    });
+
+    // Tick daily playtime every second & check on startup
+    setInterval(() => tickParentPlaytime(1), 1000);
+    checkParentTimeLimit();
 
     // Initialize Title Screen & Game Loop
     syncRunBikeButtonUI();

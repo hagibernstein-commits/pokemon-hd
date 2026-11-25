@@ -1,0 +1,28 @@
+{
+  "id": "./",
+  "name": "פוקימון: מהדורת 151 HD",
+  "short_name": "פוקימון 151",
+  "description": "משחק פוקימון 2D-HD מלא במחוז קאנטו עם 151 יצורים, התפתחויות, 8 מכונים, ליגת אינדיגו, חנויות, משימות, החלפות ועבודה מלאה אופליין.",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090d16",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

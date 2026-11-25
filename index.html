@@ -107,6 +107,69 @@
       pointer-events: none;
     }
 
+    #dpadControls {
+      position: fixed;
+      left: 18px;
+      bottom: 22px;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: repeat(3, 52px);
+      grid-template-rows: repeat(3, 52px);
+      gap: 4px;
+      direction: ltr;
+      pointer-events: none;
+    }
+
+    .dpad-btn {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.76);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(255, 255, 255, 0.28);
+      color: #e2e8f0;
+      font-size: 20px;
+      font-weight: 900;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.48), inset 0 1px 1px rgba(255, 255, 255, 0.22);
+      transition: transform 0.07s ease, background-color 0.1s ease, border-color 0.1s ease;
+      cursor: pointer;
+    }
+
+    .dpad-btn:active, .dpad-btn.active {
+      transform: scale(0.92);
+      background: rgba(37, 99, 235, 0.85);
+      border-color: rgba(147, 197, 253, 0.95);
+      color: #ffffff;
+    }
+
+    .dpad-center {
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      margin: 12px;
+      pointer-events: none;
+    }
+
+    #zoneTransitionBanner {
+      position: fixed;
+      top: 68px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-18px);
+      opacity: 0;
+      z-index: 32;
+      width: min(92vw, 430px);
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #zoneTransitionBanner.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
     .scroll-y {
       overflow-y: auto;
       touch-action: pan-y;
@@ -329,6 +392,10 @@
         <button id="btnExitInteriorHud" class="glass-hud px-2.5 py-1.5 rounded-xl text-xs font-black text-rose-300 border border-rose-400/50 hover:bg-rose-900/50 active:scale-95 transition hidden" title="צא מהאולם אל מפת קאנטו">
           <span>🚪 צא החוצה</span>
         </button>
+        <button id="btnControlModeHud" class="glass-hud px-2.5 py-1.5 rounded-xl text-xs font-bold text-sky-300 hover:bg-slate-800/80 active:scale-95 transition flex items-center gap-1" title="החלף שליטה בתנועה: ג׳ויסטיק 🕹️ או כפתורי חצים 🎮">
+          <span id="controlModeIcon">🕹️</span>
+          <span id="controlModeLabel" class="hidden sm:inline">ג׳ויסטיק</span>
+        </button>
         <button id="btnArtModeHud" class="glass-hud px-2 py-1.5 rounded-xl text-xs font-bold text-amber-200 hover:bg-slate-800/80 active:scale-95 transition" title="החלף סגנון גרפיקה: מאויר HD 🎨 מול צורות קלאסי 🔷">
           <span id="artModeIcon">🎨</span>
         </button>
@@ -361,9 +428,34 @@
       🎯 משימה: דבר עם פרופסור אוק במעבדה
     </div>
 
+    <!-- Area Transition Popup Banner -->
+    <div id="zoneTransitionBanner" class="glass-modal rounded-2xl px-4 py-3 border-2 border-sky-400/50">
+      <div class="flex items-center justify-between gap-2 mb-1">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span id="zoneBannerIcon" class="text-lg leading-none">🗺️</span>
+          <span id="zoneBannerName" class="text-sm sm:text-base font-black text-white truncate">עיירת פאלט</span>
+        </div>
+        <span id="zoneBannerLevels" class="shrink-0 text-[11px] font-black px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-400/40">רמות 2–5</span>
+      </div>
+      <p id="zoneBannerDesc" class="text-xs text-slate-200 font-semibold leading-snug"></p>
+    </div>
+
     <!-- Floating Virtual Joystick -->
     <div id="joystickBase" style="left: 92px; bottom: 32px; opacity: 0.65;">
       <div id="joystickKnob"></div>
+    </div>
+
+    <!-- Directional Buttons (D-Pad) Alternative Movement Control -->
+    <div id="dpadControls" class="hidden" aria-label="כפתורי תנועה">
+      <div></div>
+      <button type="button" class="dpad-btn" data-dpad="up" aria-label="למעלה">▲</button>
+      <div></div>
+      <button type="button" class="dpad-btn" data-dpad="left" aria-label="שמאלה">◀</button>
+      <div class="dpad-center"></div>
+      <button type="button" class="dpad-btn" data-dpad="right" aria-label="ימינה">▶</button>
+      <div></div>
+      <button type="button" class="dpad-btn" data-dpad="down" aria-label="למטה">▼</button>
+      <div></div>
     </div>
 
     <!-- Floating Right-Side Action Controls (Overworld Mode) -->
@@ -373,8 +465,8 @@
         <span class="text-[9px] mt-0.5">דיג</span>
       </button>
       <button id="btnRunToggle" class="touch-btn px-3 py-2.5 rounded-full text-xs font-extrabold text-amber-300 flex flex-col items-center justify-center pointer-events-auto" title="הליכה / נעלי ריצה / אופניים מהירים">
-        <span id="runBikeIcon" class="text-base leading-none">🚲</span>
-        <span id="runStatusText" class="text-[9px] mt-0.5">אופניים</span>
+        <span id="runBikeIcon" class="text-base leading-none">👟</span>
+        <span id="runStatusText" class="text-[9px] mt-0.5">ריצה</span>
       </button>
 
       <button id="btnInteract" class="touch-btn w-16 h-16 rounded-full text-sm font-black text-white bg-blue-600/75 border-blue-300/60 flex flex-col items-center justify-center pointer-events-auto shadow-lg">
@@ -645,8 +737,8 @@
       <div class="glass-modal rounded-3xl max-w-xl w-full p-5 space-y-3.5 scroll-y max-h-[92dvh]">
         <div class="flex items-center justify-between border-b border-slate-700 pb-2">
           <div>
-            <h2 class="text-base font-black text-white">🗺️ מפת מחוז קאנטו המקורית ושיגור מהיר (Fly)</h2>
-            <p class="text-xs text-indigo-300 font-bold">לחץ על עיר או אזור לשיגור מהיר, או עיין במפת קאנטו המלאה מפוקימון צהוב (348x368)</p>
+            <h2 class="text-base font-black text-white">🗺️ מפת מחוז קאנטו ותעופה (HM02 Fly)</h2>
+            <p class="text-xs text-indigo-300 font-bold">עיין במפת קאנטו המלאה מפוקימון צהוב (348×368) וטוס לערים שביקרת בהן לאחר פתיחת HM02 תעופה</p>
           </div>
           <button id="btnCloseMap" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">סגור ✕</button>
         </div>
@@ -656,7 +748,8 @@
         </div>
 
         <div>
-          <h3 class="text-xs font-extrabold text-sky-300 mb-1.5">✈️ שיגור מהיר לערים ואזורים מרכזיים:</h3>
+          <h3 class="text-xs font-extrabold text-sky-300 mb-1.5">✈️ תעופה מהירה (HM02 Fly) לערים שביקרת בהן:</h3>
+          <div id="flyStatusBanner" class="mb-2 text-xs font-bold px-3 py-2 rounded-xl bg-slate-900/90 border border-amber-400/40 text-amber-200 hidden"></div>
           <div id="fastTravelGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
         </div>
       </div>
@@ -1860,92 +1953,141 @@
     buildExpandedKantoMap();
 
     const FAST_TRAVEL_POINTS = [
-      { id: 'pallet',    name: '🏠 עיירת פאלט (התחלה)',         x: 62.5,  y: 246.5, desc: 'רמות 2–7 • בית השחקן ומעבדת פרופסור אוק' },
-      { id: 'viridian',  name: '🌿 עיר וירידיאן',               x: 67.5,  y: 192.5, desc: 'רמות 5–12 • דרך 1, דרך 22 ומכון האדמה (#8)' },
-      { id: 'vforest',   name: '🌲 יער וירידיאן (מבוך העצים)',   x: 40.5,  y: 149.5, desc: 'רמות 6–14 • פיקאצ׳ו, חרקים ומאמני יער' },
-      { id: 'pewter',    name: '🪨 עיר פיוטר (מכון #1 ברוק)',   x: 59.5,  y: 84.5,  desc: 'רמות 10–16 • מכון הסלע של ברוק ומוזיאון המדע' },
-      { id: 'mtmoon',    name: '⛰️ הר הירח (דרך 3–4)',          x: 145.5, y: 54.5,  desc: 'רמות 14–22 • מערת הר הירח, מאובנים וצוות רוקט' },
-      { id: 'cerulean',  name: '💧 עיר סרוליאן (מכון #2 מיסטי)', x: 243.5, y: 58.5,  desc: 'רמות 16–25 • מכון המים, גשר הזהב (24) והכף (25)' },
-      { id: 'vermilion', name: '⚓ עיר ורמיליון (מכון #3 סרג׳)', x: 235.5, y: 188.5, desc: 'רמות 20–29 • נמל הספינה ומכון החשמל של סרג׳' },
-      { id: 'lavender',  name: '👻 עיירת לוונדר ומגדל הרוחות',   x: 327.5, y: 126.5, desc: 'רמות 22–32 • מנהרת הסלע, מגדל הרוחות וגשר הדממה' },
-      { id: 'celadon',   name: '🏙️ עיר סלדון (מכון #4 אריקה)',   x: 182.5, y: 132.5, desc: 'רמות 24–34 • כלבו אבני התפתחות, קזינו ושביל האופניים' },
-      { id: 'fuchsia',   name: '🦓 עיר פושיה ואזור הספארי (#5)', x: 183.5, y: 302.5, desc: 'רמות 28–38 • מכון הרעל של קוגה ושמורת הספארי' },
-      { id: 'saffron',   name: '🔮 עיר ספרון (מכון #6 סברינה)',  x: 233.5, y: 142.5, desc: 'רמות 30–40 • מרכז קאנטו, סילף קו ומכון העל-חושי' },
-      { id: 'cinnabar',  name: '🌋 אי סיניבר (מכון #7 בליין)',   x: 65.5,  y: 358.5, desc: 'רמות 34–45 • מכון הלבה, מעבדת מאובנים ואיי קצף הים' },
-      { id: 'indigo',    name: '👑 רמת אינדיגו ודרך הניצחון',    x: 14.5,  y: 19.5,  desc: 'רמות 40–55 • רביעיית העילית, האלוף גארי ומיוטו!' }
+      { id: 'pallet',    zoneId: 'PALLET_TOWN',     name: '🏠 עיירת פאלט (התחלה)',         x: 62.5,  y: 246.5, desc: 'רמות 2–5 • בית השחקן ומעבדת פרופסור אוק' },
+      { id: 'viridian',  zoneId: 'VIRIDIAN_CITY',   name: '🌿 עיר וירידיאן',               x: 67.5,  y: 192.5, desc: 'רמות 3–6 • דרך 1, דרך 22 ומכון האדמה (#8)' },
+      { id: 'vforest',   zoneId: 'VIRIDIAN_FOREST', name: '🌲 יער וירידיאן',               x: 40.5,  y: 149.5, desc: 'רמות 3–7 • פיקאצ׳ו, חרקים ומאמני יער' },
+      { id: 'pewter',    zoneId: 'PEWTER_CITY',     name: '🪨 עיר פיוטר (מכון #1 ברוק)',   x: 59.5,  y: 84.5,  desc: 'רמות 6–10 (מכון 12–14) • מכון הסלע של ברוק' },
+      { id: 'mtmoon',    zoneId: 'MT_MOON',         name: '⛰️ הר הירח (דרך 3–4)',          x: 145.5, y: 54.5,  desc: 'רמות 7–12 • מערת הר הירח, מאובנים וצוות רוקט' },
+      { id: 'cerulean',  zoneId: 'CERULEAN_CITY',   name: '💧 עיר סרוליאן (מכון #2 מיסטי)', x: 243.5, y: 58.5,  desc: 'רמות 10–15 (מכון 18–21) • מכון המים וחנות האופניים' },
+      { id: 'vermilion', zoneId: 'VERMILION_CITY',  name: '⚓ עיר ורמיליון (מכון #3 סרג׳)', x: 235.5, y: 188.5, desc: 'רמות 14–18 (מכון 21–25) • נמל S.S. Anne ומכון החשמל' },
+      { id: 'lavender',  zoneId: 'LAVENDER_TOWN',   name: '👻 עיירת לוונדר ומגדל הרוחות',   x: 327.5, y: 126.5, desc: 'רמות 18–24 • מגדל הרוחות וגשר הדממה' },
+      { id: 'celadon',   zoneId: 'CELADON_CITY',    name: '🏙️ עיר סלדון (מכון #4 אריקה)',   x: 182.5, y: 132.5, desc: 'רמות 20–26 (מכון 27–31) • כלבו, קזינו ושביל האופניים' },
+      { id: 'fuchsia',   zoneId: 'FUCHSIA_CITY',    name: '🦓 עיר פושיה והספארי (#5 קוגה)', x: 183.5, y: 302.5, desc: 'רמות 24–33 (מכון 34–39) • מכון הרעל ושמורת הספארי' },
+      { id: 'saffron',   zoneId: 'SAFFRON_CITY',    name: '🔮 עיר ספרון (מכון #6 סברינה)',  x: 233.5, y: 142.5, desc: 'רמות 28–36 (מכון 37–41) • מרכז קאנטו ומכון העל-חושי' },
+      { id: 'cinnabar',  zoneId: 'CINNABAR_ISLAND', name: '🌋 אי סיניבר (מכון #7 בליין)',   x: 65.5,  y: 358.5, desc: 'רמות 32–40 (מכון 40–45) • מכון הלבה ומעבדת מאובנים' },
+      { id: 'indigo',    zoneId: 'INDIGO_PLATEAU',  name: '👑 רמת אינדיגו ודרך הניצחון',    x: 14.5,  y: 19.5,  desc: 'רמות 48–60 • רביעיית העילית, האלוף גארי ומיוטו!' }
     ];
 
+    const KANTO_ZONE_CATALOG = {
+      PALLET_TOWN:     { id: 'PALLET_TOWN',     icon: '🏠', name: 'עיירת פאלט',                     minLv: 2,  maxLv: 5,  levelRangeText: 'רמות 2–5',               pool: [16, 19, 60, 129], desc: 'עיירת הבית השלווה שלך ומעבדת המחקר של פרופסור אוק. מכאן מתחיל המסע הגדול במחוז קאנטו!' },
+      ROUTE_1:         { id: 'ROUTE_1',         icon: '🌿', name: 'דרך 1 (פאלט – וירידיאן)',         minLv: 2,  maxLv: 5,  levelRangeText: 'רמות 2–5',               pool: [16, 19], desc: 'שביל כפרי ירוק המחבר בין עיירת פאלט לעיר וירידיאן. מקום מושלם לאימון ראשון עם פידג׳י וראטאטה.' },
+      VIRIDIAN_CITY:   { id: 'VIRIDIAN_CITY',   icon: '🌳', name: 'עיר וירידיאן',                   minLv: 3,  maxLv: 6,  levelRangeText: 'רמות 3–6 (מכון #8: 42–48)', pool: [16, 19, 60, 129], desc: 'עיר ירוקה המוקפת עצים עם מרכז פוקימונים, חנות ומכון האדמה האחרון (#8 של ג׳ובאני).' },
+      ROUTE_22:        { id: 'ROUTE_22',        icon: '⛰️', name: 'דרך 22 (מערב לווירידיאן)',       minLv: 2,  maxLv: 5,  levelRangeText: 'רמות 2–5',               pool: [19, 21, 29, 32, 56], desc: 'שביל הררי מערבית לווירידיאן המוביל אל שער ליגת הפוקימונים. ביתם של מנקי, ספירו ונידוראנים.' },
+      ROUTE_2:         { id: 'ROUTE_2',         icon: '🌱', name: 'דרך 2',                          minLv: 3,  maxLv: 6,  levelRangeText: 'רמות 3–6',               pool: [16, 19, 10, 13, 29, 32], desc: 'דרך צרה המתפתלת בין וירידיאן לפיוטר ומקיפה את יער וירידיאן הסבוך.' },
+      VIRIDIAN_FOREST: { id: 'VIRIDIAN_FOREST', icon: '🌲', name: 'יער וירידיאן',                   minLv: 3,  maxLv: 7,  levelRangeText: 'רמות 3–7',               pool: [10, 11, 13, 14, 16, 25], desc: 'מבוך יער טבעי המלא בלוכדי חרקים, קטרפי, ווידל ופיקאצ׳ו פראי ונדיר!' },
+      PEWTER_CITY:     { id: 'PEWTER_CITY',     icon: '🪨', name: 'עיר פיוטר',                      minLv: 6,  maxLv: 10, levelRangeText: 'רמות 6–10 (מכון #1: 12–14)', pool: [16, 21, 35, 74], desc: 'עיר הסלעים ההררית! כאן שוכנים מוזיאון המדע ומכון האבן (#1) של ברוק.' },
+      ROUTE_3:         { id: 'ROUTE_3',         icon: '🥾', name: 'דרך 3 (לעבר הר הירח)',           minLv: 6,  maxLv: 11, levelRangeText: 'רמות 6–11',              pool: [19, 21, 27, 39, 56, 74], desc: 'מעלה תלול מזרחה מפיוטר אל עבר הר הירח, שופע מאמנים, ספירו, סנדשרו וג׳יגליפאף.' },
+      MT_MOON:         { id: 'MT_MOON',         icon: '🌙', name: 'הר הירח (Mt. Moon)',             minLv: 7,  maxLv: 12, levelRangeText: 'רמות 7–12',              pool: [27, 35, 41, 46, 74, 95], desc: 'הר מסתורי המפורסם באבני ירח, מאובנים עתיקים ופעילי צוות רוקט. ביתם של זובאט, ג׳אודוד וקליפיירי.' },
+      ROUTE_4:         { id: 'ROUTE_4',         icon: '🏔️', name: 'דרך 4',                          minLv: 8,  maxLv: 12, levelRangeText: 'רמות 8–12',              pool: [19, 21, 23, 27, 56], desc: 'מדרון הררי היורד מהר הירח מזרחה אל עיר סרוליאן השוקקת.' },
+      CERULEAN_CITY:   { id: 'CERULEAN_CITY',   icon: '💧', name: 'עיר סרוליאן',                    minLv: 10, maxLv: 15, levelRangeText: 'רמות 10–15 (מכון #2: 18–21)', pool: [54, 60, 98, 118, 129], desc: 'עיר המים והתעלות! כאן תמצאו את מכון המים (#2) של מיסטי ואת חנות האופניים של קאנטו.' },
+      ROUTE_24:        { id: 'ROUTE_24',        icon: '🌉', name: 'גשר הזהב (דרך 24)',              minLv: 11, maxLv: 15, levelRangeText: 'רמות 11–15',             pool: [10, 16, 17, 43, 48, 63, 69], desc: 'גשר הזהב המפורסם מצפון לסרוליאן! היזהר מהיריב גארי וחפש כאן אברה נדיר בעשב.' },
+      ROUTE_25:        { id: 'ROUTE_25',        icon: '🌊', name: 'כף סרוליאן (דרך 25)',            minLv: 12, maxLv: 16, levelRangeText: 'רמות 12–16',             pool: [11, 14, 17, 43, 48, 63, 69], desc: 'שביל צוקי חוף יפהפה המוביל אל בקתת הים של ביל בקצה הצפון-מזרחי של קאנטו.' },
+      ROUTE_5:         { id: 'ROUTE_5',         icon: '🏡', name: 'דרך 5 ובית הגידול',              minLv: 13, maxLv: 16, levelRangeText: 'רמות 13–16',             pool: [16, 17, 19, 39, 43, 52, 69], desc: 'דרך דרומית מסרוליאן שבה פועל בית הגידול לפוקימונים (Daycare) המעלה את רמתם.' },
+      ROUTE_6:         { id: 'ROUTE_6',         icon: '🌾', name: 'דרך 6',                          minLv: 13, maxLv: 17, levelRangeText: 'רמות 13–17',             pool: [16, 17, 39, 43, 52, 56, 69], desc: 'שביל פסטורלי היורד דרומה מספרון אל עיר הנמל ורמיליון.' },
+      VERMILION_CITY:  { id: 'VERMILION_CITY',  icon: '⚓', name: 'עיר ורמיליון והנמל',             minLv: 14, maxLv: 18, levelRangeText: 'רמות 14–18 (מכון #3: 21–25)', pool: [72, 90, 98, 116, 129], desc: 'עיר הנמל התוססת! כאן עוגנת ה-S.S. Anne (HM01 חיתוך), גורו הדיג ומכון החשמל (#3) של סרג׳.' },
+      ROUTE_11:        { id: 'ROUTE_11',        icon: '🛤️', name: 'דרך 11',                         minLv: 14, maxLv: 19, levelRangeText: 'רמות 14–19',             pool: [17, 19, 20, 21, 23, 27, 96], desc: 'דרך פתוחה ממזרח לוורמיליון, ידועה בדראוזי העל-חושיים ובמאמנים חובבי קרבות.' },
+      ROUTE_9:         { id: 'ROUTE_9',         icon: '🪨', name: 'דרך 9 (רכס הסלעים)',             minLv: 15, maxLv: 19, levelRangeText: 'רמות 15–19',             pool: [19, 20, 21, 22, 23, 27, 30, 33], desc: 'נתיב סלעי מזרחה מסרוליאן המוביל אל מנהרת הסלע. מלא בפוקימונים מפותחים למחצה.' },
+      ROUTE_10:        { id: 'ROUTE_10',        icon: '⚡', name: 'דרך 10 ומנהרת הסלע',             minLv: 16, maxLv: 21, levelRangeText: 'רמות 16–21',             pool: [21, 41, 66, 74, 81, 95, 100, 125], desc: 'מעבר הרים סלעי ותחנת הכוח הנטושה. שופע פוקימוני חשמל, אבן ולחימה.' },
+      LAVENDER_TOWN:   { id: 'LAVENDER_TOWN',   icon: '👻', name: 'עיירת לוונדר ומגדל הרוחות',      minLv: 18, maxLv: 24, levelRangeText: 'רמות 18–24',             pool: [92, 93, 104], desc: 'עיירה מסתורית ושקטה שבה מתנשא מגדל הפוקימונים הרדוף ברוחות רפאים וצוות רוקט.' },
+      ROUTE_8:         { id: 'ROUTE_8',         icon: '🔥', name: 'דרך 8',                          minLv: 18, maxLv: 23, levelRangeText: 'רמות 18–23',             pool: [17, 20, 37, 39, 52, 58, 63, 64], desc: 'נתיב המחבר את עיירת לוונדר למרכז קאנטו — ביתם של וולפיקס, גראולית׳ ואברה.' },
+      ROUTE_7:         { id: 'ROUTE_7',         icon: '🍃', name: 'דרך 7',                          minLv: 19, maxLv: 24, levelRangeText: 'רמות 19–24',             pool: [17, 20, 37, 43, 52, 58, 69], desc: 'משעול קצר ומלא דשא גבוה בין עיר ספרון לעיר סלדון.' },
+      CELADON_CITY:    { id: 'CELADON_CITY',    icon: '🏙️', name: 'עיר סלדון',                      minLv: 20, maxLv: 26, levelRangeText: 'רמות 20–26 (מכון #4: 27–31)', pool: [43, 69, 88, 133, 137], desc: 'המטרופולין הגדול של קאנטו! כולל את הכלבו הענק, קזינו סלדון ומכון העשב (#4) של אריקה.' },
+      ROUTE_16:        { id: 'ROUTE_16',        icon: '✈️', name: 'דרך 16',                         minLv: 20, maxLv: 25, levelRangeText: 'רמות 20–25',             pool: [20, 21, 22, 84], desc: 'היציאה המערבית מסלדון אל שביל האופניים. כאן מסתתר הבית הסודי שבו מקבלים את HM02 תעופה!' },
+      ROUTE_17:        { id: 'ROUTE_17',        icon: '🚲', name: 'שביל האופניים (דרך 17)',         minLv: 22, maxLv: 29, levelRangeText: 'רמות 22–29',             pool: [20, 22, 77, 84, 85, 88, 109], desc: 'גשר ארוך ומהיר מעל הים! מושלם לרכיבה מהירה באופניים דרומה אל עיר פושיה.' },
+      ROUTE_18:        { id: 'ROUTE_18',        icon: '🛣️', name: 'דרך 18',                         minLv: 24, maxLv: 29, levelRangeText: 'רמות 24–29',             pool: [20, 21, 22, 84], desc: 'שער היציאה הדרומי משביל האופניים המוביל מזרחה אל עיר פושיה.' },
+      ROUTE_12:        { id: 'ROUTE_12',        icon: '🎣', name: 'גשר הדממה (דרך 12)',             minLv: 23, maxLv: 29, levelRangeText: 'רמות 23–29',             pool: [17, 43, 44, 48, 69, 70, 79, 83, 143], desc: 'גשר עץ ארוך מעל המים מדרום ללוונדר — אהוב במיוחד על דייגים ועל סנורלקס ישנוני!' },
+      ROUTE_13:        { id: 'ROUTE_13',        icon: '🌊', name: 'דרך 13 (מבוך החוף)',             minLv: 24, maxLv: 30, levelRangeText: 'רמות 24–30',             pool: [17, 43, 44, 48, 69, 70, 83, 132], desc: 'גדרות עץ מפותלות לאורך קו החוף המזרחי. כאן אפשר למצוא אפילו דיטו נדיר!' },
+      ROUTE_14:        { id: 'ROUTE_14',        icon: '🌿', name: 'דרך 14',                         minLv: 25, maxLv: 31, levelRangeText: 'רמות 25–31',             pool: [17, 44, 48, 49, 70, 132], desc: 'דרך פתוחה עתירת עשב גבוה ופוקימונים חזקים בדרך דרומה אל עיר פושיה.' },
+      ROUTE_15:        { id: 'ROUTE_15',        icon: '🌲', name: 'דרך 15',                         minLv: 26, maxLv: 32, levelRangeText: 'רמות 26–32',             pool: [17, 44, 48, 49, 70, 132], desc: 'השביל המזרחי המוביל הישר אל שערי עיר פושיה ושמורת הספארי.' },
+      FUCHSIA_CITY:    { id: 'FUCHSIA_CITY',    icon: '🥷', name: 'עיר פושיה',                      minLv: 26, maxLv: 33, levelRangeText: 'רמות 26–33 (מכון #5: 34–39)', pool: [48, 49, 88, 109, 129], desc: 'עיר הנינג׳ות והטבע! ביתו של מכון הרעל (#5) של קוגה, מנהל הספארי (HM04 כוח) והכניסה לספארי.' },
+      SAFARI_ZONE:     { id: 'SAFARI_ZONE',     icon: '🦓', name: 'שמורת אזור הספארי',              minLv: 24, maxLv: 33, levelRangeText: 'רמות 24–33',             pool: [30, 33, 47, 49, 102, 111, 113, 114, 115, 123, 127, 128, 147], desc: 'שמורת טבע נדירה עם כדורי ספארי מיוחדים! בקצה הצפוני מסתתר הבית הסודי עם HM03 גלישה!' },
+      SAFFRON_CITY:    { id: 'SAFFRON_CITY',    icon: '🔮', name: 'עיר ספרון',                      minLv: 28, maxLv: 36, levelRangeText: 'רמות 28–36 (מכון #6: 37–41)', pool: [63, 64, 96, 97, 106, 107, 122], desc: 'המרכז המודרני של קאנטו! כאן שוכנים בניין סילף קו ומכון העל-חושי (#6) של סברינה.' },
+      ROUTE_19:        { id: 'ROUTE_19',        icon: '🌊', name: 'דרך ימית 19',                    minLv: 28, maxLv: 36, levelRangeText: 'רמות 28–36',             pool: [72, 73, 98, 116, 117, 120, 130], desc: 'נתיב ימי רחב מדרום לעיר פושיה אל איי קצף הים. דורש HM03 גלישה על המים!' },
+      ROUTE_20:        { id: 'ROUTE_20',        icon: '❄️', name: 'דרך ימית 20 ואיי קצף הים',       minLv: 30, maxLv: 38, levelRangeText: 'רמות 30–38',             pool: [55, 72, 73, 79, 80, 86, 87, 90, 116, 117, 131], desc: 'אוקיינוס דרומי עמוק החוצה את איי קצף הים הקפואים בדרך אל אי סיניבר.' },
+      CINNABAR_ISLAND: { id: 'CINNABAR_ISLAND', icon: '🌋', name: 'אי סיניבר',                      minLv: 32, maxLv: 40, levelRangeText: 'רמות 32–40 (מכון #7: 40–45)', pool: [37, 38, 58, 77, 88, 89, 109, 110, 126], desc: 'אי געשי בדרום-מערב קאנטו! כולל את מעבדת החייאת המאובנים ומכון הלבה (#7) של בליין.' },
+      ROUTE_21:        { id: 'ROUTE_21',        icon: '🏝️', name: 'דרך ימית 21',                    minLv: 31, maxLv: 39, levelRangeText: 'רמות 31–39',             pool: [17, 18, 72, 73, 114, 117, 121], desc: 'נתיב ים צפונה מאי סיניבר בחזרה לעיירת פאלט — ביתם של טנגלה ופוקימוני מים חזקים!' },
+      ROUTE_23:        { id: 'ROUTE_23',        icon: '🏆', name: 'דרך 23 ודרך הניצחון',            minLv: 38, maxLv: 46, levelRangeText: 'רמות 38–46',             pool: [22, 31, 34, 42, 49, 57, 67, 75, 95, 105, 112], desc: 'מבחן הגיבורים האחרון בדרך לליגת הפוקימונים! מלא בפוקימונים עוצמתיים ברמות גבוהות.' },
+      INDIGO_PLATEAU:  { id: 'INDIGO_PLATEAU',  icon: '👑', name: 'רמת אינדיגו (ליגת הפוקימונים)',  minLv: 48, maxLv: 60, levelRangeText: 'רמות 48–60',             pool: [3, 6, 9, 65, 68, 76, 94, 130, 131, 143, 148, 149], desc: 'פסגת מחוז קאנטו! כאן ממתינים רביעיית העילית (Elite Four), האלוף גארי ומיוטו האגדי!' },
+      CAVE_MT_MOON:    { id: 'CAVE_MT_MOON',    icon: '🕳️', name: 'מעמקי מערת הר הירח',             minLv: 8,  maxLv: 12, levelRangeText: 'רמות 8–12 (מקדש אגדיים: 45–50)', pool: [35, 41, 46, 74, 95], desc: 'מערה אפלה עתירת מאובנים ואבני ירח — ובמעמקיה חבוי מקדש הפוקימונים האגדיים!' },
+      ROCKET_TOWER:    { id: 'ROCKET_TOWER',    icon: '👻', name: 'מגדל הרוחות ומפקדת צוות רוקט',   minLv: 18, maxLv: 25, levelRangeText: 'רמות 18–25',             pool: [92, 93, 104], desc: 'מגדל הפוקימונים המסתורי של עיירת לוונדר — שורץ בגסטלי, האנטר, קיובון וצוות רוקט!' }
+    };
+
     function getZoneInfoAt(tx, ty) {
-      // Convert (tx, ty) back to authentic Game Boy Overworld (gbX, gbY) coordinates
+      // Handle Dungeon Interiors with wild encounters so they never inherit overworld Indigo coords!
+      if (typeof state !== 'undefined' && state.currentMap && state.currentMap !== 'OVERWORLD') {
+        if (KANTO_ZONE_CATALOG[state.currentMap]) return KANTO_ZONE_CATALOG[state.currentMap];
+        if (state.savedOverworldPos) {
+          tx = Math.floor(state.savedOverworldPos.x / TILE_SIZE);
+          ty = Math.floor(state.savedOverworldPos.y / TILE_SIZE);
+        }
+      }
+
+      // Convert (tx, ty) back to authentic Game Boy Pokémon Yellow (gbX, gbY) coordinates
       const gx = tx - 54;
       const gy = ty - 238;
 
-      // 1. Indigo Plateau & Route 23 / Victory Road (gbX <= -24)
-      if (gx <= -24 && gy <= -54) {
-        return { name: gy <= -198 ? 'רמת אינדיגו (ליגת הפוקימונים)' : 'דרך הניצחון ודרך 23', minLv: 36, maxLv: 52, pool: [3, 6, 9, 18, 26, 31, 34, 59, 65, 67, 68, 75, 76, 94, 95, 105, 112, 130, 131, 142, 143, 148, 149] };
-      }
-      // 2. Pallet Town & Route 1 (gbX: -10..30, gbY: -36..18)
-      if (gx >= -10 && gx <= 35 && gy >= -36 && gy <= 20) {
-        return { name: gy >= 0 ? 'עיירת פאלט' : 'דרך 1 (פאלט – וירידיאן)', minLv: 2, maxLv: 7, pool: [16, 19, 21, 10, 13, 25, 29, 32, 1, 4, 7] };
-      }
-      // 3. Viridian City & Route 22 (gbX: -45..45, gbY: -86..-36)
-      if (gx <= 45 && gy >= -86 && gy < -36) {
-        return { name: gx < 0 ? 'דרך 22 (מערב לווירידיאן)' : 'עיר וירידיאן', minLv: 4, maxLv: 11, pool: [16, 19, 21, 22, 23, 29, 32, 56, 60] };
-      }
-      // 4. Route 2 & Viridian Forest (gbX: -30..35, gbY: -162..-86)
-      if (gx <= 35 && gy >= -162 && gy < -86) {
-        return { name: gx < 4 && gy >= -136 && gy <= -88 ? 'יער וירידיאן' : 'דרך 2', minLv: 5, maxLv: 13, pool: [10, 11, 12, 13, 14, 15, 16, 17, 25, 43, 46, 48, 69] };
-      }
-      // 5. Pewter City & Route 3 (gbX: 0..109, gbY <= -162)
-      if (gx >= -5 && gx <= 109 && gy < -162) {
-        return { name: gx < 40 ? 'עיר פיוטר' : 'דרך 3 (לעבר הר הירח)', minLv: 8, maxLv: 16, pool: [16, 21, 27, 35, 39, 56, 74, 95] };
-      }
-      // 6. Mt. Moon & Route 4 (gbX: 100..170, gbY <= -162)
-      if (gx > 109 && gx < 170 && gy <= -162) {
-        return { name: gx <= 132 ? 'הר הירח (Mt. Moon)' : 'דרך 4', minLv: 12, maxLv: 22, pool: [27, 35, 41, 42, 46, 50, 66, 74, 75, 95, 104, 109, 138, 140] };
-      }
-      // 7. Cerulean City, Nugget Bridge (Route 24) & Cape (Route 25) (gbX: 170..260, gbY <= -162)
-      if (gx >= 170 && gx <= 260 && gy <= -162) {
-        return { name: gy < -198 ? (gx >= 200 ? 'כף סרוליאן (דרך 25)' : 'גשר הזהב (דרך 24)') : 'עיר סרוליאן', minLv: 14, maxLv: 24, pool: [43, 52, 54, 60, 61, 63, 69, 72, 79, 81, 90, 98, 116, 118, 120, 129] };
-      }
-      // 8. Route 9, Route 10 & Rock Tunnel (gbX >= 210, gbY: -198..-118)
-      if (gx >= 210 && gy > -198 && gy <= -118) {
-        return { name: gx < 270 ? 'דרך 9 (רכס הסלעים)' : 'דרך 10 ומנהרת הסלע', minLv: 18, maxLv: 29, pool: [21, 22, 41, 42, 66, 67, 74, 75, 81, 82, 95, 100, 104, 111, 125] };
-      }
-      // 9. Lavender Town & Route 8 (gbX >= 210, gbY: -118..-90)
-      if (gx >= 210 && gy > -118 && gy <= -90) {
-        return { name: gx >= 270 ? 'עיירת לוונדר ומגדל הרוחות' : 'דרך 8', minLv: 20, maxLv: 32, pool: [37, 52, 58, 63, 64, 92, 93, 94, 96, 97, 104, 105] };
-      }
-      // 10. Celadon City & Route 7 (gbX: 90..170, gbY: -135..-80)
-      if (gx >= 90 && gx < 170 && gy >= -135 && gy <= -80) {
-        return { name: gx >= 150 ? 'דרך 7' : 'עיר סלדון', minLv: 20, maxLv: 32, pool: [37, 39, 43, 44, 52, 58, 69, 70, 88, 108, 114, 123, 127, 132, 133, 137] };
-      }
-      // 11. Saffron City, Route 5 & Route 6 (gbX: 170..210, gbY: -162..-54)
-      if (gx >= 170 && gx <= 210 && gy > -162 && gy < -54) {
-        return { name: gy < -126 ? 'דרך 5 ובית הגידול' : (gy > -90 ? 'דרך 6' : 'עיר ספרון'), minLv: 22, maxLv: 35, pool: [52, 56, 63, 64, 65, 96, 97, 106, 107, 122, 124, 132] };
-      }
-      // 12. Vermilion City & Route 11 (gbX: 170..270, gbY: -54..0)
-      if (gx >= 170 && gx <= 270 && gy >= -54 && gy <= 0) {
-        return { name: gx < 210 ? 'עיר ורמיליון והנמל' : 'דרך 11', minLv: 18, maxLv: 29, pool: [21, 25, 26, 50, 51, 60, 72, 81, 82, 83, 90, 96, 98, 100, 101, 118, 129] };
-      }
-      // 13. Cycling Road (Routes 16, 17, 18) (gbX: 50..110, gbY: -125..65)
-      if (gx >= 50 && gx < 110 && gy >= -125 && gy <= 65) {
-        return { name: 'שביל האופניים (דרכים 16–18)', minLv: 24, maxLv: 35, pool: [22, 77, 78, 84, 85, 88, 89, 100, 101, 108, 109, 110, 143] };
-      }
-      // 14. Safari Zone & Fuchsia City (gbX: 110..150, gbY: 10..72)
-      if (gx >= 110 && gx <= 150 && gy >= 10 && gy <= 72) {
-        return { name: gy < 36 ? 'שמורת אזור הספארי' : 'עיר פושיה', minLv: 25, maxLv: 38, pool: [24, 30, 33, 44, 47, 49, 55, 70, 85, 102, 103, 111, 112, 113, 114, 115, 123, 127, 128, 147, 148] };
-      }
-      // 15. Silence Bridge & Routes 12–15 (gbX > 150, gbY: -90..72)
-      if (gx > 150 && gy > -90 && gy <= 72) {
-        return { name: 'גשר הדממה ודרכים 12–15', minLv: 24, maxLv: 36, pool: [17, 18, 43, 44, 48, 49, 54, 55, 69, 70, 79, 80, 83, 98, 99, 116, 117, 131, 132, 143] };
-      }
-      // 16. Cinnabar Island, Seafoam Islands & Sea Routes 19–21
-      return { name: gx <= 20 && gy >= 108 ? 'אי סיניבר' : 'דרכי הים 19–21 ואיי קצף הים', minLv: 28, maxLv: 44, pool: [37, 38, 58, 59, 72, 73, 77, 78, 79, 80, 86, 87, 88, 89, 90, 91, 109, 110, 116, 117, 120, 121, 126, 130, 131] };
+      // Exact 1:1 bounding boxes matching all 37 Pokémon Yellow maps + Safari Zone
+      if (gx <= -30 && gy <= -209) return KANTO_ZONE_CATALOG.INDIGO_PLATEAU;
+      if (gx <= -30 && gy >= -208 && gy <= -65) return KANTO_ZONE_CATALOG.ROUTE_23;
+      if (gx <= -11 && gy >= -64 && gy <= -45) return KANTO_ZONE_CATALOG.ROUTE_22;
+
+      if (gx >= 0 && gx <= 20 && gy >= 0 && gy <= 17) return KANTO_ZONE_CATALOG.PALLET_TOWN;
+      if (gx >= 0 && gx <= 20 && gy >= -36 && gy <= -1) return KANTO_ZONE_CATALOG.ROUTE_1;
+      if (gx >= -10 && gx <= 29 && gy >= -72 && gy <= -37) return KANTO_ZONE_CATALOG.VIRIDIAN_CITY;
+      if (gx >= -30 && gx <= 2 && gy >= -136 && gy <= -89) return KANTO_ZONE_CATALOG.VIRIDIAN_FOREST;
+      if (gx >= -10 && gx <= 29 && gy >= -144 && gy <= -73) return KANTO_ZONE_CATALOG.ROUTE_2;
+      if (gx >= -10 && gx <= 29 && gy >= -180 && gy <= -145) return KANTO_ZONE_CATALOG.PEWTER_CITY;
+
+      if (gx >= 82 && gx <= 122 && gy >= -190 && gy <= -155) return KANTO_ZONE_CATALOG.MT_MOON;
+      if (gx >= 30 && gx <= 99 && gy >= -172 && gy <= -155) return KANTO_ZONE_CATALOG.ROUTE_3;
+      if (gx >= 80 && gx <= 169 && gy >= -190 && gy <= -173) return KANTO_ZONE_CATALOG.ROUTE_4;
+
+      if (gx >= 180 && gx <= 199 && gy <= -199) return KANTO_ZONE_CATALOG.ROUTE_24;
+      if (gx >= 200 && gx <= 260 && gy <= -199) return KANTO_ZONE_CATALOG.ROUTE_25;
+      if (gx >= 170 && gx <= 209 && gy >= -198 && gy <= -163) return KANTO_ZONE_CATALOG.CERULEAN_CITY;
+
+      if (gx >= 210 && gx <= 269 && gy >= -190 && gy <= -173) return KANTO_ZONE_CATALOG.ROUTE_9;
+      if (gx >= 270 && gx <= 290 && gy >= -190 && gy <= -119) return KANTO_ZONE_CATALOG.ROUTE_10;
+      if (gx >= 270 && gx <= 290 && gy >= -118 && gy <= -101) return KANTO_ZONE_CATALOG.LAVENDER_TOWN;
+      if (gx >= 210 && gx <= 269 && gy >= -118 && gy <= -101) return KANTO_ZONE_CATALOG.ROUTE_8;
+
+      if (gx >= 180 && gx <= 199 && gy >= -162 && gy <= -127) return KANTO_ZONE_CATALOG.ROUTE_5;
+      if (gx >= 170 && gx <= 209 && gy >= -126 && gy <= -91) return KANTO_ZONE_CATALOG.SAFFRON_CITY;
+      if (gx >= 180 && gx <= 199 && gy >= -90 && gy <= -55) return KANTO_ZONE_CATALOG.ROUTE_6;
+      if (gx >= 170 && gx <= 209 && gy >= -54 && gy <= -19) return KANTO_ZONE_CATALOG.VERMILION_CITY;
+      if (gx >= 210 && gx <= 269 && gy >= -46 && gy <= -29) return KANTO_ZONE_CATALOG.ROUTE_11;
+
+      if (gx >= 150 && gx <= 169 && gy >= -118 && gy <= -101) return KANTO_ZONE_CATALOG.ROUTE_7;
+      if (gx >= 100 && gx <= 149 && gy >= -126 && gy <= -91) return KANTO_ZONE_CATALOG.CELADON_CITY;
+      if (gx >= 60 && gx <= 99 && gy >= -118 && gy <= -101) return KANTO_ZONE_CATALOG.ROUTE_16;
+      if (gx >= 60 && gx <= 79 && gy >= -100 && gy <= 43) return KANTO_ZONE_CATALOG.ROUTE_17;
+      if (gx >= 60 && gx <= 109 && gy >= 44 && gy <= 61) return KANTO_ZONE_CATALOG.ROUTE_18;
+
+      if (gx >= 270 && gx <= 290 && gy >= -100 && gy <= 7) return KANTO_ZONE_CATALOG.ROUTE_12;
+      if (gx >= 230 && gx <= 290 && gy >= 8 && gy <= 25) return KANTO_ZONE_CATALOG.ROUTE_13;
+      if (gx >= 210 && gx <= 229 && gy >= 8 && gy <= 61) return KANTO_ZONE_CATALOG.ROUTE_14;
+      if (gx >= 150 && gx <= 209 && gy >= 44 && gy <= 61) return KANTO_ZONE_CATALOG.ROUTE_15;
+
+      if (gx >= 114 && gx <= 146 && gy >= 12 && gy <= 35) return KANTO_ZONE_CATALOG.SAFARI_ZONE;
+      if (gx >= 110 && gx <= 149 && gy >= 36 && gy <= 71) return KANTO_ZONE_CATALOG.FUCHSIA_CITY;
+
+      if (gx >= 120 && gx <= 139 && gy >= 72 && gy <= 126) return KANTO_ZONE_CATALOG.ROUTE_19;
+      if (gx >= 20 && gx <= 119 && gy >= 108 && gy <= 126) return KANTO_ZONE_CATALOG.ROUTE_20;
+      if (gx >= 0 && gx <= 19 && gy >= 108 && gy <= 126) return KANTO_ZONE_CATALOG.CINNABAR_ISLAND;
+      if (gx >= 0 && gx <= 19 && gy >= 18 && gy <= 107) return KANTO_ZONE_CATALOG.ROUTE_21;
+
+      // Fallback by closest region if player stands on a border connector tile
+      if (gy <= -150 && gx < 170) return KANTO_ZONE_CATALOG.ROUTE_4;
+      if (gy <= -150) return KANTO_ZONE_CATALOG.CERULEAN_CITY;
+      if (gy >= 72 && gx <= 25) return KANTO_ZONE_CATALOG.CINNABAR_ISLAND;
+      if (gy >= 72) return KANTO_ZONE_CATALOG.ROUTE_20;
+      if (gx >= 210 && gy < 0) return KANTO_ZONE_CATALOG.ROUTE_12;
+      if (gx >= 150 && gy >= 0) return KANTO_ZONE_CATALOG.ROUTE_15;
+      return KANTO_ZONE_CATALOG.ROUTE_1;
     }
 
     const SIGNS = {
-      '61,251':  '🏠 עיירת פאלט: צא צפונה בדרך 1 אל עיר וירידיאן, או דרומה בדרך ימית 21 לאי סיניבר!',
+      '61,251':  '🏠 עיירת פאלט: צא צפונה בדרך 1 אל עיר וירידיאן, או דרומה בדרך ימית 21 לאי סיניבר (דורש HM03 גלישה)!',
       '57,243':  '🏠 בית השחקן בעיירת פאלט',
       '65,243':  '🏠 בית היריב גארי בעיירת פאלט',
       '67,251':  '🔬 מעבדת המחקר לפוקימונים של פרופסור אוק',
@@ -1954,12 +2096,12 @@
       '40,148':  '🌲 יער וירידיאן: מבוך טבעי המוביל צפונה לעיר פיוטר. היזהר מלוכדי החרקים וחפש פיקאצ׳ו!',
       '69,65':   '🪨 עיר פיוטר: מכון האבן (#1) של ברוק ומוזיאון המדע. המשך מזרחה בדרך 3 אל הר הירח!',
       '171,46':  '⛰️ הר הירח (Mt. Moon): היכנס למערה או המשך מזרחה בדרך 4 לעיר סרוליאן!',
-      '241,57':  '💧 עיר סרוליאן: מכון המים (#2) של מיסטי! צפונה לגשר הזהב וכף סרוליאן, מזרחה למנהרת הסלע, דרומה לספרון.',
+      '241,57':  '💧 עיר סרוליאן: מכון המים (#2) של מיסטי וחנות האופניים! צפונה לגשר הזהב וכף סרוליאן, מזרחה למנהרת הסלע, דרומה לספרון.',
       '325,129': '👻 עיירת לוונדר: ביתו של מגדל הרוחות. מערבה לספרון, דרומה על גשר הדממה (דרך 12) לפושיה.',
       '241,151': '🔮 עיר ספרון: לב מחוז קאנטו! מכון העל-חושי (#6) של סברינה ובניין סילף קו.',
-      '183,131': '🏙️ עיר סלדון: כלבו הענק, קזינו סלדון ומכון העשב (#4) של אריקה! מערבה לשביל האופניים (דרך 16–18).',
-      '237,199': '⚓ עיר ורמיליון: עיר הנמל ומכון החשמל (#3) של לוטננט סרג׳!',
-      '179,299': '🦓 עיר פושיה: מכון הרעל (#5) של קוגה, ובקצה הצפוני של העיר — שמורת הספארי המפורסמת!',
+      '183,131': '🏙️ עיר סלדון: כלבו הענק, קזינו סלדון ומכון העשב (#4) של אריקה! מערבה לדרך 16 (HM02 תעופה) ושביל האופניים.',
+      '237,199': '⚓ עיר ורמיליון: עיר הנמל (HM01 חיתוך ב-S.S. Anne וגורו הדיג) ומכון החשמל (#3) של לוטננט סרג׳!',
+      '179,299': '🦓 עיר פושיה: מכון הרעל (#5) של קוגה, מנהל הספארי (HM04 כוח), ובצפון — שמורת הספארי (HM03 גלישה)!',
       '69,351':  '🌋 אי סיניבר: מכון הלבה (#7) של בליין, מעבדת החייאת המאובנים ואחוזת הפוקימונים!',
       '14,19':   '👑 רמת אינדיגו: היכל ליגת הפוקימונים, רביעיית העילית (Elite Four) והאלוף גארי!'
     };
@@ -1971,12 +2113,12 @@
       { id: 'brock',      name: 'ברוק (מכון האבן #1)',    x: 59,  y: 76,  dir: 'down', shirt: '#a8a29e', hat: '#78350f', role: 'gym', badgeId: 'boulder', badgeName: 'תג הסלע 🪨', rewardMoney: 1200, team: [ ['geodude', 12], ['onix', 14] ] },
       { id: 'misty',      name: 'מיסטי (מכון המים #2)',   x: 253, y: 60,  dir: 'down', shirt: '#0ea5e9', hat: '#f97316', role: 'gym', badgeId: 'cascade', badgeName: 'תג המפל 💧', rewardMoney: 1800, team: [ ['staryu', 18], ['psyduck', 19], ['starmie', 21] ] },
       { id: 'nurse2',     name: 'האחות ג׳וי (סרוליאן)',  x: 242, y: 58,  dir: 'down', shirt: '#ec4899', hat: '#fbcfe8', role: 'healer' },
-      { id: 'surge',      name: 'סרג׳ (מכון החשמל #3)',  x: 235, y: 204, dir: 'down', shirt: '#eab308', hat: '#15803d', role: 'gym', badgeId: 'thunder', badgeName: 'תג הרעם ⚡', rewardMoney: 2500, team: [ ['voltorb', 24], ['pikachu', 25], ['raichu', 28] ] },
+      { id: 'surge',      name: 'סרג׳ (מכון החשמל #3)',  x: 235, y: 204, dir: 'down', shirt: '#eab308', hat: '#15803d', role: 'gym', badgeId: 'thunder', badgeName: 'תג הרעם ⚡', rewardMoney: 2500, team: [ ['voltorb', 21], ['pikachu', 22], ['raichu', 25] ] },
       { id: 'clerk2',     name: 'מנהל כלבו סלדון',       x: 163, y: 126, dir: 'down', shirt: '#10b981', hat: '#fef08a', role: 'shop' },
       { id: 'trader1',    name: 'מומחה ההחלפות והקזינו', x: 181, y: 132, dir: 'down', shirt: '#06b6d4', hat: '#cffafe', role: 'trader' },
-      { id: 'blaine',     name: 'בליין (מכון האש #7)',    x: 71,  y: 350, dir: 'down', shirt: '#ef4444', hat: '#f8fafc', role: 'gym', badgeId: 'volcano', badgeName: 'תג הלבה 🔥', rewardMoney: 3500, team: [ ['growlithe', 34], ['rapidash', 36], ['arcanine', 39] ] },
-      { id: 'champion',   name: 'האלוף גארי',            x: 14,  y: 18,  dir: 'down', shirt: '#7e22ce', hat: '#facc15', role: 'champion', rewardMoney: 6000, team: [ ['pidgeot', 42], ['alakazam', 43], ['rhydon', 44], ['gyarados', 45], ['arcanine', 46], ['charizard', 48] ] },
-      { id: 'mewtwo_npc', name: 'מיוטו האגדי 🔮',        x: 13,  y: 18,  dir: 'down', shirt: '#c084fc', hat: '#f472b6', role: 'legendary', speciesId: 'mewtwo', level: 50 }
+      { id: 'blaine',     name: 'בליין (מכון האש #7)',    x: 71,  y: 350, dir: 'down', shirt: '#ef4444', hat: '#f8fafc', role: 'gym', badgeId: 'volcano', badgeName: 'תג הלבה 🔥', rewardMoney: 3800, team: [ ['growlithe', 40], ['ponyta', 41], ['rapidash', 42], ['arcanine', 45] ] },
+      { id: 'champion',   name: 'האלוף גארי',            x: 14,  y: 18,  dir: 'down', shirt: '#7e22ce', hat: '#facc15', role: 'champion', rewardMoney: 7000, team: [ ['pidgeot', 55], ['alakazam', 56], ['rhydon', 57], ['gyarados', 58], ['arcanine', 59], ['charizard', 60] ] },
+      { id: 'mewtwo_npc', name: 'מיוטו האגדי 🔮',        x: 13,  y: 18,  dir: 'down', shirt: '#c084fc', hat: '#f472b6', role: 'legendary', speciesId: 'mewtwo', level: 65 }
     ];
 
     /********************************************************************
@@ -2032,8 +2174,8 @@
       },
       {
         id: 'q_gym_brock',
-        title: 'תג הסלע: נצח את ברוק',
-        desc: 'מצא את ברוק ביער וירידיאן (או השתגר לשם במפה) ונצח אותו בקרב מכון.',
+        title: 'תג הסלע (#1): נצח את ברוק',
+        desc: 'עבור דרך יער וירידיאן אל עיר פיוטר ונצח את ברוק במכון האבן.',
         check: (s) => !!s.badges.boulder,
         progressText: (s) => s.badges.boulder ? 'הושלם ✓' : 'טרם הושלם',
         rewardMoney: 1200,
@@ -2042,8 +2184,8 @@
       },
       {
         id: 'q_gym_misty',
-        title: 'תג המפל: נצח את מיסטי',
-        desc: 'הגע לעיר סרוליאן בצפון ונצח את מיסטי במכון המים.',
+        title: 'תג המפל (#2): נצח את מיסטי',
+        desc: 'חצה את הר הירח לעיר סרוליאן ונצח את מיסטי במכון המים (פותח HM01 חיתוך!).',
         check: (s) => !!s.badges.cascade,
         progressText: (s) => s.badges.cascade ? 'הושלם ✓' : 'טרם הושלם',
         rewardMoney: 1800,
@@ -2072,8 +2214,8 @@
       },
       {
         id: 'q_gym_surge',
-        title: 'תג הרעם: נצח את סרג׳',
-        desc: 'נצח את לוטננט סרג׳ בעיר סלדון המרכזית.',
+        title: 'תג הרעם (#3): נצח את סרג׳',
+        desc: 'נצח את לוטננט סרג׳ בעיר ורמיליון (פותח HM02 תעופה יחד עם הבית הסודי בדרך 16!).',
         check: (s) => !!s.badges.thunder,
         progressText: (s) => s.badges.thunder ? 'הושלם ✓' : 'טרם הושלם',
         rewardMoney: 2500,
@@ -2082,8 +2224,8 @@
       },
       {
         id: 'q_gym_blaine',
-        title: 'תג הלבה: נצח את בליין',
-        desc: 'הפלג לאי סיניבר בדרום-מזרח המפה ונצח את בליין.',
+        title: 'תג הלבה (#7): נצח את בליין',
+        desc: 'גלוש על המים (HM03 Surf) לאי סיניבר בדרום-מערב המפה ונצח את בליין.',
         check: (s) => !!s.badges.volcano,
         progressText: (s) => s.badges.volcano ? 'הושלם ✓' : 'טרם הושלם',
         rewardMoney: 3500,
@@ -2204,7 +2346,7 @@
       { id: 'cascade',  name: 'תג המפל',  icon: '💧', leader: 'מיסטי (Misty)',    city: 'עיר סרוליאן',     tip: 'השתמש בחשמל ⚡ או עשב 🌿!' },
       { id: 'thunder',  name: 'תג הרעם',  icon: '⚡', leader: 'סרג׳ (Lt. Surge)', city: 'עיר ורמיליון',    tip: 'השתמש באדמה 🏜️ או אבן 🪨!' },
       { id: 'rainbow',  name: 'תג הקשת',  icon: '🌿', leader: 'אריקה (Erika)',    city: 'עיר סלדון',       tip: 'השתמש באש 🔥, קרח ❄️ או מעופף 🦅!' },
-      { id: 'soul',     name: 'תג הנשמה', icon: '☠️', leader: 'קוגה (Koga)',      city: 'עיר פuschia / ספארי', tip: 'השתמש בעל-חושי 🔮 או אדמה 🏜️!' },
+      { id: 'soul',     name: 'תג הנשמה', icon: '☠️', leader: 'קוגה (Koga)',      city: 'עיר פושיה / ספארי', tip: 'השתמש בעל-חושי 🔮 או אדמה 🏜️!' },
       { id: 'marsh',    name: 'תג הביצה', icon: '🔮', leader: 'סברינה (Sabrina)', city: 'עיר ספרון',       tip: 'השתמש ברוח 👻 או חרק 🐛!' },
       { id: 'volcano',  name: 'תג הלבה',  icon: '🔥', leader: 'בליין (Blaine)',   city: 'אי סיניבר',       tip: 'השתמש במים 💧, אדמה 🏜️ או אבן 🪨!' },
       { id: 'earth',    name: 'תג האדמה', icon: '🏜️', leader: 'ג׳ובאני (Giovanni)',city: 'מכון וירידיאן העליון', tip: 'השתמש במים 💧, עשב 🌿 או קרח ❄️!' }
@@ -2212,10 +2354,10 @@
 
     // Add the 4 missing Gym Leaders + Legendary Birds & Mew to Overworld NPCS
     const EXTRA_NPCS = [
-      { id: 'erika',      name: 'אריקה (מכון העשב #4)',    x: 165, y: 140, dir: 'down', shirt: '#22c55e', hat: '#f43f5e', role: 'gym', gymInteriorId: 'GYM_ERIKA',    badgeId: 'rainbow', badgeName: 'תג הקשת 🌿',  rewardMoney: 2800, team: [ ['tangela', 26], ['weepinbell', 28], ['vileplume', 30] ] },
-      { id: 'koga',       name: 'קוגה (מכון הרעל #5)',     x: 168, y: 302, dir: 'down', shirt: '#9333ea', hat: '#1e1b4b', role: 'gym', gymInteriorId: 'GYM_KOGA',     badgeId: 'soul',    badgeName: 'תג הנשמה ☠️', rewardMoney: 3100, team: [ ['koffing', 30], ['muk', 32], ['venomoth', 33], ['weezing', 35] ] },
-      { id: 'sabrina',    name: 'סברינה (מכון על-חושי #6)', x: 257, y: 116, dir: 'down', shirt: '#ec4899', hat: '#500724', role: 'gym', gymInteriorId: 'GYM_SABRINA',  badgeId: 'marsh',   badgeName: 'תג הביצה 🔮', rewardMoney: 3400, team: [ ['kadabra', 34], ['mr_mime', 35], ['venomoth', 36], ['alakazam', 38] ] },
-      { id: 'giovanni',   name: 'ג׳ובאני (מכון האדמה #8)', x: 75,  y: 174, dir: 'down', shirt: '#1c1917', hat: '#dc2626', role: 'gym', gymInteriorId: 'GYM_GIOVANNI', badgeId: 'earth',   badgeName: 'תג האדמה 🏜️', rewardMoney: 4500, team: [ ['rhyhorn', 38], ['dugtrio', 40], ['nidoqueen', 41], ['nidoking', 42], ['rhydon', 44] ] },
+      { id: 'erika',      name: 'אריקה (מכון העשב #4)',    x: 165, y: 140, dir: 'down', shirt: '#22c55e', hat: '#f43f5e', role: 'gym', gymInteriorId: 'GYM_ERIKA',    badgeId: 'rainbow', badgeName: 'תג הקשת 🌿',  rewardMoney: 2800, team: [ ['tangela', 27], ['weepinbell', 29], ['vileplume', 31] ] },
+      { id: 'koga',       name: 'קוגה (מכון הרעל #5)',     x: 168, y: 302, dir: 'down', shirt: '#9333ea', hat: '#1e1b4b', role: 'gym', gymInteriorId: 'GYM_KOGA',     badgeId: 'soul',    badgeName: 'תג הנשמה ☠️', rewardMoney: 3200, team: [ ['koffing', 34], ['muk', 36], ['venomoth', 37], ['weezing', 39] ] },
+      { id: 'sabrina',    name: 'סברינה (מכון על-חושי #6)', x: 257, y: 116, dir: 'down', shirt: '#ec4899', hat: '#500724', role: 'gym', gymInteriorId: 'GYM_SABRINA',  badgeId: 'marsh',   badgeName: 'תג הביצה 🔮', rewardMoney: 3500, team: [ ['kadabra', 37], ['mr_mime', 38], ['venomoth', 39], ['alakazam', 41] ] },
+      { id: 'giovanni',   name: 'ג׳ובאני (מכון האדמה #8)', x: 75,  y: 174, dir: 'down', shirt: '#1c1917', hat: '#dc2626', role: 'gym', gymInteriorId: 'GYM_GIOVANNI', badgeId: 'earth',   badgeName: 'תג האדמה 🏜️', rewardMoney: 4800, team: [ ['rhyhorn', 42], ['dugtrio', 43], ['nidoqueen', 45], ['nidoking', 46], ['rhydon', 48] ] },
       { id: 'cave_guide', name: 'כניסה למערת הר הירח 🕳️', x: 151, y: 54,  dir: 'down', shirt: '#78716c', hat: '#facc15', role: 'enter_interior', targetInterior: 'CAVE_MT_MOON' }
     ];
     EXTRA_NPCS.forEach(n => {
@@ -2655,6 +2797,10 @@
 
       const exitBtn = document.getElementById('btnExitInteriorHud');
       if (exitBtn) exitBtn.classList.remove('hidden');
+      if (KANTO_ZONE_CATALOG[interiorId] && typeof showZoneTransitionBanner === 'function') {
+        state.lastZoneId = interiorId;
+        showZoneTransitionBanner(KANTO_ZONE_CATALOG[interiorId]);
+      }
       updateHud();
     }
 
@@ -2670,6 +2816,9 @@
         state.player.y = 245.5 * TILE_SIZE;
       }
       state.partnerTrail = [];
+      const tx = Math.floor(state.player.x / TILE_SIZE);
+      const ty = Math.floor(state.player.y / TILE_SIZE);
+      state.lastZoneId = getZoneInfoAt(tx, ty).id;
       sfx.playConfirm();
       const exitBtn = document.getElementById('btnExitInteriorHud');
       if (exitBtn) exitBtn.classList.add('hidden');
@@ -2932,20 +3081,27 @@
     }
     placeHMObstaclesOnWorldMap();
 
-    // 3. Route Trainers with Line-of-Sight ('!'), Team Rocket, Fossil Scientist & Daycare NPCs
+    // 3. Route Trainers with Line-of-Sight ('!'), Team Rocket, Fossil Scientist, Daycare & Authentic HM/Equipment NPCs
     const V4_NPCS = [
-      // Route Trainers (Line-of-Sight!)
-      { id: 'rt_bug1',     name: 'לוכד החרקים סמי 👀',       x: 40,  y: 140, dir: 'left',  shirt: '#84cc16', hat: '#fef08a', role: 'route_trainer', sightRange: 3.6, rewardMoney: 450,  team: [ ['caterpie', 8], ['weedle', 8], ['butterfree', 10] ], intro: 'היי! המבטים שלנו נפגשו! חרקי יער וירידיאן שלי בלתי מנוצחים!' },
-      { id: 'rt_lass1',    name: 'המאמנת ליסה 👀',           x: 59,  y: 100, dir: 'down',  shirt: '#f43f5e', hat: '#fbcfe8', role: 'route_trainer', sightRange: 3.6, rewardMoney: 550,  team: [ ['pidgey', 9], ['jigglypuff', 10] ], intro: 'ראיתי אותך יוצא מיער וירידיאן בדרך 2! בוא נראה כמה הפוקימונים שלך חזקים!' },
-      { id: 'rt_hiker1',   name: 'המטייל דניאל 👀',          x: 112, y: 74,  dir: 'left',  shirt: '#d97706', hat: '#78350f', role: 'route_trainer', sightRange: 3.6, rewardMoney: 800,  team: [ ['geodude', 14], ['machop', 15], ['onix', 16] ], intro: 'אף מאמן לא חוצה את דרך 3 להר הירח בלי קרב סלעים אמיתי!' },
-      { id: 'rt_rocket1',  name: 'חייל צוות רוקט R 👀',       x: 151, y: 55,  dir: 'left',  shirt: '#1e293b', hat: '#ef4444', role: 'route_trainer', sightRange: 3.8, rewardMoney: 950,  team: [ ['ekans', 17], ['zubat', 17], ['koffing', 19] ], intro: 'צוות רוקט ישתלט על כל המאובנים והפוקימונים הנדירים בהר הירח!' },
-      { id: 'rt_swimmer1', name: 'השחיין רון 👀',            x: 150, y: 350, dir: 'left',  shirt: '#0ea5e9', hat: '#fde047', role: 'route_trainer', sightRange: 3.6, rewardMoney: 1100, team: [ ['horsea', 26], ['shellder', 27], ['starmie', 29] ], intro: 'אתה גולש בדרך ימית 20 ליד איי קצף הים? בוא לקרב מים!' },
+      // Route Trainers (Line-of-Sight!) — Balanced to authentic Pokémon Yellow progression
+      { id: 'rt_bug1',     name: 'לוכד החרקים סמי 👀',       x: 40,  y: 140, dir: 'left',  shirt: '#84cc16', hat: '#fef08a', role: 'route_trainer', sightRange: 3.6, rewardMoney: 350,  team: [ ['caterpie', 5], ['weedle', 5], ['metapod', 6] ], intro: 'היי! המבטים שלנו נפגשו! חרקי יער וירידיאן שלי בלתי מנוצחים!' },
+      { id: 'rt_lass1',    name: 'המאמנת ליסה 👀',           x: 59,  y: 100, dir: 'down',  shirt: '#f43f5e', hat: '#fbcfe8', role: 'route_trainer', sightRange: 3.6, rewardMoney: 450,  team: [ ['pidgey', 7], ['jigglypuff', 8] ], intro: 'ראיתי אותך יוצא מיער וירידיאן בדרך 2! בוא נראה כמה הפוקימונים שלך חזקים!' },
+      { id: 'rt_hiker1',   name: 'המטייל דניאל 👀',          x: 112, y: 74,  dir: 'left',  shirt: '#d97706', hat: '#78350f', role: 'route_trainer', sightRange: 3.6, rewardMoney: 700,  team: [ ['geodude', 10], ['machop', 11], ['onix', 12] ], intro: 'אף מאמן לא חוצה את דרך 3 להר הירח בלי קרב סלעים אמיתי!' },
+      { id: 'rt_rocket1',  name: 'חייל צוות רוקט R 👀',       x: 151, y: 55,  dir: 'left',  shirt: '#1e293b', hat: '#ef4444', role: 'route_trainer', sightRange: 3.8, rewardMoney: 850,  team: [ ['ekans', 11], ['zubat', 11], ['koffing', 13] ], intro: 'צוות רוקט ישתלט על כל המאובנים והפוקימונים הנדירים בהר הירח!' },
+      { id: 'rt_swimmer1', name: 'השחיין רון 👀',            x: 150, y: 350, dir: 'left',  shirt: '#0ea5e9', hat: '#fde047', role: 'route_trainer', sightRange: 3.6, rewardMoney: 1200, team: [ ['horsea', 31], ['shellder', 32], ['starmie', 34] ], intro: 'אתה גולש בדרך ימית 20 ליד איי קצף הים? בוא לקרב מים!' },
       // Rival Gary on Nugget Bridge (Route 24)
-      { id: 'rival_mid',   name: 'היריב גארי (גשר הזהב) 👀',  x: 245, y: 20,  dir: 'down',  shirt: '#7e22ce', hat: '#facc15', role: 'route_trainer', sightRange: 3.8, rewardMoney: 1500, team: [ ['pidgeotto', 19], ['kadabra', 20], ['gyarados', 22] ], intro: 'יו! הגעת לגשר הזהב בסרוליאן! אני כבר תפסתי מעל 20 מינים, בוא נבדוק אם השתפרת!' },
+      { id: 'rival_mid',   name: 'היריב גארי (גשר הזהב) 👀',  x: 245, y: 20,  dir: 'down',  shirt: '#7e22ce', hat: '#facc15', role: 'route_trainer', sightRange: 3.8, rewardMoney: 1400, team: [ ['pidgeotto', 16], ['kadabra', 16], ['gyarados', 18] ], intro: 'יו! הגעת לגשר הזהב בסרוליאן! אני כבר תפסתי מעל 20 מינים, בוא נבדוק אם השתפרת!' },
       // Special Classic Kanto Feature NPCs:
       { id: 'fossil_doc',  name: 'מדען החייאת מאובנים 🧬',    x: 59,  y: 356, dir: 'down',  shirt: '#f8fafc', hat: '#38bdf8', role: 'fossil_lab' },
       { id: 'daycare_npc', name: 'בעלת בית הגידול 🏡',       x: 243, y: 98,  dir: 'down',  shirt: '#ec4899', hat: '#fef08a', role: 'daycare' },
-      { id: 'rocket_door', name: 'כניסה למגדל הרוחות 👻',     x: 337, y: 126, dir: 'down',  shirt: '#1e293b', hat: '#ef4444', role: 'enter_interior', targetInterior: 'ROCKET_TOWER' }
+      { id: 'rocket_door', name: 'כניסה למגדל הרוחות 👻',     x: 337, y: 126, dir: 'down',  shirt: '#1e293b', hat: '#ef4444', role: 'enter_interior', targetInterior: 'ROCKET_TOWER' },
+      // Authentic Gen 1 HM & Special Ability Progression NPCs:
+      { id: 'bike_shop_npc',    name: 'בעל חנות האופניים 🚲',              x: 235, y: 66,  dir: 'down', shirt: '#f59e0b', hat: '#fef08a', role: 'hm_giver', hmKey: 'bike' },
+      { id: 'fishing_guru_npc', name: 'גורו הדיג (ורמיליון) 🎣',           x: 237, y: 198, dir: 'down', shirt: '#0284c7', hat: '#bae6fd', role: 'hm_giver', hmKey: 'rod' },
+      { id: 'hm_cut_npc',       name: 'קפטן S.S. Anne (HM01 חיתוך) 🌳',     x: 243, y: 199, dir: 'down', shirt: '#1d4ed8', hat: '#ffffff', role: 'hm_giver', hmKey: 'cut' },
+      { id: 'hm_fly_npc',       name: 'נערת הבית הסודי (HM02 תעופה) ✈️',    x: 132, y: 124, dir: 'down', shirt: '#38bdf8', hat: '#e0f2fe', role: 'hm_giver', hmKey: 'fly' },
+      { id: 'hm_strength_npc',  name: 'מנהל הספארי (HM04 כוח) 🪨',          x: 185, y: 302, dir: 'down', shirt: '#b45309', hat: '#fde68a', role: 'hm_giver', hmKey: 'strength' },
+      { id: 'hm_surf_npc',      name: 'מדריך הבית הסודי (HM03 גלישה) 🌊',   x: 182, y: 254, dir: 'down', shirt: '#0ea5e9', hat: '#cffafe', role: 'hm_giver', hmKey: 'surf' }
     ];
     V4_NPCS.forEach(n => {
       if (!NPCS.some(e => e.id === n.id)) NPCS.push(n);
@@ -2960,9 +3116,9 @@
       spawnX: 7.5, spawnY: 11.8,
       floorColor1: '#1e1b4b', floorColor2: '#312e81',
       npcs: [
-        { id: 'in_r_exec',  name: 'קצין צוות רוקט ארצ׳ר R', x: 7.5, y: 6.5, dir: 'down', shirt: '#0f172a', hat: '#ef4444', role: 'route_trainer', sightRange: 3.2, rewardMoney: 2200, team: [ ['arbok', 29], ['golbat', 30], ['weezing', 32] ], intro: 'לעולם לא ניתן לך לשחרר את רוח המארוואק או לקחת את משקפת סילף!' },
-        { id: 'in_marowak', name: 'רוח המארוואק העתיקה 👻', x: 7.5, y: 2.5, dir: 'down', role: 'legendary', speciesId: 'marowak', level: 34 },
-        { id: 'in_gengar_s',name: 'גנגר הצללים 👻',         x: 3.5, y: 3.5, dir: 'down', role: 'legendary', speciesId: 'gengar',  level: 36 }
+        { id: 'in_r_exec',  name: 'קצין צוות רוקט ארצ׳ר R', x: 7.5, y: 6.5, dir: 'down', shirt: '#0f172a', hat: '#ef4444', role: 'route_trainer', sightRange: 3.2, rewardMoney: 2200, team: [ ['arbok', 23], ['golbat', 24], ['weezing', 26] ], intro: 'לעולם לא ניתן לך לשחרר את רוח המארוואק או לקחת את משקפת סילף!' },
+        { id: 'in_marowak', name: 'רוח המארוואק העתיקה 👻', x: 7.5, y: 2.5, dir: 'down', role: 'legendary', speciesId: 'marowak', level: 28 },
+        { id: 'in_gengar_s',name: 'גנגר הצללים 👻',         x: 3.5, y: 3.5, dir: 'down', role: 'legendary', speciesId: 'gengar',  level: 30 }
       ]
     };
 
@@ -2975,24 +3131,30 @@
       spawnX: 7.5, spawnY: 13.8,
       floorColor1: '#311042', floorColor2: '#4c1d95',
       npcs: [
-        { id: 'e4_lorelei', name: 'לורליי (עילית #1 — קרח ❄️)',  x: 4.5,  y: 10.5, dir: 'right', shirt: '#06b6d4', hat: '#cffafe', role: 'elite4', e4Index: 1, rewardMoney: 3500, team: [ ['dewgong', 40], ['cloyster', 41], ['slowbro', 42], ['jynx', 43], ['lapras', 44] ] },
-        { id: 'e4_bruno',   name: 'ברונו (עילית #2 — לחימה 🥊)', x: 10.5, y: 8.5,  dir: 'left',  shirt: '#dc2626', hat: '#78350f', role: 'elite4', e4Index: 2, rewardMoney: 3800, team: [ ['onix', 41], ['hitmonchan', 42], ['hitmonlee', 42], ['machamp', 45] ] },
-        { id: 'e4_agatha',  name: 'אגאתה (עילית #3 — רוח 👻)',   x: 4.5,  y: 6.5,  dir: 'right', shirt: '#7e22ce', hat: '#d8b4fe', role: 'elite4', e4Index: 3, rewardMoney: 4200, team: [ ['gengar', 43], ['golbat', 43], ['haunter', 44], ['arbok', 44], ['gengar', 46] ] },
-        { id: 'e4_lance',   name: 'לאנס (עילית #4 — דרקון 🐉)',  x: 10.5, y: 4.5,  dir: 'left',  shirt: '#4f46e5', hat: '#facc15', role: 'elite4', e4Index: 4, rewardMoney: 4800, team: [ ['gyarados', 44], ['dragonair', 45], ['aerodactyl', 46], ['dragonite', 48] ] },
-        { id: 'in_champ',   name: 'האלוף גארי 👑 (גמר הליגה)',    x: 7.5,  y: 2.2,  dir: 'down',  shirt: '#7e22ce', hat: '#facc15', role: 'champion', rewardMoney: 7000, team: [ ['pidgeot', 46], ['alakazam', 47], ['rhydon', 48], ['gyarados', 49], ['arcanine', 50], ['charizard', 52] ] },
-        { id: 'in_mewtwo',  name: 'מיוטו האגדי 🔮',              x: 2.5,  y: 2.5,  dir: 'down',  role: 'legendary', speciesId: 'mewtwo', level: 55 }
+        { id: 'e4_lorelei', name: 'לורליי (עילית #1 — קרח ❄️)',  x: 4.5,  y: 10.5, dir: 'right', shirt: '#06b6d4', hat: '#cffafe', role: 'elite4', e4Index: 1, rewardMoney: 3800, team: [ ['dewgong', 48], ['cloyster', 49], ['slowbro', 50], ['jynx', 51], ['lapras', 52] ] },
+        { id: 'e4_bruno',   name: 'ברונו (עילית #2 — לחימה 🥊)', x: 10.5, y: 8.5,  dir: 'left',  shirt: '#dc2626', hat: '#78350f', role: 'elite4', e4Index: 2, rewardMoney: 4200, team: [ ['onix', 49], ['hitmonchan', 51], ['hitmonlee', 51], ['machamp', 54] ] },
+        { id: 'e4_agatha',  name: 'אגאתה (עילית #3 — רוח 👻)',   x: 4.5,  y: 6.5,  dir: 'right', shirt: '#7e22ce', hat: '#d8b4fe', role: 'elite4', e4Index: 3, rewardMoney: 4600, team: [ ['gengar', 51], ['golbat', 51], ['haunter', 52], ['arbok', 53], ['gengar', 55] ] },
+        { id: 'e4_lance',   name: 'לאנס (עילית #4 — דרקון 🐉)',  x: 10.5, y: 4.5,  dir: 'left',  shirt: '#4f46e5', hat: '#facc15', role: 'elite4', e4Index: 4, rewardMoney: 5200, team: [ ['gyarados', 53], ['dragonair', 54], ['aerodactyl', 55], ['dragonite', 57] ] },
+        { id: 'in_champ',   name: 'האלוף גארי 👑 (גמר הליגה)',    x: 7.5,  y: 2.2,  dir: 'down',  shirt: '#7e22ce', hat: '#facc15', role: 'champion', rewardMoney: 8000, team: [ ['pidgeot', 55], ['alakazam', 56], ['rhydon', 57], ['gyarados', 58], ['arcanine', 59], ['charizard', 60] ] },
+        { id: 'in_mewtwo',  name: 'מיוטו האגדי 🔮',              x: 2.5,  y: 2.5,  dir: 'down',  role: 'legendary', speciesId: 'mewtwo', level: 65 }
       ]
     };
 
 
-    // 5. Fishing Rod Engine ('🎣')
+    // 5. Fishing Rod Engine ('🎣') — Unlocked from Fishing Guru in Vermilion City!
     function castFishingRod() {
       if (state.mode !== 'OVERWORLD') return;
+      if (!hasRod()) {
+        showDialogue('חכת דיג 🎣', [
+          '🔒 עדיין אין לך חכת דיג!',
+          'התקדם אל עיר ורמיליון ודבר עם גורו הדיג (🎣) ליד הנמל כדי לקבל חכת דיג אמיתית!'
+        ]);
+        return;
+      }
       const mData = getActiveMapData();
       const tx = Math.floor(state.player.x / TILE_SIZE);
       const ty = Math.floor(state.player.y / TILE_SIZE);
 
-      // Check if player is on water or adjacent to water (or anywhere if Kid-Friendly mode wants to test fishing)
       let nearWater = false;
       for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
@@ -3001,20 +3163,28 @@
       }
 
       if (!nearWater) {
-        showDialogue('חכת דיג עלית 🎣', [
-          'הטל את החכה ליד מים (נהר, אגם או חוף הים בדרום המפה) — או גלוש על המים (🌊 Surf) כדי לדוג פוקימוני מים נדירים!'
+        showDialogue('חכת דיג 🎣', [
+          'הטל את החכה ליד מים (אגם, נהר או חוף הים) כדי לדוג פוקימוני מים המתאימים לרמת האזור!'
         ]);
         return;
       }
 
       sfx.playConfirm();
-      const fishPool = ['magikarp', 'poliwag', 'goldeen', 'horsea', 'krabby', 'shellder', 'staryu', 'tentacool', 'psyduck', 'slowpoke', 'seel', 'dratini', 'gyarados', 'lapras'];
+      const zInfo = getZoneInfoAt(tx, ty);
+      let fishPool;
+      if (zInfo.maxLv <= 16) {
+        fishPool = ['magikarp', 'poliwag', 'goldeen', 'krabby', 'psyduck'];
+      } else if (zInfo.maxLv <= 29) {
+        fishPool = ['magikarp', 'poliwag', 'goldeen', 'horsea', 'krabby', 'shellder', 'staryu', 'tentacool', 'psyduck', 'slowpoke'];
+      } else {
+        fishPool = ['horsea', 'seadra', 'krabby', 'shellder', 'staryu', 'starmie', 'tentacool', 'tentacruel', 'slowpoke', 'seel', 'dratini', 'gyarados', 'lapras'];
+      }
       const chosenFish = fishPool[Math.floor(Math.random() * fishPool.length)];
-      const avgLv = Math.max(8, Math.min(45, (state.party[0]?.level || 10) + Math.floor(Math.random() * 4 - 1)));
-      showDialogue('חכת דיג עלית 🎣', [
+      const fishLv = Math.floor(zInfo.minLv + Math.random() * (zInfo.maxLv - zInfo.minLv + 1));
+      showDialogue('חכת דיג 🎣', [
         'הטלת את החכה למים הצלולים... 🌊 ... ... ❗ יש אכילה על החכה!',
-        `משכת מהמים את ${SPECIES_DB[chosenFish].name}!`
-      ], () => triggerWildBattle(tx, ty, chosenFish, avgLv));
+        `משכת מהמים את ${SPECIES_DB[chosenFish].name} (רמה ${fishLv})!`
+      ], () => triggerWildBattle(tx, ty, chosenFish, fishLv));
     }
 
     // 6. Cinnabar Fossil Revival Lab ('🧬')
@@ -3118,6 +3288,7 @@
      ********************************************************************/
     const STORAGE_KEY = 'POKEMON_HD_SAVES_V2';
     const ACTIVE_SLOT_KEY = 'POKEMON_HD_ACTIVE_SLOT_V2';
+    const CONTROL_MODE_KEY = 'POKEMON_HD_CONTROL_MODE';
 
     const state = {
       mode: 'TITLE',
@@ -3125,8 +3296,21 @@
       saveName: 'אש',
       selectedStarter: 'pikachu',
       runEnabled: true,
-      bikeMode: 2, // 0: Walk, 1: Run Shoes, 2: Bicycle
+      bikeMode: 1, // 0: Walk, 1: Run Shoes, 2: Bicycle (unlocked in Cerulean Bike Shop)
       isSurfing: false,
+      controlMode: (() => {
+        try { return localStorage.getItem(CONTROL_MODE_KEY) === 'dpad' ? 'dpad' : 'joystick'; } catch (_) { return 'joystick'; }
+      })(),
+      lastZoneId: null,
+      hms: {
+        cut: false,      // HM01 Cut (S.S. Anne Captain + Cascade Badge #2)
+        fly: false,      // HM02 Fly (Route 16 Secret House + Thunder Badge #3)
+        surf: false,     // HM03 Surf (Safari Zone Secret House + Soul Badge #5)
+        strength: false, // HM04 Strength (Fuchsia Warden + Rainbow Badge #4)
+        bike: false,     // Bicycle (Cerulean Bike Shop)
+        rod: false       // Fishing Rod (Vermilion Fishing Guru)
+      },
+      visitedZones: { PALLET_TOWN: true },
       defeatedTrainers: {},
       eliteFourDefeated: {},
       revivedFossils: {},
@@ -3188,6 +3372,199 @@
       evoAnim: null
     };
 
+    // Authentic Gen 1 Special Ability / HM Helpers
+    function canUseCut()      { return !!(state.hms?.cut && state.badges?.cascade); }
+    function canUseFly()      { return !!(state.hms?.fly && state.badges?.thunder); }
+    function canUseSurf()     { return !!(state.hms?.surf && state.badges?.soul); }
+    function canUseStrength() { return !!(state.hms?.strength && state.badges?.rainbow); }
+    function hasBike()        { return !!(state.hms?.bike); }
+    function hasRod()         { return !!(state.hms?.rod); }
+
+    function syncRunBikeButtonUI() {
+      if (state.bikeMode === 2 && !hasBike()) {
+        state.bikeMode = 1;
+      }
+      state.runEnabled = state.bikeMode >= 1;
+      const icons = ['🚶', '👟', '🚲'];
+      const labels = ['הליכה', 'ריצה', 'אופניים'];
+      const iconEl = document.getElementById('runBikeIcon');
+      const txtEl = document.getElementById('runStatusText');
+      if (iconEl) iconEl.textContent = icons[state.bikeMode] || '👟';
+      if (txtEl) txtEl.textContent = labels[state.bikeMode] || 'ריצה';
+    }
+
+    function syncControlModeUI() {
+      const isDpad = state.controlMode === 'dpad';
+      const inBattle = state.mode === 'BATTLE';
+      const joyEl = document.getElementById('joystickBase');
+      const dpadEl = document.getElementById('dpadControls');
+      const iconEl = document.getElementById('controlModeIcon');
+      const lblEl = document.getElementById('controlModeLabel');
+      if (iconEl) iconEl.textContent = isDpad ? '🎮' : '🕹️';
+      if (lblEl) lblEl.textContent = isDpad ? 'כפתורים' : 'ג׳ויסטיק';
+      if (joyEl) joyEl.classList.toggle('hidden', inBattle || isDpad);
+      if (dpadEl) dpadEl.classList.toggle('hidden', inBattle || !isDpad);
+    }
+
+    let _zoneBannerTimer = null;
+    function hideZoneTransitionBanner() {
+      const el = document.getElementById('zoneTransitionBanner');
+      if (el) el.classList.remove('visible');
+      clearTimeout(_zoneBannerTimer);
+    }
+
+    function showZoneTransitionBanner(zInfo) {
+      if (!zInfo) return;
+      const el = document.getElementById('zoneTransitionBanner');
+      if (!el) return;
+      document.getElementById('zoneBannerIcon').textContent = zInfo.icon || '🗺️';
+      document.getElementById('zoneBannerName').textContent = zInfo.name;
+      document.getElementById('zoneBannerLevels').textContent = `⚔️ ${zInfo.levelRangeText || `רמות ${zInfo.minLv}–${zInfo.maxLv}`}`;
+      document.getElementById('zoneBannerDesc').textContent = zInfo.desc || '';
+      el.classList.add('visible');
+      clearTimeout(_zoneBannerTimer);
+      _zoneBannerTimer = setTimeout(() => {
+        el.classList.remove('visible');
+      }, 4600);
+    }
+
+    function checkZoneTransition(forceShow = false) {
+      const tx = Math.floor(state.player.x / TILE_SIZE);
+      const ty = Math.floor(state.player.y / TILE_SIZE);
+      const zInfo = getZoneInfoAt(tx, ty);
+      if (!zInfo) return;
+      state.visitedZones = state.visitedZones || { PALLET_TOWN: true };
+      state.visitedZones[zInfo.id] = true;
+      if (forceShow || zInfo.id !== state.lastZoneId) {
+        state.lastZoneId = zInfo.id;
+        const badgeEl = document.getElementById('hudZoneBadge');
+        const activeMap = getActiveMapData();
+        if (badgeEl) badgeEl.textContent = activeMap.isInterior ? activeMap.name : zInfo.name;
+        if (state.mode === 'OVERWORLD' && (!activeMap.isInterior || KANTO_ZONE_CATALOG[state.currentMap])) {
+          showZoneTransitionBanner(zInfo);
+        }
+      }
+    }
+
+    function handleHMGiverNPC(npc) {
+      state.hms = state.hms || { cut: false, fly: false, surf: false, strength: false, bike: false, rod: false };
+      const k = npc.hmKey;
+      if (k === 'bike') {
+        if (!state.hms.bike) {
+          state.hms.bike = true;
+          state.bikeMode = 2;
+          syncRunBikeButtonUI();
+          saveGameToSlot(state.saveName, true);
+          sfx.playEvolveFanfare();
+          showDialogue(npc.name, [
+            'ברוך הבא לחנות האופניים המפורסמת של עיר סרוליאן! 🚲',
+            '🎉 קיבלת את האופניים המהירים של קאנטו! כעת תוכל להחליף בין הליכה, ריצה ואופניים בכפתור המהירות למטה, ולדהור בשביל האופניים!'
+          ]);
+        } else {
+          showDialogue(npc.name, ['האופניים שלך במצב מעולה! לחץ על כפתור המהירות (👟/🚲) כדי לרכוב במהירות ברחבי קאנטו!']);
+        }
+        return;
+      }
+      if (k === 'rod') {
+        if (!state.hms.rod) {
+          state.hms.rod = true;
+          saveGameToSlot(state.saveName, true);
+          sfx.playEvolveFanfare();
+          showDialogue(npc.name, [
+            'שלום מאמן צעיר! אני גורו הדיג של עיר ורמיליון! 🎣',
+            '🎉 קיבלת ממני חכת דיג אמיתית! עמוד ליד נהר, אגם או חוף ים ולחץ על כפתור הדיג (🎣) כדי לתפוס פוקימוני מים!'
+          ]);
+        } else {
+          showDialogue(npc.name, ['איך הולך הדיג? נסה להטיל חכה באזורים שונים במחוז קאנטו כדי לדוג מינים נדירים וחזקים יותר!']);
+        }
+        return;
+      }
+      if (k === 'cut') {
+        if (!state.hms.cut) {
+          state.hms.cut = true;
+          saveGameToSlot(state.saveName, true);
+          sfx.playEvolveFanfare();
+          showDialogue(npc.name, [
+            'תודה שבאת לבקר על סיפון ה-S.S. Anne בנמל ורמיליון! ⚓',
+            '🎉 קיבלת את דיסק היכולת המיוחדת: HM01 חיתוך (Cut) 🌳!',
+            state.badges.cascade
+              ? '🏅 כבר יש לך את תג המפל של מיסטי! כעת תוכל לחתוך שיחים חוסמים בכל רחבי קאנטו!'
+              : '⚠️ כדי להשתמש בחיתוך מחוץ לקרב, נצח את מיסטי במכון #2 (עיר סרוליאן) והשג את תג המפל 💧!'
+          ]);
+        } else {
+          showDialogue(npc.name, [
+            state.badges.cascade
+              ? 'HM01 חיתוך (Cut) פעיל! גש לכל שיח חוסם ולחץ על פעולה (A) כדי לחתוך אותו!'
+              : 'יש לך כבר את HM01 חיתוך! השג את תג המפל (#2 מיסטי בעיר סרוליאן) כדי להשתמש בו במפה.'
+          ]);
+        }
+        return;
+      }
+      if (k === 'fly') {
+        if (!state.hms.fly) {
+          state.hms.fly = true;
+          saveGameToSlot(state.saveName, true);
+          sfx.playEvolveFanfare();
+          showDialogue(npc.name, [
+            'ששש... מצאת את הבית הסודי שלי בדרך 16! ✈️',
+            '🎉 קיבלת ממני את היכולת המיוחדת: HM02 תעופה (Fly)!',
+            state.badges.thunder
+              ? '🏅 כבר יש לך את תג הרעם של סרג׳! פתח את ה-🗺️ מפה למעלה כדי לעוף מיד לכל עיר שביקרת בה!'
+              : '⚠️ כדי להשתמש בתעופה, נצח את לוטננט סרג׳ במכון #3 (עיר ורמיליון) והשג את תג הרעם ⚡!'
+          ]);
+        } else {
+          showDialogue(npc.name, [
+            state.badges.thunder
+              ? '✈️ HM02 תעופה פעיל! פתח את ה-🗺️ מפה כדי לעוף לכל עיר שכבר ביקרת בה!'
+              : 'יש לך את HM02 תעופה! נצח את סרג׳ (#3 בעיר ורמיליון) כדי לקבל את תג הרעם ולהתחיל לעוף!'
+          ]);
+        }
+        return;
+      }
+      if (k === 'strength') {
+        if (!state.hms.strength) {
+          state.hms.strength = true;
+          saveGameToSlot(state.saveName, true);
+          sfx.playEvolveFanfare();
+          showDialogue(npc.name, [
+            'שלום! אני מנהל שמורת הספארי בעיר פושיה! 🪨',
+            '🎉 קיבלת ממני את דיסק היכולת: HM04 כוח (Strength)!',
+            state.badges.rainbow
+              ? '🏅 כבר יש לך את תג הקשת של אריקה! כעת תוכל להזיז סלעי ענק שחוסמים מעברים!'
+              : '⚠️ כדי להשתמש ב-HM04 כוח מחוץ לקרב, נצח את אריקה במכון #4 (עיר סלדון) והשג את תג הקשת 🌿!'
+          ]);
+        } else {
+          showDialogue(npc.name, [
+            state.badges.rainbow
+              ? '🪨 HM04 כוח פעיל! לחץ פעולה (A) מול סלעי ענק כדי להדוף אותם מהדרך!'
+              : 'יש לך את HM04 כוח! השג את תג הקשת (#4 אריקה בסלדון) כדי להשתמש בו במפה.'
+          ]);
+        }
+        return;
+      }
+      if (k === 'surf') {
+        if (!state.hms.surf) {
+          state.hms.surf = true;
+          saveGameToSlot(state.saveName, true);
+          sfx.playEvolveFanfare();
+          showDialogue(npc.name, [
+            'כל הכבוד! הגעת עד הבית הסודי בקצה הצפוני של שמורת הספארי! 🦓🌊',
+            '🎉 קיבלת את הפרס האגדי: HM03 גלישה על המים (Surf)!',
+            state.badges.soul
+              ? '🏅 כבר יש לך את תג הנשמה של קוגה! כעת תוכל לגלוש על כל ים ונהר אל אי סיניבר, איי קצף הים ודרך הניצחון!'
+              : '⚠️ כדי לגלוש על המים, נצח את קוגה במכון #5 (עיר פושיה) והשג את תג הנשמה ☠️!'
+          ]);
+        } else {
+          showDialogue(npc.name, [
+            state.badges.soul
+              ? '🌊 HM03 גלישה פעיל! פשוט צעד לתוך המים כדי לגלוש דרומה לאי סיניבר או צפונה לדרך הניצחון!'
+              : 'יש לך כבר את HM03 גלישה! נצח את קוגה במכון #5 בעיר פושיה כדי לקבל את תג הנשמה ולגלוש על המים!'
+          ]);
+        }
+        return;
+      }
+    }
+
     function markDexSeen(speciesId) {
       const norm = normalizeSpeciesId(speciesId);
       state.pokedexSeen[norm] = true;
@@ -3235,6 +3612,8 @@
         playerDir: state.player.dir,
         money: state.money,
         badges: { ...state.badges },
+        hms: { ...(state.hms || {}) },
+        visitedZones: { ...(state.visitedZones || { PALLET_TOWN: true }) },
         claimedQuests: { ...state.claimedQuests },
         stats: { ...state.stats },
         pokedexSeen: { ...state.pokedexSeen },
@@ -3282,6 +3661,30 @@
       state.player.dir = data.playerDir || 'down';
       state.money = typeof data.money === 'number' ? data.money : 1500;
       state.badges = data.badges || {};
+      // Restore HMs (gracefully migrate older saves based on earned badges!)
+      if (data.hms) {
+        state.hms = { cut: false, fly: false, surf: false, strength: false, bike: false, rod: false, ...data.hms };
+      } else {
+        state.hms = {
+          cut: !!state.badges.cascade,
+          fly: !!state.badges.thunder,
+          surf: !!state.badges.soul,
+          strength: !!state.badges.rainbow,
+          bike: !!(state.badges.cascade || state.badges.thunder),
+          rod: !!state.badges.thunder
+        };
+      }
+      state.visitedZones = data.visitedZones ? { PALLET_TOWN: true, ...data.visitedZones } : { PALLET_TOWN: true };
+      if (!data.visitedZones) {
+        if (state.badges.boulder) { state.visitedZones.VIRIDIAN_CITY = true; state.visitedZones.VIRIDIAN_FOREST = true; state.visitedZones.PEWTER_CITY = true; }
+        if (state.badges.cascade) { state.visitedZones.MT_MOON = true; state.visitedZones.CERULEAN_CITY = true; }
+        if (state.badges.thunder) { state.visitedZones.VERMILION_CITY = true; }
+        if (state.badges.rainbow) { state.visitedZones.LAVENDER_TOWN = true; state.visitedZones.CELADON_CITY = true; }
+        if (state.badges.soul)    { state.visitedZones.FUCHSIA_CITY = true; state.visitedZones.SAFARI_ZONE = true; }
+        if (state.badges.marsh)   { state.visitedZones.SAFFRON_CITY = true; }
+        if (state.badges.volcano) { state.visitedZones.CINNABAR_ISLAND = true; }
+        if (state.badges.earth)   { state.visitedZones.INDIGO_PLATEAU = true; }
+      }
       state.claimedQuests = data.claimedQuests || {};
       state.stats = { evolutionsCount: 0, tradesCount: 0, battlesWon: 0, ...(data.stats || {}) };
       state.pokedexSeen = data.pokedexSeen || {};
@@ -3305,6 +3708,7 @@
       state.revivedFossils = data.revivedFossils || {};
       state.coins = typeof data.coins === 'number' ? data.coins : 250;
       state.safariBalls = typeof data.safariBalls === 'number' ? data.safariBalls : 30;
+      state.lastZoneId = null;
       syncPartyToDex();
 
       try { localStorage.setItem(ACTIVE_SLOT_KEY, state.saveName); } catch (_) {}
@@ -3312,7 +3716,10 @@
       document.getElementById('titleModal').classList.add('hidden');
       document.getElementById('saveModal').classList.add('hidden');
       document.getElementById('saveModal').classList.remove('flex');
+      syncRunBikeButtonUI();
+      syncControlModeUI();
       updateHud();
+      checkZoneTransition(true);
       sfx.playConfirm();
       return true;
     }
@@ -3331,11 +3738,17 @@
       const cleanName = (customName || 'אש').trim() || 'אש';
       const normStarter = normalizeSpeciesId(starterId || 'pikachu');
       state.saveName = cleanName;
+      state.currentMap = 'OVERWORLD';
       state.player.x = 62.5 * TILE_SIZE;
       state.player.y = 245.5 * TILE_SIZE;
       state.player.dir = 'down';
+      state.bikeMode = 1;
+      state.isSurfing = false;
       state.money = 1800;
       state.badges = {};
+      state.hms = { cut: false, fly: false, surf: false, strength: false, bike: false, rod: false };
+      state.visitedZones = { PALLET_TOWN: true };
+      state.lastZoneId = null;
       state.claimedQuests = {};
       state.stats = { evolutionsCount: 0, tradesCount: 0, battlesWon: 0 };
       state.pokedexSeen = {};
@@ -3358,6 +3771,9 @@
       state.party = [createMonster(normStarter, 5)];
       state.pcBox = [];
       state.collectedItems = {};
+      state.defeatedTrainers = {};
+      state.eliteFourDefeated = {};
+      state.revivedFossils = {};
       state.championDefeated = false;
       syncPartyToDex();
       state.mode = 'OVERWORLD';
@@ -3365,8 +3781,11 @@
       document.getElementById('titleModal').classList.add('hidden');
       document.getElementById('saveModal').classList.add('hidden');
       document.getElementById('saveModal').classList.remove('flex');
+      syncRunBikeButtonUI();
+      syncControlModeUI();
 
       saveGameToSlot(cleanName, true);
+      checkZoneTransition(true);
       sfx.playVictory();
       toggleFullscreen(true);
 
@@ -3374,7 +3793,8 @@
         'פרופסור אוק',
         [
           `ברוך הבא למחוז קאנטו המקורי, ${cleanName}! בחרת את ${SPECIES_DB[normStarter].name} בתור השותף שלך!`,
-          'צא מעיירת פאלט צפונה בדרך 1 אל עיר וירידיאן, יער וירידיאן ועיר פיוטר (מכון #1 של ברוק), או פתח את ה-🗺️ מפה למעלה!'
+          'צא מעיירת פאלט צפונה בדרך 1 אל עיר וירידיאן, יער וירידיאן ועיר פיוטר (מכון #1 של ברוק)!',
+          'בהמשך המסע תפתח יכולות מיוחדות ממש כמו במשחק המקורי: אופניים בסרוליאן, חכת דיג ו-HM01 חיתוך בורמיליון, HM02 תעופה בדרך 16, ו-HM03 גלישה בשמורת הספארי!'
         ]
       );
     }
@@ -3444,8 +3864,14 @@
       pointerMode: null,
       joyOriginX: 92,
       joyOriginY: window.innerHeight - 90,
-      keys: new Set()
+      keys: new Set(),
+      dpadDirs: new Set()
     };
+
+    function clearDpadInput() {
+      inputState.dpadDirs.clear();
+      document.querySelectorAll('.dpad-btn.active').forEach(b => b.classList.remove('active'));
+    }
 
     function isPointSolid(worldX, worldY) {
       const mData = getActiveMapData();
@@ -3453,7 +3879,8 @@
       const ty = Math.floor(worldY / TILE_SIZE);
       if (tx < 0 || ty < 0 || tx >= mData.cols || ty >= mData.rows) return true;
       const tile = mData.grid[ty][tx];
-      // Note: tile 3 (Water) is walkable via HM03 Surf!
+      // Water (tile 3) requires HM03 Surf + Soul Badge (#5 Koga) just like the original game!
+      if (tile === 3 && !canUseSurf()) return true;
       if (tile === 1 || tile === 5 || tile === 6 || tile === 8 || tile === 11 || tile === 13 || tile === 16) return true;
       if ((tile === 10 || tile === 21 || tile === 22) && !state.collectedItems[`${state.currentMap || 'OW'}_${tx},${ty}`] && !state.collectedItems[`${tx},${ty}`]) return true;
       for (const npc of mData.npcs) {
@@ -3500,15 +3927,15 @@
         return;
       }
 
-      let vx = inputState.vx;
-      let vy = inputState.vy;
+      let vx = state.controlMode === 'joystick' ? inputState.vx : 0;
+      let vy = state.controlMode === 'joystick' ? inputState.vy : 0;
 
-      if (inputState.keys.size > 0) {
+      if (inputState.keys.size > 0 || inputState.dpadDirs.size > 0) {
         vx = 0; vy = 0;
-        if (inputState.keys.has('left')) vx -= 1;
-        if (inputState.keys.has('right')) vx += 1;
-        if (inputState.keys.has('up')) vy -= 1;
-        if (inputState.keys.has('down')) vy += 1;
+        if (inputState.keys.has('left') || inputState.dpadDirs.has('left')) vx -= 1;
+        if (inputState.keys.has('right') || inputState.dpadDirs.has('right')) vx += 1;
+        if (inputState.keys.has('up') || inputState.dpadDirs.has('up')) vy -= 1;
+        if (inputState.keys.has('down') || inputState.dpadDirs.has('down')) vy += 1;
         const len = Math.hypot(vx, vy);
         if (len > 0) { vx /= len; vy /= len; }
       }
@@ -3527,7 +3954,7 @@
         state.player.dir = vy > 0 ? 'down' : 'up';
       }
 
-      const speed = state.bikeMode === 2 ? 5.2 : (state.runEnabled ? 3.9 : 2.4);
+      const speed = (state.bikeMode === 2 && hasBike()) ? 5.2 : (state.runEnabled ? 3.9 : 2.4);
       const nextX = state.player.x + vx * speed;
       const nextY = state.player.y + vy * speed;
 
@@ -3560,10 +3987,15 @@
           return;
         }
 
+        // Check for area/zone transition popup banner & mark city as visited for HM02 Fly
+        if (!mData.isInterior) {
+          checkZoneTransition(false);
+        }
+
         if (state.tick % 20 === 0) updateHud();
 
         // Update HM03 Surfing state when on Water (tile 3)
-        state.isSurfing = (tile === 3);
+        state.isSurfing = (tile === 3 && canUseSurf());
 
         // Passive Daycare XP on steps + Line-of-Sight Trainer check
         if (state.tick % 18 === 0 && state.party[0]) {
@@ -3576,20 +4008,22 @@
         // Wild encounters in Tall Grass (tile 2), Mountain Cave (tile 15), or Surfing on Water (tile 3)
         if (tile === 2 || tile === 15 || tile === 3) {
           state.player.grassDistAccum += speed;
-          if (Math.random() < 0.24) {
+          if (Math.random() < 0.22) {
             state.particles.push({
               x: state.player.x + (Math.random() - 0.5) * 20,
               y: state.player.y + 8,
               vx: (Math.random() - 0.5) * 1.2,
               vy: -Math.random() * 1.5 - 0.5,
-              color: tile === 15 ? '#a8a29e' : '#4ade80',
+              color: tile === 15 ? '#a8a29e' : (tile === 3 ? '#38bdf8' : '#4ade80'),
               life: 18
             });
           }
-          if (state.player.grassDistAccum > TILE_SIZE * 1.55) {
+          // Balanced calmer encounter frequency in tall grass, caves & water
+          if (state.player.grassDistAccum > TILE_SIZE * 1.95) {
             state.player.grassDistAccum = 0;
             sfx.playStep();
-            if (Math.random() < 0.24) {
+            const encounterChance = tile === 2 ? 0.16 : 0.14;
+            if (Math.random() < encounterChance) {
               triggerWildBattle(tx, ty);
             }
           }
@@ -3651,6 +4085,10 @@
         const nx = (npc.x + 0.5) * TILE_SIZE;
         const ny = (npc.y + 0.5) * TILE_SIZE;
         if (Math.hypot(state.player.x - nx, state.player.y - ny) < TILE_SIZE * 1.55) {
+          if (npc.role === 'hm_giver') {
+            handleHMGiverNPC(npc);
+            return;
+          }
           if (npc.role === 'game_corner') {
             openGameCornerModal();
             return;
@@ -3700,7 +4138,7 @@
             const caughtCount = Object.keys(state.pokedexCaught).length;
             showDialogue(npc.name, [
               `שלום ${state.saveName}! תפסת עד כה ${caughtCount} מתוך 151 מיני פוקימונים במחוז קאנטו!`,
-              'בדוק את תפריט ה-📜 משימות כדי לקבל פרסים כספיים, אבני התפתחות ומאסטר-בול!'
+              'בדוק את תפריט ה-📜 משימות ואת כרטיס המאמן (🪪) כדי לעקוב אחרי תגי המכונים ויכולות ה-HM המיוחדות שלך!'
             ]);
             return;
           }
@@ -3755,45 +4193,77 @@
           }
           if (npc.role === 'legendary') {
             showDialogue(npc.name, [
-              'גלי כוח על-חושי אדירים בוקעים ממיוטו האגדי! הוא מתכונן לקרב!'
+              `נוכחות עוצמתית בוקעת מ-${SPECIES_DB[npc.speciesId]?.name || npc.name}! הוא מתכונן לקרב!`
             ], () => triggerWildBattle(npc.x, npc.y, npc.speciesId, npc.level));
             return;
           }
         }
       }
 
-      // 2. Check Tile in front (Door, Sign, Pokéball item)
+      // 2. Check Tile in front (Door, Sign, HM Obstacle, Water, Pokéball item)
       const tx = Math.floor(lookX / TILE_SIZE);
       const ty = Math.floor(lookY / TILE_SIZE);
-      const tile = WORLD_MAP[ty]?.[tx];
+      const tile = mData.grid[ty]?.[tx];
 
-      if (tile === 7 || tile === 12 || tile === 14) {
+      if (!mData.isInterior && (tile === 7 || tile === 12 || tile === 14)) {
         handleOverworldDoorAction(tx, ty, tile);
         return;
       }
-      if (tile === 8) {
+      if (!mData.isInterior && tile === 8) {
         const msg = SIGNS[`${tx},${ty}`] || '🗺️ שלט דרכים במחוז קאנטו: המשך לחקור את הערים והמכונים!';
         showDialogue('שלט עץ', [msg]);
         return;
       }
       if (tile === 21 && !state.collectedItems[`${tx},${ty}`]) {
+        if (!canUseCut()) {
+          const needDisc = !state.hms?.cut;
+          const needBadge = !state.badges?.cascade;
+          const hints = ['🌳 שיח קטן חוסם את הדרך! נראה שאפשר לחתוך אותו עם HM01 חיתוך (Cut).'];
+          if (needDisc && needBadge) hints.push('🔒 דרושים: תג המפל (#2 מיסטי בסרוליאן) + דיסק HM01 חיתוך מקפטן ה-S.S. Anne בעיר ורמיליון!');
+          else if (needDisc) hints.push('🔒 יש לך את תג המפל! דבר עם קפטן ה-S.S. Anne בנמל עיר ורמיליון כדי לקבל את HM01 חיתוך!');
+          else hints.push('🔒 יש לך את HM01 חיתוך! נצח את מיסטי במכון #2 בעיר סרוליאן כדי להפעיל אותו!');
+          showDialogue('שיח חוסם 🌳', hints);
+          return;
+        }
         state.collectedItems[`${tx},${ty}`] = true;
         sfx.playAttack('GRASS');
         showDialogue('🌳 HM01 חיתוך (Cut)!', ['הפוקימון שלך חתך את השיח החוסם ופינה את המעבר!']);
         return;
       }
       if (tile === 22 && !state.collectedItems[`${tx},${ty}`]) {
+        if (!canUseStrength()) {
+          const needDisc = !state.hms?.strength;
+          const needBadge = !state.badges?.rainbow;
+          const hints = ['🪨 סלע ענק חוסם את המעבר! נדרשת יכולת HM04 כוח (Strength) כדי להזיז אותו.'];
+          if (needDisc && needBadge) hints.push('🔒 דרושים: תג הקשת (#4 אריקה בסלדון) + דיסק HM04 כוח ממנהל הספארי בעיר פושיה!');
+          else if (needDisc) hints.push('🔒 יש לך את תג הקשת! דבר עם מנהל הספארי בעיר פושיה כדי לקבל את HM04 כוח!');
+          else hints.push('🔒 יש לך את HM04 כוח! נצח את אריקה במכון #4 בעיר סלדון כדי להפעיל אותו!');
+          showDialogue('סלע כבד 🪨', hints);
+          return;
+        }
         state.collectedItems[`${tx},${ty}`] = true;
         sfx.playAttack('ROCK');
         showDialogue('🪨 HM04 כוח (Strength)!', ['הפוקימון שלך הדף בעוצמה את סלע הענק ופתח את הדרך!']);
         return;
       }
       if (tile === 3) {
+        if (!canUseSurf()) {
+          const needDisc = !state.hms?.surf;
+          const needBadge = !state.badges?.soul;
+          const hints = ['🌊 המים צלולים ועמוקים! כדי לגלוש על המים תצטרך את יכולת HM03 גלישה (Surf).'];
+          if (needDisc && needBadge) hints.push('🔒 דרושים: תג הנשמה (#5 קוגה בעיר פושיה) + דיסק HM03 גלישה בבית הסודי בצפון שמורת הספארי!');
+          else if (needDisc) hints.push('🏅 יש לך כבר את תג הנשמה! מצא את הבית הסודי בקצה הצפוני של שמורת הספארי (מעל עיר פושיה) כדי לקבל HM03 גלישה!');
+          else hints.push('📀 יש לך כבר את HM03 גלישה! נצח את קוגה במכון #5 בעיר פושיה כדי להפעיל גלישה על המים!');
+          if (hasRod()) hints.push('💡 טיפ: בינתיים אפשר גם לדוג כאן בעזרת כפתור הדיג (🎣)!');
+          showDialogue('מים עמוקים 🌊', hints);
+          return;
+        }
         castFishingRod();
         return;
       }
-      if (tile === 10 && !state.collectedItems[`${tx},${ty}`]) {
-        state.collectedItems[`${tx},${ty}`] = true;
+      if (tile === 10 && !state.collectedItems[`${state.currentMap || 'OW'}_${tx},${ty}`] && !state.collectedItems[`${tx},${ty}`]) {
+        const key = mData.isInterior ? `${state.currentMap}_${tx},${ty}` : `${tx},${ty}`;
+        state.collectedItems[key] = true;
         state.inventory.ultraball = (state.inventory.ultraball || 0) + 2;
         state.inventory.rare_candy = (state.inventory.rare_candy || 0) + 1;
         state.money += 500;
@@ -3828,19 +4298,22 @@
       inputState.vx = 0;
       inputState.vy = 0;
       inputState.activePointerId = null;
+      clearDpadInput();
+      hideZoneTransitionBanner();
 
       let chosenId = forcedSpeciesId;
       let lv = forcedLevel;
 
       if (!chosenId) {
         const zInfo = getZoneInfoAt(tx ?? Math.floor(state.player.x / TILE_SIZE), ty ?? Math.floor(state.player.y / TILE_SIZE));
-        // 85% from zone regional pool, 15% any stage-1/2 Kanto species for full 151 variety!
-        if (Math.random() < 0.82 && zInfo.pool.length > 0) {
+        // 94% authentic regional species pool, 6% stage-appropriate Kanto wild variety
+        if (Math.random() < 0.94 && zInfo.pool.length > 0) {
           const dexNum = zInfo.pool[Math.floor(Math.random() * zInfo.pool.length)];
           chosenId = DEX_ORDER[dexNum - 1] || 'pikachu';
         } else {
-          const wildCandidates = DEX_ORDER.filter(id => SPECIES_DB[id].dex <= 149);
-          chosenId = wildCandidates[Math.floor(Math.random() * wildCandidates.length)];
+          const maxStage = zInfo.maxLv <= 16 ? 1 : (zInfo.maxLv <= 32 ? 2 : 3);
+          const wildCandidates = DEX_ORDER.filter(id => SPECIES_DB[id].dex <= 143 && SPECIES_DB[id].stage <= maxStage);
+          chosenId = wildCandidates[Math.floor(Math.random() * wildCandidates.length)] || 'pidgey';
         }
         lv = Math.floor(zInfo.minLv + Math.random() * (zInfo.maxLv - zInfo.minLv + 1));
       }
@@ -3881,7 +4354,7 @@
 
       state.mode = 'BATTLE';
       document.getElementById('overworldTouchControls').classList.add('hidden');
-      document.getElementById('joystickBase').classList.add('hidden');
+      syncControlModeUI();
       document.getElementById('topHudControls')?.classList.add('hidden');
       document.getElementById('activeQuestBanner')?.classList.add('hidden');
       document.getElementById('battleOverlay').classList.remove('hidden');
@@ -3898,6 +4371,9 @@
     function triggerTrainerBattle(npc) {
       inputState.vx = 0;
       inputState.vy = 0;
+      inputState.activePointerId = null;
+      clearDpadInput();
+      hideZoneTransitionBanner();
       const tParty = (npc.team || [['geodude', 12], ['onix', 14]]).map(([spId, lv]) => {
         markDexSeen(spId);
         return createMonster(spId, lv);
@@ -3928,7 +4404,7 @@
 
       state.mode = 'BATTLE';
       document.getElementById('overworldTouchControls').classList.add('hidden');
-      document.getElementById('joystickBase').classList.add('hidden');
+      syncControlModeUI();
       document.getElementById('topHudControls')?.classList.add('hidden');
       document.getElementById('activeQuestBanner')?.classList.add('hidden');
       document.getElementById('battleOverlay').classList.remove('hidden');
@@ -3986,9 +4462,10 @@
       state.battle = null;
       updateBattleButtonsForMode();
       state.mode = 'OVERWORLD';
+      clearDpadInput();
       document.getElementById('battleOverlay').classList.add('hidden');
       document.getElementById('overworldTouchControls').classList.remove('hidden');
-      document.getElementById('joystickBase').classList.remove('hidden');
+      syncControlModeUI();
       document.getElementById('topHudControls')?.classList.remove('hidden');
       document.getElementById('activeQuestBanner')?.classList.remove('hidden');
 
@@ -4185,6 +4662,23 @@
             state.badges[npc.badgeId] = true;
             state.money += (npc.rewardMoney || 1500);
             msgs.push(`🏅 ניצחת את ${npc.name}! זכית ב-${npc.badgeName} ובבונוס של ₽${npc.rewardMoney || 1500}!`);
+            if (npc.badgeId === 'cascade') {
+              msgs.push(state.hms?.cut
+                ? '🌳 תג המפל הפעיל את HM01 חיתוך (Cut)! כעת תוכל לחתוך שיחים חוסמים!'
+                : '🌳 תג המפל מאפשר להשתמש ב-HM01 חיתוך (Cut)! מצא את קפטן ה-S.S. Anne בנמל ורמיליון כדי לקבל אותו!');
+            } else if (npc.badgeId === 'thunder') {
+              msgs.push(state.hms?.fly
+                ? '✈️ תג הרעם הפעיל את HM02 תעופה (Fly)! פתח את המפה (🗺️) כדי לעוף לערים שביקרת בהן!'
+                : '✈️ תג הרעם מאפשר להשתמש ב-HM02 תעופה (Fly)! מצא את הבית הסודי בדרך 16 (מערב לעיר סלדון) כדי לקבל אותו!');
+            } else if (npc.badgeId === 'rainbow') {
+              msgs.push(state.hms?.strength
+                ? '🪨 תג הקשת הפעיל את HM04 כוח (Strength)! כעת תוכל להדוף סלעי ענק!'
+                : '🪨 תג הקשת מאפשר להשתמש ב-HM04 כוח (Strength)! דבר עם מנהל הספארי בעיר פושיה כדי לקבל אותו!');
+            } else if (npc.badgeId === 'soul') {
+              msgs.push(state.hms?.surf
+                ? '🌊 תג הנשמה הפעיל את HM03 גלישה (Surf)! כעת תוכל לגלוש על המים לאי סיניבר ולאיי קצף הים!'
+                : '🌊 תג הנשמה מאפשר לגלוש על המים (HM03 Surf)! מצא את הבית הסודי בצפון שמורת הספארי כדי לקבל את HM03!');
+            }
           } else if (npc.role === 'route_trainer') {
             state.defeatedTrainers = state.defeatedTrainers || {};
             state.defeatedTrainers[npc.id] = true;
@@ -4684,7 +5178,7 @@
         ctx.fill();
         ctx.stroke();
         ctx.restore();
-      } else if (state.bikeMode === 2) {
+      } else if (state.bikeMode === 2 && hasBike()) {
         ctx.save();
         ctx.strokeStyle = '#facc15';
         ctx.lineWidth = 2.5;
@@ -5041,6 +5535,16 @@
       }
       if (state.mode !== 'OVERWORLD') return;
 
+      // In Buttons (D-Pad) mode, do not spawn floating joystick; allow quick tap on canvas to interact
+      if (state.controlMode === 'dpad') {
+        inputState.tapStartTime = Date.now();
+        inputState.tapStartX = e.clientX;
+        inputState.tapStartY = e.clientY;
+        inputState.activePointerId = e.pointerId;
+        inputState.pointerMode = 'tap_only';
+        return;
+      }
+
       inputState.activePointerId = e.pointerId;
       inputState.pointerMode = 'joystick';
       inputState.joyOriginX = e.clientX;
@@ -5059,6 +5563,7 @@
 
     window.addEventListener('pointermove', (e) => {
       if (e.pointerId !== inputState.activePointerId) return;
+      if (inputState.pointerMode !== 'joystick') return;
       if (state.mode !== 'OVERWORLD') return;
       const dx = e.clientX - inputState.joyOriginX;
       const dy = e.clientY - inputState.joyOriginY;
@@ -5077,6 +5582,56 @@
     });
 
     window.addEventListener('pointercancel', resetJoystick);
+
+    // Directional Buttons (D-Pad) Pointer Handlers (Multi-touch & Mouse Safe)
+    const dpadPointerMap = new Map();
+    function releaseDpadPointer(pointerId) {
+      const entry = dpadPointerMap.get(pointerId);
+      if (!entry) return;
+      dpadPointerMap.delete(pointerId);
+      entry.btn.classList.remove('active');
+      // Only remove dir if no other pointer is holding the same direction
+      let stillHeld = false;
+      for (const v of dpadPointerMap.values()) {
+        if (v.dir === entry.dir) stillHeld = true;
+      }
+      if (!stillHeld) inputState.dpadDirs.delete(entry.dir);
+    }
+
+    document.querySelectorAll('.dpad-btn[data-dpad]').forEach(btn => {
+      const dir = btn.getAttribute('data-dpad');
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        sfx.init();
+        if (state.mode !== 'OVERWORLD') return;
+        dpadPointerMap.set(e.pointerId, { dir, btn });
+        inputState.dpadDirs.add(dir);
+        btn.classList.add('active');
+        try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+      });
+      btn.addEventListener('pointerup', (e) => releaseDpadPointer(e.pointerId));
+      btn.addEventListener('pointercancel', (e) => releaseDpadPointer(e.pointerId));
+      btn.addEventListener('lostpointercapture', (e) => releaseDpadPointer(e.pointerId));
+    });
+    window.addEventListener('pointerup', (e) => releaseDpadPointer(e.pointerId));
+    window.addEventListener('pointercancel', (e) => releaseDpadPointer(e.pointerId));
+    window.addEventListener('blur', () => {
+      dpadPointerMap.clear();
+      clearDpadInput();
+      resetJoystick();
+      inputState.keys.clear();
+    });
+
+    document.getElementById('btnControlModeHud')?.addEventListener('click', () => {
+      state.controlMode = state.controlMode === 'dpad' ? 'joystick' : 'dpad';
+      try { localStorage.setItem(CONTROL_MODE_KEY, state.controlMode); } catch (_) {}
+      resetJoystick();
+      dpadPointerMap.clear();
+      clearDpadInput();
+      syncControlModeUI();
+      sfx.playConfirm();
+    });
 
     window.addEventListener('keydown', (e) => {
       const map = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right' };
@@ -5102,12 +5657,9 @@
     document.getElementById('btnFishAction').addEventListener('click', castFishingRod);
 
     document.getElementById('btnRunToggle').addEventListener('click', () => {
-      state.bikeMode = ((state.bikeMode ?? 2) + 1) % 3;
-      state.runEnabled = state.bikeMode >= 1;
-      const icons = ['🚶', '👟', '🚲'];
-      const labels = ['הליכה', 'ריצה', 'אופניים'];
-      document.getElementById('runBikeIcon').textContent = icons[state.bikeMode];
-      document.getElementById('runStatusText').textContent = labels[state.bikeMode];
+      const maxModes = hasBike() ? 3 : 2;
+      state.bikeMode = ((state.bikeMode ?? 1) + 1) % maxModes;
+      syncRunBikeButtonUI();
       sfx.playConfirm();
     });
 
@@ -5197,6 +5749,14 @@
       const caughtCount = Object.keys(state.pokedexCaught).length;
       const badgeList = ALL_8_BADGES;
       const shinyCount = [...state.party, ...state.pcBox].filter(m => m.shiny).length;
+      const specialAbilities = [
+        { icon: '🚲', name: 'אופניים מהירים',   unlocked: hasBike(),       hint: 'חנות האופניים בעיר סרוליאן' },
+        { icon: '🎣', name: 'חכת דיג',          unlocked: hasRod(),        hint: 'גורו הדיג בעיר ורמיליון' },
+        { icon: '🌳', name: 'HM01 חיתוך (Cut)', unlocked: canUseCut(),     hint: state.hms?.cut ? 'דרוש תג המפל (#2 מיסטי)' : 'קפטן S.S. Anne (ורמיליון) + תג #2' },
+        { icon: '✈️', name: 'HM02 תעופה (Fly)', unlocked: canUseFly(),     hint: state.hms?.fly ? 'דרוש תג הרעם (#3 סרג׳)' : 'בית סודי בדרך 16 + תג #3' },
+        { icon: '🪨', name: 'HM04 כוח (Strength)', unlocked: canUseStrength(), hint: state.hms?.strength ? 'דרוש תג הקשת (#4 אריקה)' : 'מנהל הספארי (פושיה) + תג #4' },
+        { icon: '🌊', name: 'HM03 גלישה (Surf)', unlocked: canUseSurf(),   hint: state.hms?.surf ? 'דרוש תג הנשמה (#5 קוגה)' : 'צפון שמורת הספארי + תג #5' }
+      ];
       body.innerHTML = `
         <div class="bg-slate-900/95 border border-slate-700 rounded-2xl p-3.5 space-y-2">
           <div class="flex items-center justify-between">
@@ -5227,6 +5787,20 @@
                 </div>
               `;
             }).join('')}
+          </div>
+        </div>
+        <div class="space-y-1.5">
+          <div class="text-xs font-extrabold text-sky-300">✨ יכולות מיוחדות (HM וציוד התקדמות):</div>
+          <div class="grid grid-cols-2 gap-2">
+            ${specialAbilities.map(ab => `
+              <div class="p-2 rounded-xl border flex items-center gap-2 ${ab.unlocked ? 'bg-sky-500/20 border-sky-400/60 text-white' : 'bg-slate-900/50 border-slate-800 text-slate-400'}">
+                <span class="text-lg">${ab.unlocked ? ab.icon : '🔒'}</span>
+                <div class="min-w-0">
+                  <div class="text-[11px] font-black truncate">${ab.name}</div>
+                  <div class="text-[10px] leading-tight">${ab.unlocked ? 'פתוח ופעיל ✓' : ab.hint}</div>
+                </div>
+              </div>
+            `).join('')}
           </div>
         </div>
       `;
@@ -6000,17 +6574,48 @@
       mctx.arc(px, py, 4, 0, Math.PI * 2);
       mctx.fill();
 
-      // Render Fast Travel Buttons
+      // Render Fast Travel (HM02 Fly) Status & Buttons
+      const flyUnlocked = canUseFly();
+      const flyBanner = document.getElementById('flyStatusBanner');
+      if (flyBanner) {
+        flyBanner.classList.remove('hidden');
+        if (flyUnlocked) {
+          flyBanner.className = 'mb-2 text-xs font-bold px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-200';
+          flyBanner.textContent = '✈️ יכולת HM02 תעופה פעילה! לחץ על כל עיר שכבר ביקרת בה כדי לעוף אליה מיד.';
+        } else {
+          const hasBadge = !!state.badges?.thunder;
+          const hasDisc = !!state.hms?.fly;
+          flyBanner.className = 'mb-2 text-xs font-bold px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-400/40 text-amber-200 space-y-1';
+          flyBanner.innerHTML = `
+            <div>🔒 יכולת התעופה (HM02 Fly) תיפתח בהמשך המשחק, ממש כמו במשחק המקורי:</div>
+            <div class="text-[11px] font-semibold text-slate-200">
+              ${hasBadge ? '✅' : '⬜'} תג הרעם (#3 לוטננט סרג׳ בעיר ורמיליון)<br>
+              ${hasDisc ? '✅' : '⬜'} דיסק HM02 תעופה (נערת הבית הסודי בדרך 16, מערב לעיר סלדון)
+            </div>
+          `;
+        }
+      }
+
+      const visited = state.visitedZones || { PALLET_TOWN: true };
       const ftGrid = document.getElementById('fastTravelGrid');
       ftGrid.innerHTML = '';
       FAST_TRAVEL_POINTS.forEach(pt => {
+        const isVisited = !!visited[pt.zoneId];
+        const canFlyHere = flyUnlocked && isVisited;
         const btn = document.createElement('button');
-        btn.className = 'p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-indigo-500/40 text-right transition';
+        btn.className = canFlyHere
+          ? 'p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-sky-400/50 text-right transition cursor-pointer'
+          : 'p-2.5 rounded-xl bg-slate-900/50 border border-slate-800 text-right opacity-60 cursor-not-allowed';
         btn.innerHTML = `
-          <div class="text-xs font-black text-white">${pt.name}</div>
-          <div class="text-[10px] text-indigo-300 mt-0.5">${pt.desc}</div>
+          <div class="text-xs font-black ${canFlyHere ? 'text-white' : 'text-slate-400'}">${canFlyHere ? '✈️ ' : '🔒 '}${pt.name}</div>
+          <div class="text-[10px] ${canFlyHere ? 'text-sky-300' : 'text-slate-400'} mt-0.5">${pt.desc}</div>
+          ${flyUnlocked && !isVisited ? '<div class="text-[10px] text-amber-300 font-bold mt-0.5">בקר באזור לראשונה כדי לטוס אליו</div>' : ''}
         `;
         btn.addEventListener('click', () => {
+          if (!canFlyHere) {
+            sfx.playCancel();
+            return;
+          }
           if (state.currentMap && state.currentMap !== 'OVERWORLD') {
             exitInteriorToOverworld();
           }
@@ -6022,6 +6627,7 @@
           document.getElementById('mapModal').classList.remove('flex');
           sfx.playConfirm();
           updateHud();
+          checkZoneTransition(true);
         });
         ftGrid.appendChild(btn);
       });
@@ -7004,6 +7610,8 @@
     });
 
     // Initialize Title Screen & Game Loop
+    syncRunBikeButtonUI();
+    syncControlModeUI();
     renderTitleScreenModal();
     updateHud();
     requestAnimationFrame(gameLoop);

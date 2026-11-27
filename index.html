@@ -8,11 +8,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="פוקימון HD 151" />
-  <title>פוקימון: מהדורת 151 מלאה | POKéMON 2D-HD KANTO v5.0.0</title>
+  <title>פוקימון: מהדורת 151 מלאה | POKéMON 2D-HD KANTO v5.1.0</title>
   <link id="appleTouchIcon" rel="apple-touch-icon" href="./icons/icon-192.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
   <link id="webManifestLink" rel="manifest" href="./manifest.json" />
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="./vendor/tailwindcss.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -537,7 +537,7 @@
         <div class="text-center space-y-1">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-extrabold mb-1">
             <span>מהדורת 151 יצורים • מפת קאנטו הענקית</span>
-            <span id="titleVersionBadge" class="px-1.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-400/50 text-emerald-200 text-[10px] font-black">v5.0.0</span>
+            <span id="titleVersionBadge" class="px-1.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-400/50 text-emerald-200 text-[10px] font-black">v5.1.0</span>
           </div>
           <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">פוקימון: מהדורת 151 HD</h1>
           <p class="text-xs text-slate-300">151 פוקימונים • התפתחויות • מפת קאנטו מקורית 1:1 (348x368) • חנויות • משימות • החלפות • אופליין מלא</p>
@@ -588,7 +588,7 @@
         <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
           <div class="flex items-center gap-2">
             <h2 class="text-base font-black text-white">💾 שמירות והגדרות</h2>
-            <span id="settingsVersionBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black">v5.0.0</span>
+            <span id="settingsVersionBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black">v5.1.0</span>
           </div>
           <button id="btnCloseSaveModal" class="px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">סגור ✕</button>
         </div>
@@ -1083,7 +1083,7 @@
      ********************************************************************/
     let deferredInstallPrompt = null;
 
-    const GAME_VERSION = '5.0.0';
+    const GAME_VERSION = '5.1.0';
     const CURRENT_MAP_VERSION = 5;
 
     function setupPWA() {
@@ -2001,9 +2001,9 @@
         [17, 27, 180, -162, 11, 7, "HOUSE"],
         // Route 10 (Rock Tunnel PokéCenter & Power Plant) (270, -190)
         [11, 19, 270, -190, 6, 7, "POKECENTER"],
-        [8, 17, 270, -190, 13, 14, "CAVE_MT_MOON"],
-        [8, 53, 270, -190, 13, 14, "CAVE_MT_MOON"],
-        [6, 39, 270, -190, 13, 14, "CAVE_MT_MOON"],
+        [8, 17, 270, -190, 13, 14, "CAVE_ROCK_TUNNEL"],
+        [8, 53, 270, -190, 13, 14, "CAVE_ROCK_TUNNEL"],
+        [6, 39, 270, -190, 13, 14, "CAVE_ROCK_TUNNEL"],
         // Lavender Town (270, -118)
         [3, 5, 270, -118, 6, 7, "POKECENTER"],
         [14, 5, 270, -118, 13, 14, "ROCKET_TOWER"],
@@ -2049,7 +2049,7 @@
         [31, 27, 110, 36, 6, 7, "HOUSE"],
         // Cinnabar Island (0, 108)
         [18, 3, 0, 108, 13, 14, "GYM_BLAINE"],
-        [6, 3, 0, 108, 13, 14, "ROCKET_TOWER"],
+        [6, 3, 0, 108, 13, 14, "CAVE_VOLCANO"],
         [6, 9, 0, 108, 11, 7, "LAB"],
         [11, 11, 0, 108, 6, 7, "POKECENTER"],
         [15, 11, 0, 108, 11, 12, "POKEMART"],
@@ -2057,16 +2057,16 @@
         [9, 5, -50, -226, 13, 14, "INDIGO_HALL"],
         [10, 5, -50, -226, 13, 14, "INDIGO_HALL"],
         // Seafoam Islands Caves (Route 20) (20, 108)
-        [48, 5, 20, 108, 13, 14, "CAVE_MT_MOON"],
-        [58, 9, 20, 108, 13, 14, "CAVE_MT_MOON"],
+        [48, 5, 20, 108, 13, 14, "CAVE_SEAFOAM"],
+        [58, 9, 20, 108, 13, 14, "CAVE_SEAFOAM"],
         // Remaining Route Gatehouses, Diglett's Cave & Route Houses (explicitly mapped!)
-        [12, 9, 0, -144, 13, 14, "CAVE_MT_MOON"],     // (66,103) Route 2 East Diglett's Cave
+        [12, 9, 0, -144, 13, 14, "CAVE_DIGLETT"],     // (66,103) Route 2 East Diglett's Cave
         [13, 3, 210, -118, 6, 7, "HOUSE"],            // (277,123) Route 8 Underground House
         [7, 5, 60, -118, 6, 7, "HOUSE"],              // (121,125) Route 16 Secret House
         [10, 21, 270, -100, 6, 7, "HOUSE"],           // (334,159) Route 12 Gatehouse
         [17, 13, 180, -90, 6, 7, "HOUSE"],            // (251,161) Route 6 Underground House
         [8, 5, -50, -64, 6, 7, "POKECENTER"],         // (12,179) Route 22 Indigo League Gate
-        [4, 5, 210, -46, 13, 14, "CAVE_MT_MOON"],     // (268,197) Route 11 Diglett's Cave
+        [4, 5, 210, -46, 13, 14, "CAVE_DIGLETT"],     // (268,197) Route 11 Diglett's Cave
         [11, 77, 270, -100, 6, 7, "HOUSE"],           // (335,215) Route 12 Fishing House
         [22, 13, 110, 36, 6, 7, "HOUSE"],             // (186,287) Fuchsia Warden's House
         [5, 9, 120, 72, 6, 7, "HOUSE"]                // (179,319) Route 19 Beach House
@@ -2169,6 +2169,10 @@
       ROUTE_23:        { id: 'ROUTE_23',        icon: '🏆', name: 'דרך 23 ודרך הניצחון',            minLv: 38, maxLv: 46, levelRangeText: 'רמות 38–46',             pool: [22, 31, 34, 42, 49, 57, 67, 75, 95, 105, 112], desc: 'מבחן הגיבורים האחרון בדרך לליגת הפוקימונים! מלא בפוקימונים עוצמתיים ברמות גבוהות.' },
       INDIGO_PLATEAU:  { id: 'INDIGO_PLATEAU',  icon: '👑', name: 'רמת אינדיגו (ליגת הפוקימונים)',  minLv: 48, maxLv: 60, levelRangeText: 'רמות 48–60',             pool: [3, 6, 9, 65, 68, 76, 94, 130, 131, 143, 148, 149], desc: 'פסגת מחוז קאנטו! כאן ממתינים רביעיית העילית (Elite Four), האלוף גארי ומיוטו האגדי!' },
       CAVE_MT_MOON:    { id: 'CAVE_MT_MOON',    icon: '🕳️', name: 'מעמקי מערת הר הירח',             minLv: 8,  maxLv: 12, levelRangeText: 'רמות 8–12 (מקדש אגדיים: 45–50)', pool: [35, 41, 46, 74, 95], desc: 'מערה אפלה עתירת מאובנים ואבני ירח — ובמעמקיה חבוי מקדש הפוקימונים האגדיים!' },
+      CAVE_DIGGLETT:   { id: 'CAVE_DIGGLETT',   icon: '🕳️', name: 'מערת דיגלט',                     minLv: 15, maxLv: 31, levelRangeText: 'רמות 15–31',             pool: [50, 50, 50, 51], desc: 'מנהרה עתיקה שחפרו אלפי דיגלט!' },
+      CAVE_ROCK_TUNNEL:{ id: 'CAVE_ROCK_TUNNEL',icon: '⚡', name: 'מנהרת הסלעים',                   minLv: 15, maxLv: 22, levelRangeText: 'רמות 15–22 (אגדי: 45)',  pool: [41, 66, 74, 95], desc: 'מנהרה אפלה עם חשמל סטטי באוויר — זאפדוס האגדי חבוי בעומקה.' },
+      CAVE_SEAFOAM:    { id: 'CAVE_SEAFOAM',    icon: '❄️', name: 'מערות איי קצף הים',              minLv: 30, maxLv: 38, levelRangeText: 'רמות 30–38 (אגדי: 45)',  pool: [86, 87, 90, 91, 79, 80], desc: 'מערות קרח מתחת לאיים — ארטיקונו האגדי שוכן כאן.' },
+      CAVE_VOLCANO:    { id: 'CAVE_VOLCANO',    icon: '🌋', name: 'לוע הר הגעש של סיניבר',          minLv: 32, maxLv: 40, levelRangeText: 'רמות 32–40 (אגדי: 45)',  pool: [37, 58, 77, 126], desc: 'מערת לבה בוערת — מולטרס האגדי מתגורר כאן.' },
       ROCKET_TOWER:    { id: 'ROCKET_TOWER',    icon: '👻', name: 'מגדל הרוחות ומפקדת צוות רוקט',   minLv: 18, maxLv: 25, levelRangeText: 'רמות 18–25',             pool: [92, 93, 104], desc: 'מגדל הפוקימונים המסתורי של עיירת לוונדר — שורץ בגסטלי, האנטר, קיובון וצוות רוקט!' }
     };
 
@@ -2308,7 +2312,8 @@
       { id: 'trade_golem',  trainer: 'כורה מהר הירח',       giveId: 'graveler',  getId: 'golem',     desc: 'תן גראבלר (#75) ⬅ מתפתח בהחלפה לגולם (#76)!' },
       { id: 'trade_jynx',   trainer: 'אספן מסרוליאן',       giveId: 'poliwhirl', getId: 'jynx',      desc: 'תן פוליווירל (#61) ⬅ קבל ג׳ינקס (#124)!' },
       { id: 'trade_eevee',  trainer: 'מגדל פוקימונים בסלדון', giveId: 'pikachu',   getId: 'eevee',     desc: 'תן פיקאצ׳ו (#25) ⬅ קבל איווי (#133) בעל 3 התפתחויות!' },
-      { id: 'trade_lapras', trainer: 'מדען סילף קו',        giveId: 'growlithe', getId: 'lapras',    desc: 'תן גראולית׳ (#58) ⬅ קבל לפרס (#131) עוצמתי!' }
+      { id: 'trade_lapras', trainer: 'מדען סילף קו',        giveId: 'growlithe', getId: 'lapras',    desc: 'תן גראולית׳ (#58) ⬅ קבל לפרס (#131) עוצמתי!' },
+      { id: 'trade_lickitung', trainer: 'חוקר מערות דיגלט', giveId: 'slowbro', getId: 'lickitung', desc: 'תן סלואובראו (#80) ⬅ קבל ליקיטונג (#108)!' }
     ];
 
     const QUESTS_CATALOG = [
@@ -2600,9 +2605,6 @@
         spawnX: 9.5, spawnY: 13.8,
         floorColor1: '#292524', floorColor2: '#44403c',
         npcs: [
-          { id: 'leg_articuno', name: 'ארטיקונו האגדי ❄️', x: 4,  y: 3, dir: 'down', role: 'legendary', speciesId: 'articuno', level: 45 },
-          { id: 'leg_zapdos',   name: 'זאפדוס האגדי ⚡',   x: 15, y: 3, dir: 'down', role: 'legendary', speciesId: 'zapdos',   level: 45 },
-          { id: 'leg_moltres',  name: 'מולטרס האגדי 🔥',   x: 9.5,y: 2.2,dir:'down', role: 'legendary', speciesId: 'moltres',  level: 45 },
           { id: 'leg_mew',      name: 'מיו המסתורי 🌟',    x: 9.5,y: 6.5,dir:'down', role: 'legendary', speciesId: 'mew',      level: 50 }
         ]
       },
@@ -2619,6 +2621,24 @@
         ]
       }
     };
+
+
+    // Dedicated caves (split from the former shared Mt. Moon interior); each legendary lives in its natural home.
+    [
+      ['CAVE_DIGGLETT',    '🕳️ מערת דיגלט',               null],
+      ['CAVE_ROCK_TUNNEL', '⚡ מנהרת הסלעים',             { id: 'leg_zapdos',   name: 'זאפדוס האגדי ⚡',   x: 9.5, y: 3, dir: 'down', role: 'legendary', speciesId: 'zapdos',   level: 45 }],
+      ['CAVE_SEAFOAM',     '❄️ מערות איי קצף הים',        { id: 'leg_articuno', name: 'ארטיקונו האגדי ❄️', x: 9.5, y: 3, dir: 'down', role: 'legendary', speciesId: 'articuno', level: 45 }],
+      ['CAVE_VOLCANO',     '🌋 לוע הר הגעש של סיניבר',    { id: 'leg_moltres',  name: 'מולטרס האגדי 🔥',   x: 9.5, y: 3, dir: 'down', role: 'legendary', speciesId: 'moltres',  level: 45 }]
+    ].forEach(([cid, title, legend]) => {
+      INTERIOR_MAPS[cid] = {
+        id: cid, name: title, cols: 20, rows: 16,
+        grid: buildInteriorGrid(20, 16, 15, 16),
+        spawnX: 9.5, spawnY: 13.8,
+        floorColor1: cid === 'CAVE_VOLCANO' ? '#450a0a' : (cid === 'CAVE_SEAFOAM' ? '#0c4a6e' : '#292524'),
+        floorColor2: cid === 'CAVE_VOLCANO' ? '#7f1d1d' : (cid === 'CAVE_SEAFOAM' ? '#0369a1' : '#44403c'),
+        npcs: legend ? [legend] : []
+      };
+    });
 
     // Dynamically create the 8 Gym Interior Halls!
     const GYM_HALL_DEFS = [
@@ -6684,7 +6704,7 @@
       const evoTarget = canUseStoneOnMonster(lead, itemKey);
       if (!evoTarget) {
         sfx.playCancel();
-        alert(`הפריט הזה לא מתאים להתפתחות של ${lead.name}! בדוק את תנאי ההתפתחות של הפוקימון.`);
+        showDialogue("אבן התפתחות", [`הפריט הזה לא מתאים להתפתחות של ${lead.name}! בדוק את תנאי ההתפתחות של הפוקימון.`]);
         return;
       }
       state.inventory[itemKey]--;
@@ -8193,7 +8213,7 @@
     });
 
     /********************************************************************
-     * 16. BEGINNER GUIDE, PORTABLE SAVE CODE & PARENT CONTROLS (v5.0.0)
+     * 16. BEGINNER GUIDE, PORTABLE SAVE CODE & PARENT CONTROLS (v5.1.0)
      ********************************************************************/
     // Sync visible version badges with GAME_VERSION
     const titleVerEl = document.getElementById('titleVersionBadge');

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Automated Acceptance & Regression Test Suite for Pokemon Pocket HD (v5.0.0)
+Automated Acceptance & Regression Test Suite for Pokemon Pocket HD (v5.1.0)
 Verifies all 10 Fix Prompt items, full map BFS reachability (doors, 14 items, 17 signs, HM gates),
 building save/reload, mapVersion 4->5 migration, offline PWA service worker, Wonder Trade balance,
 Daycare/Fossil anti-farming, Parent Controls PIN + 1-min limit, Portable Save Code, QA regressions,
@@ -10,6 +10,7 @@ mobile layout, and end-to-end playthrough.
 import http.server
 import json
 import os
+import re
 import socketserver
 import sys
 import threading
@@ -91,10 +92,10 @@ def run_all_tests():
             game_ver = page.evaluate("GAME_VERSION")
             changelog_text = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
 
-            assert_ok(game_ver == "5.0.0", f"GAME_VERSION is {game_ver}")
-            assert_ok(title_ver == "v5.0.0", f"Title version badge visible: {title_ver}")
-            assert_ok(settings_ver == "v5.0.0", f"Settings version badge matches: {settings_ver}")
-            assert_ok("[5.0.0]" in changelog_text, "CHANGELOG.md documents [5.0.0]")
+            assert_ok(game_ver == "5.1.0", f"GAME_VERSION is {game_ver}")
+            assert_ok(title_ver == "v5.1.0", f"Title version badge visible: {title_ver}")
+            assert_ok(settings_ver == "v5.1.0", f"Settings version badge matches: {settings_ver}")
+            assert_ok("[5.1.0]" in changelog_text, "CHANGELOG.md documents [5.1.0]")
 
             # ================================================================
             # 2. REAL PWA MANIFEST, ICONS & OFFLINE MODE (Fix #3)
@@ -141,7 +142,7 @@ def run_all_tests():
             context.set_offline(True)
             page.reload(wait_until="domcontentloaded")
             page.wait_for_timeout(500)
-            offline_ok = page.evaluate("typeof startNewGame === 'function' && GAME_VERSION === '5.0.0'")
+            offline_ok = page.evaluate("typeof startNewGame === 'function' && GAME_VERSION === '5.1.0'")
             assert_ok(offline_ok, "Game loads and runs completely OFFLINE after reload!")
             start_fresh_game(page, "אופליין")
             assert_ok(page.evaluate("state.mode === 'OVERWORLD' && state.party.length === 1"), "Can start & play game while offline")
@@ -809,6 +810,63 @@ def run_all_tests():
                 f"Mobile 390x844 HUD ({mob_layout['hudBottom']:.0f}px) does not overlap Quest Banner ({mob_layout['bannerTop']:.0f}px)",
             )
             mobile_ctx.close()
+
+
+            # ================================================================
+            # 11. v5.1.0 GAPS: offline Tailwind, 151/151, split caves, no alert()
+            # ================================================================
+            print("\n=== 11. v5.1.0: Tailwind local, 151 obtainable, split caves, no alert() ===")
+            html_text = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read() if "ROOT" in globals() else open("index.html", encoding="utf-8").read()
+            assert_ok("gstatic.com" not in html_text and "cdn.tailwindcss" not in html_text, "index.html has no external script dependency")
+            sw_text = open("sw.js", encoding="utf-8").read()
+            assert_ok("vendor/tailwindcss.min.js" in sw_text, "sw.js precaches vendored Tailwind")
+            assert_ok(not re.search(r"(?<![\w.])alert\(", html_text), "No native alert() calls remain")
+            res = page.evaluate("""() => {
+              const got = new Set();
+              Object.values(KANTO_ZONE_CATALOG).forEach(z => (z.pool||[]).forEach(n => got.add(n)));
+              const byId = {}; DEX_ORDER.forEach(n => {});
+              return { pools: [...got], trades: NPC_TRADES_LIST.map(t => t.getId) };
+            }""")
+            has_dig = page.evaluate("() => KANTO_ZONE_CATALOG.CAVE_DIGGLETT.pool.includes(50) && KANTO_ZONE_CATALOG.CAVE_DIGGLETT.pool.includes(51)")
+            assert_ok(has_dig, "Diglett (#50) and Dugtrio (#51) in Diglett's Cave pool")
+            assert_ok("lickitung" in res["trades"], "Lickitung (#108) obtainable via NPC trade")
+            caves = page.evaluate("""() => {
+              const out = {};
+              return Object.keys(INTERIOR_MAPS).filter(k => k.startsWith('CAVE_'));
+            }""")
+            for c in ["CAVE_MT_MOON", "CAVE_DIGGLETT", "CAVE_ROCK_TUNNEL", "CAVE_SEAFOAM", "CAVE_VOLCANO"]:
+                assert_ok(c in caves, f"Interior {c} exists")
+            homes = page.evaluate("""() => {
+              const r = {};
+              Object.values(INTERIOR_MAPS).forEach(m => (m.npcs||[]).forEach(n => { if (n.role === 'legendary') r[n.speciesId] = m.id; }));
+              return r;
+            }""")
+            exp = {"zapdos": "CAVE_ROCK_TUNNEL", "articuno": "CAVE_SEAFOAM", "moltres": "CAVE_VOLCANO", "mew": "CAVE_MT_MOON", "mewtwo": "INDIGO_HALL"}
+            assert_ok(all(homes.get(k) == v for k, v in exp.items()), f"Legendaries in natural homes: {homes}")
+            reach = page.evaluate("""() => {
+              const out = {};
+              ['CAVE_DIGGLETT','CAVE_ROCK_TUNNEL','CAVE_SEAFOAM','CAVE_VOLCANO','CAVE_MT_MOON'].forEach(id => {
+                state.currentMap = 'OVERWORLD'; state.player.x = 63.5*TILE_SIZE; state.player.y = 247.5*TILE_SIZE;
+                enterInteriorMap(id);
+                const m = INTERIOR_MAPS[id];
+                const ok = (x,y) => canStandAt((x+0.5)*TILE_SIZE,(y+0.5)*TILE_SIZE);
+                const sx = Math.floor(state.player.x/TILE_SIZE), sy = Math.floor(state.player.y/TILE_SIZE);
+                const seen = new Set([sx+','+sy]); const q=[[sx,sy]];
+                while (q.length) { const [x,y]=q.shift(); [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{ const nx=x+dx, ny=y+dy; const k=nx+','+ny; if(!seen.has(k)&&nx>=0&&ny>=0&&nx<m.cols&&ny<m.rows&&ok(nx,ny)){seen.add(k);q.push([nx,ny]);} }); }
+                const leg = (m.npcs||[]).filter(n=>n.role==='legendary').map(n => {
+                  const lx=Math.floor(n.x), ly=Math.floor(n.y);
+                  return [[0,1],[0,-1],[1,0],[-1,0]].some(([dx,dy])=>seen.has((lx+dx)+','+(ly+dy)));
+                });
+                out[id] = { tiles: seen.size, legendReachable: leg.every(Boolean) };
+              });
+              return out;
+            }""")
+            for k, v in reach.items():
+                assert_ok(v["tiles"] > 20 and v["legendReachable"], f"{k}: walkable ({v['tiles']} tiles) and legendary reachable")
+            html_doors = re.findall(r'\[\d+, \d+, -?\d+, -?\d+, 13, 14, "(CAVE_[A-Z_]+)"\]', html_text)
+            from collections import Counter
+            cnt = Counter(html_doors)
+            assert_ok(cnt["CAVE_ROCK_TUNNEL"] == 3 and cnt["CAVE_SEAFOAM"] == 2 and cnt["CAVE_DIGLETT"] == 2 and cnt["CAVE_VOLCANO"] == 1, f"Cave doors split into distinct interiors: {dict(cnt)}")
 
             # ================================================================
             # 10. MANUAL-STYLE PLAYTHROUGH: Start -> Pallet -> Gym #1 -> Save/Reload -> Offline

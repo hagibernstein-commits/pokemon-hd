@@ -1,11 +1,11 @@
-const CACHE_VERSION = 'v5.0.0';
+const CACHE_VERSION = 'v5.1.0';
 const CACHE_NAME = `pokemon-hd-151-${CACHE_VERSION}`;
 
 const PRECACHE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-192.png',
+  './vendor/tailwindcss.min.js','./icons/icon-192.png',
   './icons/icon-512.png'
 ];
 
